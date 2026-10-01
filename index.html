@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* 省略了基础样式以保持阅读整洁，核心样式与上一版一致 */
 :root { --surface: rgba(255, 255, 255, 0.85); --surface-hover: #f4f4f5; --text-primary: #09090b; --text-secondary: #71717a; --accent-blue: #2563eb; --accent-yellow: #fbbf24; --gradient-main: linear-gradient(135deg, #2563eb 0%, #fbbf24 100%); --gradient-hover: linear-gradient(135deg, #1d4ed8 0%, #f59e0b 100%); --gradient-text: linear-gradient(135deg, #1d4ed8, #d97706); --accent-foreground: #ffffff; --border: #e4e4e7; --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05); --shadow-md: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(251, 191, 36, 0.06); --shadow-xl: 0 20px 25px -5px rgba(37, 99, 235, 0.15), 0 10px 10px -5px rgba(251, 191, 36, 0.1); --radius: 16px; --glass: rgba(255, 255, 255, 0.8); --glass-border: rgba(0, 0, 0, 0.08); --modal-overlay: rgba(0, 0, 0, 0.2); }
 body.dark-mode { --surface: rgba(20, 20, 20, 0.85); --surface-hover: #1f1f22; --text-primary: #ededef; --text-secondary: #a1a1aa; --accent-blue: #3b82f6; --accent-yellow: #f59e0b; --gradient-main: linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%); --gradient-hover: linear-gradient(135deg, #60a5fa 0%, #fbbf24 100%); --gradient-text: linear-gradient(135deg, #60a5fa, #fbbf24); --accent-foreground: #ffffff; --border: #27272a; --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5); --shadow-md: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(245, 158, 11, 0.1); --shadow-xl: 0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(245, 158, 11, 0.2); --glass: rgba(0, 0, 0, 0.8); --glass-border: rgba(255, 255, 255, 0.08); --modal-overlay: rgba(0, 0, 0, 0.8); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,6 +83,7 @@ body.dark-mode .form-group input, body.dark-mode .form-group textarea { backgrou
 .empty-state p { color: var(--text-secondary); font-size: 0.9rem; }
 .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--gradient-main); color: var(--accent-foreground); padding: 14px 28px; border-radius: 99px; font-size: 0.9rem; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 300; box-shadow: var(--shadow-xl); pointer-events: none; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.error { background: #ef4444; color: white; }
 @media (max-width: 640px) { .header { padding: 12px 16px; flex-direction: column; gap: 12px; align-items: flex-start; } .header-actions { width: 100%; justify-content: space-between; } .header-actions .btn span { display: none; } .header-actions .btn { padding: 10px; border-radius: 50%; } .toolbar { flex-direction: column; align-items: stretch; padding: 0 16px; } .stat-box { width: 100%; justify-content: space-around; } .search-box { width: 100%; } .grid { grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; } .card-body { padding: 12px; } .card-title { font-size: 0.9rem; } .card-meta, .card-desc { font-size: 0.7rem; margin-bottom: 10px; } .vote-btn { padding: 8px; font-size: 0.8rem; } }
 </style>
 </head>
@@ -164,7 +164,7 @@ body.dark-mode .form-group input, body.dark-mode .form-group textarea { backgrou
 <script>
 /* ================= Supabase 初始化 ================= */
 const SUPABASE_URL = 'https://juqpfxkpdekxuthiwjxq.supabase.co'; 
-const SUPABASE_ANON_KEY = 'sb_publishable_JBeSZiYIDTIP363zjcOsVA_i1s3ZEgO'; // 这里已填入你的 Publishable Key
+const SUPABASE_ANON_KEY = 'sb_publishable_JBeSZiYIDTIP363zjcOsVA_i1s3ZEgO'; 
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -177,31 +177,37 @@ let currentVotes = [];
 
 /* ================= 云端数据操作 ================= */
 async function fetchDishes() {
-  const { data, error } = await supabaseClient.from('菜肴').select('*').order('id', { ascending: true });
-  if (error) { console.error('获取菜品失败:', error); return; }
+  const { data, error } = await supabaseClient.from('dishes').select('*').order('id', { ascending: true });
+  if (error) { console.error('获取菜品失败:', error); showToast('获取数据失败，请检查控制台', true); return; }
   dishes = data || [];
   renderDishes();
 }
 
 async function saveDishToCloud(dishData) {
+  let result;
   if (dishData.id) {
-    const { error } = await supabaseClient.from('菜肴').update(dishData).eq('id', dishData.id);
-    if (error) return false;
+    result = await supabaseClient.from('dishes').update(dishData).eq('id', dishData.id);
   } else {
-    const { error } = await supabaseClient.from('菜肴').insert([dishData]);
-    if (error) return false;
+    result = await supabaseClient.from('dishes').insert([dishData]);
+  }
+  if (result.error) {
+    console.error('保存失败:', result.error);
+    showToast('保存失败: ' + result.error.message, true);
+    return false;
   }
   await fetchDishes();
   return true;
 }
 
 async function deleteDishFromCloud(id) {
-  await supabaseClient.from('菜肴').delete().eq('id', id);
+  const { error } = await supabaseClient.from('dishes').delete().eq('id', id);
+  if (error) { showToast('删除失败', true); return; }
   await fetchDishes();
 }
 
 async function voteInCloud(id, newVotes) {
-  await supabaseClient.from('菜肴').update({ 投票: newVotes }).eq('id', id);
+  const { error } = await supabaseClient.from('dishes').update({ 投票: newVotes }).eq('id', id);
+  if (error) { showToast('投票失败', true); return; }
   await fetchDishes();
 }
 
@@ -220,19 +226,40 @@ function init() {
 }
 
 /* ================= 上传与渲染 ================= */
-function handleBatchUpload(input) { const files = input.files; if (!files || files.length === 0) return; processFiles(files); input.value = ''; }
+// ★★★ 修复了这里：先把 FileList 转成数组，再清空 input ★★★
+function handleBatchUpload(input) {
+  const files = Array.from(input.files); // 立即转成数组，防止被清空
+  if (files.length === 0) return;
+  input.value = ''; // 现在可以安全清空了
+  processFiles(files);
+}
+
 const dropZone = document.getElementById('dropZone');
 ['dragenter', 'dragover'].forEach(eventName => { dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); }); });
 ['dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); }); });
-dropZone.addEventListener('drop', (e) => { const files = e.dataTransfer.files; if (files.length > 0) processFiles(files); });
+dropZone.addEventListener('drop', (e) => { const files = Array.from(e.dataTransfer.files); if (files.length > 0) processFiles(files); });
 
 async function processFiles(files) {
+  let successCount = 0;
   for (const file of files) {
+    // 检查图片大小（防止超限）
+    if (file.size > 2 * 1024 * 1024) {
+      showToast(`图片 ${file.name} 超过 2MB，已跳过`, true);
+      continue;
+    }
     const reader = new FileReader();
-    const imgBase64 = await new Promise((resolve) => { reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(file); });
-    await saveDishToCloud({ 名称: '待命名', 厨师1: '', 厨师2: '', 图片: imgBase64, 投票: 0 });
+    const imgBase64 = await new Promise((resolve) => { 
+      reader.onload = (e) => resolve(e.target.result); 
+      reader.readAsDataURL(file); 
+    });
+    const success = await saveDishToCloud({ 名称: '待命名', 厨师1: '', 厨师2: '', 图片: imgBase64, 投票: 0 });
+    if (success) successCount++;
   }
-  showToast(`🎉 成功导入 ${files.length} 张图片`);
+  if (successCount > 0) {
+    showToast(`🎉 成功导入 ${successCount} 张图片`);
+  } else {
+    showToast('导入失败，请检查控制台报错', true);
+  }
 }
 
 function renderDishes() {
@@ -302,7 +329,14 @@ function openImageViewer(src) { const viewer = document.getElementById('imageVie
 function closeImageViewer() { document.getElementById('imageViewer').classList.remove('show'); }
 function resetAllData() { if (confirm('⚠️ 警告：这只是重置你本地的投票记录，不会清空云端数据库。确定吗？')) { localStorage.removeItem(VOTE_KEY); currentVotes = []; renderDishes(); showToast('🔄 本地投票记录已重置'); } }
 let toastTimer;
-function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2500); }
+function showToast(msg, isError = false) { 
+  const t = document.getElementById('toast'); 
+  t.textContent = msg; 
+  t.classList.add('show'); 
+  if (isError) t.classList.add('error'); else t.classList.remove('error');
+  clearTimeout(toastTimer); 
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4000); 
+}
 document.getElementById('searchInput').addEventListener('input', renderDishes);
 document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeModal(); closeImageViewer(); } });
