@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* 样式部分完全保留，保证颜值 */
 :root { --surface: rgba(255, 255, 255, 0.85); --surface-hover: #f4f4f5; --text-primary: #09090b; --text-secondary: #71717a; --accent-blue: #2563eb; --accent-yellow: #fbbf24; --gradient-main: linear-gradient(135deg, #2563eb 0%, #fbbf24 100%); --gradient-hover: linear-gradient(135deg, #1d4ed8 0%, #f59e0b 100%); --gradient-text: linear-gradient(135deg, #1d4ed8, #d97706); --accent-foreground: #ffffff; --border: #e4e4e7; --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05); --shadow-md: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(251, 191, 36, 0.06); --shadow-xl: 0 20px 25px -5px rgba(37, 99, 235, 0.15), 0 10px 10px -5px rgba(251, 191, 36, 0.1); --radius: 16px; --glass: rgba(255, 255, 255, 0.8); --glass-border: rgba(0, 0, 0, 0.08); --modal-overlay: rgba(0, 0, 0, 0.2); }
 body.dark-mode { --surface: rgba(20, 20, 20, 0.85); --surface-hover: #1f1f22; --text-primary: #ededef; --text-secondary: #a1a1aa; --accent-blue: #3b82f6; --accent-yellow: #f59e0b; --gradient-main: linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%); --gradient-hover: linear-gradient(135deg, #60a5fa 0%, #fbbf24 100%); --gradient-text: linear-gradient(135deg, #60a5fa, #fbbf24); --accent-foreground: #ffffff; --border: #27272a; --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5); --shadow-md: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(245, 158, 11, 0.1); --shadow-xl: 0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(245, 158, 11, 0.2); --glass: rgba(0, 0, 0, 0.8); --glass-border: rgba(255, 255, 255, 0.08); --modal-overlay: rgba(0, 0, 0, 0.8); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -192,7 +193,8 @@ async function saveDishToCloud(dishData) {
   }
   if (result.error) {
     console.error('保存失败:', result.error);
-    showToast('保存失败: ' + result.error.message, true);
+    // 直接弹窗提示，保证你看到错误
+    alert('保存失败: ' + result.error.message); 
     return false;
   }
   await fetchDishes();
@@ -201,13 +203,13 @@ async function saveDishToCloud(dishData) {
 
 async function deleteDishFromCloud(id) {
   const { error } = await supabaseClient.from('dishes').delete().eq('id', id);
-  if (error) { showToast('删除失败', true); return; }
+  if (error) { alert('删除失败: ' + error.message); return; }
   await fetchDishes();
 }
 
 async function voteInCloud(id, newVotes) {
   const { error } = await supabaseClient.from('dishes').update({ 投票: newVotes }).eq('id', id);
-  if (error) { showToast('投票失败', true); return; }
+  if (error) { alert('投票失败: ' + error.message); return; }
   await fetchDishes();
 }
 
@@ -225,11 +227,11 @@ function init() {
   fetchDishes();
 }
 
-/* ================= 上传与渲染 ================= */
-// ★★★ 修复了这里：先把 FileList 转成数组，再清空 input ★★★
+/* ================= 上传逻辑（终极修复版） ================= */
 function handleBatchUpload(input) {
-  const files = Array.from(input.files); // 立即转成数组，防止被清空
-  if (files.length === 0) return;
+  // 1. 立刻把 FileList 转成数组，防止被清空
+  const files = Array.from(input.files); 
+  if (files.length === 0) { alert('你没有选择任何图片！'); return; }
   input.value = ''; // 现在可以安全清空了
   processFiles(files);
 }
@@ -237,12 +239,16 @@ function handleBatchUpload(input) {
 const dropZone = document.getElementById('dropZone');
 ['dragenter', 'dragover'].forEach(eventName => { dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); }); });
 ['dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); }); });
-dropZone.addEventListener('drop', (e) => { const files = Array.from(e.dataTransfer.files); if (files.length > 0) processFiles(files); });
+dropZone.addEventListener('drop', (e) => { 
+  const files = Array.from(e.dataTransfer.files); 
+  if (files.length > 0) processFiles(files); 
+  else alert('拖拽没有捕获到文件，请直接点击上方按钮上传！');
+});
 
 async function processFiles(files) {
   let successCount = 0;
   for (const file of files) {
-    // 检查图片大小（防止超限）
+    // 1. 检查大小，超过 2MB 直接跳过并报错
     if (file.size > 2 * 1024 * 1024) {
       showToast(`图片 ${file.name} 超过 2MB，已跳过`, true);
       continue;
@@ -252,6 +258,7 @@ async function processFiles(files) {
       reader.onload = (e) => resolve(e.target.result); 
       reader.readAsDataURL(file); 
     });
+    // 2. 写入云端数据库
     const success = await saveDishToCloud({ 名称: '待命名', 厨师1: '', 厨师2: '', 图片: imgBase64, 投票: 0 });
     if (success) successCount++;
   }
