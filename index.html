@@ -69,8 +69,8 @@
 
     <script>
         // ==================== 替换为你自己的 CloudBase 环境 ID ====================
-        // 如果你环境名不同，请在这里修改
-        const ENV_ID = 'monthly-dishes-d7gu69s4x8964e12e';
+        // ⚠️ 就是下面这一行！把 '你的环境ID' 替换成真实的一串代码
+        const ENV_ID = 'monthly-dishes-d7gu69s4x8964e12e'; 
 
         let app, db, _;
         let isReady = false;
@@ -111,7 +111,7 @@
 
             const ready = await initCloudBase();
             if (!ready) {
-                container.innerHTML = '<div class="error">❌ 云服务连接失败，请刷新页面重试。</div>';
+                container.innerHTML = '<div class="error">❌ 云服务连接失败，请检查环境 ID 是否正确并刷新页面重试。</div>';
                 return;
             }
 
