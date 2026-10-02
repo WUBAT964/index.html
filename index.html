@@ -23,9 +23,7 @@
         .header h1 span { color: var(--primary-color); }
         .header p { color: var(--text-sub); font-size: 0.85rem; margin: 0; }
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto; padding: 0 16px; }
-        @media (max-width: 600px) {
-            .grid-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 8px; }
-        }
+        @media (max-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 8px; } }
         .card { background-color: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; }
         .card-image-wrapper { width: 100%; aspect-ratio: 4 / 3; overflow: hidden; position: relative; background: linear-gradient(135deg, #fdfbf7 0%, #f0ebe4 100%); }
         .card-img { width: 100%; height: 100%; object-fit: cover; }
@@ -52,7 +50,7 @@
 
     <header class="header">
         <h1>🍲 月度<span>好菜</span></h1>
-        <p>记录每一顿用心烹饪的美食 · 为你喜欢的菜投上一票</p>
+        <p>记录每一顿用心烹饪的美食</p>
     </header>
 
     <main id="app" class="grid-container">
@@ -60,8 +58,14 @@
     </main>
 
     <script>
-        // ==================== 你的云函数地址 ====================
-        const FUNC_URL = 'https://monthly-dishes-d7gu69s4x8964e12e-1499564379.ap-shanghai.app.tcloudbase.com/vote-api';
+        // ==================== 替换为你自己的 Token ====================
+        // 把下面这行的 ghp_xxxxxxxxxxxx 替换成你刚才在 GitHub 生成的真实 Token
+        const GH_TOKEN = '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';
+
+        // 仓库信息（已帮你填好，不用改）
+        const VOTE_REPO = 'wubat964/dish-votes';
+        const VOTE_FILE = 'votes.json';
+        const GH_API = `https://api.github.com/repos/${VOTE_REPO}/contents/${VOTE_FILE}`;
 
         function isRealImage(url) {
             if (!url) return false;
@@ -76,24 +80,42 @@
             localStorage.setItem('voted_dish_ids', JSON.stringify(ids));
         }
 
-        // JSONP 请求封装，绕过 CORS
-        function jsonp(url) {
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
-                window[callbackName] = (data) => {
-                    resolve(data);
-                    document.body.removeChild(script);
-                    delete window[callbackName];
-                };
-                const script = document.createElement('script');
-                script.src = `${url}&callback=${callbackName}`;
-                script.onerror = () => {
-                    reject(new Error('JSONP request failed'));
-                    document.body.removeChild(script);
-                    delete window[callbackName];
-                };
-                document.body.appendChild(script);
+        // 从 GitHub 读取 votes.json
+        async function fetchVotes() {
+            const res = await fetch(`${GH_API}?t=${Date.now()}`, {
+                headers: {
+                    'Authorization': `token ${GH_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
             });
+            if (res.status === 404) return { votes: {}, sha: null };
+            if (!res.ok) throw new Error('读取失败：' + res.status);
+            const json = await res.json();
+            const content = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\n/g, '')))));
+            return { votes: content, sha: json.sha };
+        }
+
+        // 写回 votes.json
+        async function saveVotes(votes, sha) {
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(votes, null, 2))));
+            const res = await fetch(GH_API, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GH_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `vote update`,
+                    content: content,
+                    sha: sha
+                })
+            });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error('保存失败：' + res.status + ' ' + errText);
+            }
+            return await res.json();
         }
 
         async function loadDishes() {
@@ -110,15 +132,13 @@
                     return;
                 }
 
-                // 获取票数
+                // 从 GitHub 读取票数
                 let voteCounts = {};
                 try {
-                    const voteData = await jsonp(`${FUNC_URL}/api/votes?t=${new Date().getTime()}`);
-                    if (voteData && !voteData.error) {
-                        voteData.forEach(v => { voteCounts[v.dishId] = v.count || 0; });
-                    }
+                    const result = await fetchVotes();
+                    voteCounts = result.votes || {};
                 } catch (e) {
-                    console.warn('获取云端票数失败，将从 0 开始', e);
+                    console.warn('获取云端票数失败', e);
                 }
 
                 container.innerHTML = '';
@@ -183,26 +203,23 @@
             }
 
             try {
-                const data = await jsonp(`${FUNC_URL}/api/vote?dishId=${dishId}&t=${new Date().getTime()}`);
-
-                if (data && data.error) {
-                    alert('投票失败：' + data.error);
-                    return;
-                }
+                // 读取 → 修改 → 写回（防止覆盖别人的票）
+                const { votes, sha } = await fetchVotes();
+                votes[dishId] = (votes[dishId] || 0) + 1;
+                await saveVotes(votes, sha);
 
                 votedIds.push(dishId);
                 saveLocalVotedIds(votedIds);
 
                 btn.classList.add('voted');
                 voteTextSpan.textContent = '已投票';
-                voteCountSpan.textContent = data.count;
+                voteCountSpan.textContent = votes[dishId];
 
                 btn.style.transform = 'scale(1.1)';
                 setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
-
             } catch (e) {
                 console.error('投票失败:', e);
-                alert('网络错误，请重试');
+                alert('投票失败：' + e.message);
             } finally {
                 btn.disabled = false;
             }
