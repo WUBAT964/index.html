@@ -1,549 +1,186 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>月度好菜投票</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --surface: rgba(255, 255, 255, 0.85);
-  --surface-hover: #f4f4f5;
-  --text-primary: #09090b;
-  --text-secondary: #71717a;
-  --accent-blue: #2563eb;
-  --accent-yellow: #fbbf24;
-  --gradient-main: linear-gradient(135deg, #2563eb 0%, #fbbf24 100%);
-  --gradient-hover: linear-gradient(135deg, #1d4ed8 0%, #f59e0b 100%);
-  --gradient-text: linear-gradient(135deg, #1d4ed8, #d97706);
-  --accent-foreground: #ffffff;
-  --border: #e4e4e7;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(251, 191, 36, 0.06);
-  --shadow-xl: 0 20px 25px -5px rgba(37, 99, 235, 0.15), 0 10px 10px -5px rgba(251, 191, 36, 0.1);
-  --radius: 16px;
-  --glass: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --modal-overlay: rgba(0, 0, 0, 0.2);
-}
-body.dark-mode {
-  --surface: rgba(20, 20, 20, 0.85);
-  --surface-hover: #1f1f22;
-  --text-primary: #ededef;
-  --text-secondary: #a1a1aa;
-  --accent-blue: #3b82f6;
-  --accent-yellow: #f59e0b;
-  --gradient-main: linear-gradient(135deg, #3b82f6 0%, #f59e0b 100%);
-  --gradient-hover: linear-gradient(135deg, #60a5fa 0%, #fbbf24 100%);
-  --gradient-text: linear-gradient(135deg, #60a5fa, #fbbf24);
-  --border: #27272a;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(245, 158, 11, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(245, 158, 11, 0.2);
-  --glass: rgba(0, 0, 0, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.08);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-  color: var(--text-primary);
-  min-height: 100vh;
-  padding-bottom: 80px;
-  transition: background-color 0.4s ease, color 0.4s ease;
-  -webkit-font-smoothing: antialiased;
-  background:
-    radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.12), transparent 45%),
-    radial-gradient(circle at 90% 80%, rgba(251, 191, 36, 0.12), transparent 45%),
-    #fafafa;
-  background-attachment: fixed;
-}
-body.dark-mode {
-  background:
-    radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.22), transparent 50%),
-    radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.18), transparent 50%),
-    #050505;
-  background-attachment: fixed;
-}
-
-/* 顶部导航 */
-.header {
-  position: sticky; top: 0; z-index: 50;
-  background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--glass-border);
-  padding: 16px 24px;
-  display: flex; justify-content: space-between; align-items: center;
-  transition: background 0.4s, border 0.4s;
-}
-.header-left h1 {
-  font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em;
-  background: var(--gradient-text);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.header-left p { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
-.header-actions { display: flex; gap: 8px; align-items: center; }
-
-/* 按钮 */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 8px 16px; border-radius: 99px;
-  font-size: 0.85rem; font-weight: 600; cursor: pointer;
-  border: 1px solid var(--border); background: var(--surface); color: var(--text-primary);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: var(--shadow-sm); outline: none;
-  backdrop-filter: blur(8px);
-}
-.btn:hover { background: var(--surface-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--accent-blue); }
-.btn:active { transform: translateY(0); }
-.btn-primary { background: var(--gradient-main); color: var(--accent-foreground); border-color: transparent; }
-.btn-primary:hover { background: var(--gradient-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.btn-danger { background: #ef4444; color: #fff; border-color: #ef4444; }
-.btn-danger:hover { background: #dc2626; border-color: #dc2626; }
-
-/* 工具栏 & 统计 */
-.toolbar {
-  max-width: 1200px; margin: 24px auto 0; padding: 0 24px;
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
-}
-.stat-box {
-  display: flex; gap: 24px; background: var(--surface); padding: 12px 24px;
-  border-radius: 99px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-  position: relative; overflow: hidden; backdrop-filter: blur(8px);
-}
-.stat-box::before {
-  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-  background: var(--gradient-main);
-}
-.stat-item { display: flex; flex-direction: column; align-items: center; }
-.stat-value { font-size: 1.1rem; font-weight: 800; background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
-
-.search-box {
-  padding: 10px 16px; border: 1px solid var(--border); border-radius: 99px;
-  font-size: 0.9rem; outline: none; width: 260px;
-  background: var(--surface); color: var(--text-primary);
-  transition: all 0.2s; box-shadow: var(--shadow-sm); backdrop-filter: blur(8px);
-}
-.search-box:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
-
-/* 网格 */
-.grid {
-  max-width: 1200px; margin: 24px auto; padding: 0 24px;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;
-}
-
-/* 卡片 */
-.card {
-  background: var(--surface); border-radius: var(--radius);
-  overflow: hidden; border: 1px solid var(--border);
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  display: flex; flex-direction: column; position: relative;
-  box-shadow: var(--shadow-sm); backdrop-filter: blur(12px);
-}
-.card:hover { transform: translateY(-8px); box-shadow: var(--shadow-xl); border-color: transparent; }
-.card::after {
-  content: ''; position: absolute; inset: 0; border-radius: var(--radius);
-  padding: 2px; background: var(--gradient-main);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  pointer-events: none; opacity: 0; transition: opacity 0.3s;
-}
-.card:hover::after { opacity: 1; }
-
-.card-img-wrap { position: relative; width: 100%; aspect-ratio: 4/3; overflow: hidden; background: #111; cursor: zoom-in; }
-.card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); display: block; }
-.card:hover .card-img-wrap img { transform: scale(1.08); }
-
-/* 删除按钮 */
-.card-delete-btn {
-  position: absolute; top: 12px; right: 12px; z-index: 10;
-  width: 32px; height: 32px; border-radius: 50%;
-  border: none; cursor: pointer;
-  background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
-  color: white; display: flex; justify-content: center; align-items: center;
-  font-size: 0.9rem; transition: all 0.2s;
-  opacity: 0;
-}
-.card:hover .card-delete-btn { opacity: 1; }
-.card-delete-btn:hover { background: #ef4444; transform: scale(1.1); }
-
-/* 排行徽章 */
-.rank-badge {
-  position: absolute; top: 12px; left: 12px; z-index: 10;
-  padding: 6px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;
-  display: flex; align-items: center; gap: 4px; backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-.rank-1 { background: var(--gradient-main); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
-.rank-2 { background: linear-gradient(135deg, #e5e7eb, #9ca3af); color: #000; }
-.rank-3 { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
-
-.card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-.card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
-.card-meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
-.card-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px; min-height: 20px; flex: 1; }
-
-.vote-btn {
-  width: 100%; padding: 12px; border-radius: 99px;
-  font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text-primary);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; justify-content: center; align-items: center; gap: 6px;
-}
-.vote-btn:hover:not(:disabled) { border-color: var(--accent-blue); color: var(--accent-blue); background: var(--surface-hover); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
-.vote-btn.voted { background: var(--gradient-main); color: var(--accent-foreground); border-color: transparent; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); }
-.vote-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* 图片查看器 */
-#imageViewer {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200;
-  display: none; justify-content: center; align-items: center; padding: 40px;
-  opacity: 0; transition: opacity 0.3s ease;
-}
-#imageViewer.show { display: flex; opacity: 1; }
-#imageViewer img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); animation: zoomIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
-@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-/* 空状态 & Toast */
-.empty-state { grid-column: 1 / -1; text-align: center; padding: 80px 20px; }
-.empty-state svg { width: 80px; height: 80px; color: var(--border); margin-bottom: 16px; }
-.empty-state h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
-.empty-state p { color: var(--text-secondary); font-size: 0.9rem; }
-
-.toast {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-  background: var(--gradient-main); color: var(--accent-foreground); padding: 14px 28px; border-radius: 99px;
-  font-size: 0.9rem; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  z-index: 300; box-shadow: var(--shadow-xl); pointer-events: none;
-}
-.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-.loading-state { grid-column: 1 / -1; text-align: center; padding: 80px 20px; color: var(--text-secondary); }
-.loading-spinner {
-  width: 40px; height: 40px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent-blue);
-  border-radius: 50%;
-  margin: 0 auto 16px;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.footer { text-align: center; padding: 40px 20px 20px; color: var(--text-secondary); font-size: 0.8rem; }
-
-@media (max-width: 640px) {
-  .header { padding: 12px 16px; flex-direction: column; gap: 12px; align-items: flex-start; }
-  .header-actions { width: 100%; justify-content: space-between; }
-  .header-actions .btn span { display: none; }
-  .header-actions .btn { padding: 10px; border-radius: 50%; }
-  .toolbar { flex-direction: column; align-items: stretch; padding: 0 16px; }
-  .stat-box { width: 100%; justify-content: space-around; }
-  .search-box { width: 100%; }
-  .grid { grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; }
-  .card-body { padding: 12px; }
-  .card-title { font-size: 0.9rem; }
-  .card-meta, .card-desc { font-size: 0.7rem; margin-bottom: 10px; }
-  .vote-btn { padding: 8px; font-size: 0.8rem; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>月度好菜</title>
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+        header p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #eee;
+        }
+        .card-img-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #bbb;
+            font-size: 3rem;
+        }
+        .card-content {
+            padding: 16px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            color: var(--text-main);
+        }
+        .card-info {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .card-info span {
+            margin-right: 5px;
+        }
+        .card-date {
+            margin-top: auto;
+            font-size: 0.85rem;
+            color: #999;
+            text-align: right;
+            padding-top: 10px;
+        }
+        .loading, .error {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 40px;
+            color: var(--text-sub);
+            font-size: 1.1rem;
+        }
+        .error { color: #e74c3c; }
+    </style>
 </head>
 <body>
+    <header>
+        <h1>🍲 月度好菜</h1>
+        <p>数据由 GitHub Actions 自动更新</p>
+    </header>
 
-<header class="header">
-  <div class="header-left">
-    <h1>月度好菜投票</h1>
-    <p>每人限投 <span id="limitTip">2</span> 票 · 选出你心中的最佳菜品</p>
-  </div>
-  <div class="header-actions">
-    <button class="btn" id="themeToggleBtn" onclick="toggleTheme()" title="切换主题">🌙 <span>夜间</span></button>
-    <button class="btn" onclick="reloadDishes()" title="刷新菜品数据">🔄 <span>刷新</span></button>
-    <button class="btn" onclick="resetHidden()" title="恢复隐藏的菜品">👁️ <span>恢复隐藏</span></button>
-    <button class="btn" onclick="resetVote()" title="重置投票" style="color: #ef4444;">🗑️ <span>重置投票</span></button>
-  </div>
-</header>
+    <main id="app" class="grid-container">
+        <div class="loading">正在加载菜品数据...</div>
+    </main>
 
-<div class="toolbar">
-  <div class="stat-box">
-    <div class="stat-item">
-      <span class="stat-value" id="totalDishes">0</span>
-      <span class="stat-label">菜品总数</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value" id="totalVotes">0</span>
-      <span class="stat-label">我的票数</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value" id="totalHidden">0</span>
-      <span class="stat-label">已隐藏</span>
-    </div>
-  </div>
-  <input type="text" class="search-box" id="searchInput" placeholder="🔍 搜索菜名或厨师...">
-</div>
+    <script>
+        async function loadDishes() {
+            const container = document.getElementById('app');
+            
+            try {
+                // 加上 ?v=时间戳 来强制绕过浏览器和 CDN 缓存
+                const response = await fetch('dishes.json?v=' + new Date().getTime());
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const dishes = await response.json();
+                
+                // 如果数组为空
+                if (!dishes || dishes.length === 0) {
+                    container.innerHTML = '<div class="loading">暂时还没有菜品数据哦~</div>';
+                    return;
+                }
 
-<main class="grid" id="dishGrid"></main>
+                // 清空加载提示
+                container.innerHTML = '';
 
-<div class="footer">
-  <p>数据来源：腾讯文档智能表格 · 每月自动同步</p>
-</div>
+                // 遍历数据生成卡片
+                dishes.forEach(dish => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
 
-<div id="imageViewer" onclick="closeImageViewer()">
-  <img id="viewerImg" src="" alt="预览">
-</div>
+                    // 处理图片
+                    let imgHtml = '';
+                    if (dish.img && dish.img.trim() !== '') {
+                        // 核心修复：加入 referrerpolicy="no-referrer" 突破防盗链
+                        imgHtml = `<img src="${dish.img}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+                        imgHtml += `<div class="card-img-placeholder" style="display:none;">🍽️</div>`;
+                    } else {
+                        imgHtml = `<div class="card-img-placeholder">🍽️</div>`;
+                    }
 
-<div class="toast" id="toast"></div>
+                    // 处理厨师信息
+                    let chefText = dish.chef1 || '未知';
+                    if (dish.chef2 && dish.chef2.trim() !== '') {
+                        chefText += ` & ${dish.chef2}`;
+                    }
 
-<script>
-/* ================= 配置 ================= */
-const VOTE_LIMIT = 2;
-const VOTE_KEY = 'food_vote_records_v1';
-const HIDDEN_KEY = 'food_vote_hidden_v1';
-const THEME_KEY = 'food_vote_theme';
-const DATA_URL = 'dishes.json';
+                    card.innerHTML = `
+                        ${imgHtml}
+                        <div class="card-content">
+                            <h2 class="card-title">${dish.name}</h2>
+                            <div class="card-info"><span>👨‍🍳</span> ${chefText}</div>
+                            <div class="card-date">📅 ${dish.date || '未知日期'}</div>
+                        </div>
+                    `;
 
-let dishes = [];
-let currentVotes = [];
-let hiddenIds = new Set();
+                    container.appendChild(card);
+                });
 
-/* ================= 主题 ================= */
-function toggleTheme() {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
-  updateThemeBtn(isDark);
-}
-function updateThemeBtn(isDark) {
-  const btn = document.getElementById('themeToggleBtn');
-  btn.innerHTML = isDark ? '☀️ <span>白天</span>' : '🌙 <span>夜间</span>';
-}
-function initTheme() {
-  const saved = localStorage.getItem(THEME_KEY);
-  if (saved === 'dark') {
-    document.body.classList.add('dark-mode');
-    updateThemeBtn(true);
-  } else {
-    updateThemeBtn(false);
-  }
-}
+            } catch (error) {
+                console.error('加载 dishes.json 失败:', error);
+                container.innerHTML = `<div class="error">❌ 数据加载失败，请刷新页面或稍后再试。<br><small>${error.message}</small></div>`;
+            }
+        }
 
-/* ================= 加载数据 ================= */
-async function loadDishes() {
-  const grid = document.getElementById('dishGrid');
-  grid.innerHTML = `
-    <div class="loading-state">
-      <div class="loading-spinner"></div>
-      <p>正在加载本月菜品...</p>
-    </div>
-  `;
-
-  try {
-    const res = await fetch(DATA_URL + '?t=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    dishes = (data || []).filter(d => d && d.name && d.name.trim());
-    console.log('✅ 加载了', dishes.length, '道菜');
-    renderDishes();
-  } catch (e) {
-    console.error('加载 dishes.json 失败:', e);
-    grid.innerHTML = `
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <h2>数据加载失败</h2>
-        <p>请确认 dishes.json 与网页在同一个文件夹</p>
-      </div>
-    `;
-  }
-}
-
-function reloadDishes() {
-  showToast('🔄 正在刷新数据...');
-  loadDishes();
-}
-
-/* ================= 删除（隐藏）功能 ================= */
-function deleteDish(id) {
-  if (!confirm('确定要隐藏这道菜吗？\n（这是本地隐藏，不会影响源数据，可在顶部"恢复隐藏"按钮恢复）')) {
-    return;
-  }
-  hiddenIds.add(id);
-  localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenIds]));
-  showToast('🗑️ 已隐藏');
-  renderDishes();
-}
-
-function resetHidden() {
-  if (hiddenIds.size === 0) {
-    showToast('没有已隐藏的菜品');
-    return;
-  }
-  if (confirm(`确定要恢复 ${hiddenIds.size} 道被隐藏的菜品吗？`)) {
-    hiddenIds.clear();
-    localStorage.removeItem(HIDDEN_KEY);
-    showToast('👁️ 已全部恢复');
-    renderDishes();
-  }
-}
-
-/* ================= 渲染 ================= */
-function renderDishes() {
-  const grid = document.getElementById('dishGrid');
-  const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
-  grid.innerHTML = '';
-
-  // 统计
-  const visibleDishes = dishes.filter(d => !hiddenIds.has(d.id));
-  document.getElementById('totalDishes').textContent = visibleDishes.length;
-  document.getElementById('totalVotes').textContent = currentVotes.length;
-  document.getElementById('totalHidden').textContent = hiddenIds.size;
-
-  let filtered = visibleDishes;
-  if (search) {
-    filtered = visibleDishes.filter(d =>
-      (d.name || '').toLowerCase().includes(search) ||
-      (d.chef1 || '').toLowerCase().includes(search) ||
-      (d.chef2 || '').toLowerCase().includes(search)
-    );
-  }
-
-  if (filtered.length === 0) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        <h2>${dishes.length === 0 ? '本月还没有菜品' : '没有匹配的菜品'}</h2>
-        <p>${dishes.length === 0 ? '等团队上传菜品后，运行 123.py 更新数据' : '试试搜索其他关键词'}</p>
-      </div>
-    `;
-    return;
-  }
-
-  // 排行
-  const voteCounts = {};
-  currentVotes.forEach(id => { voteCounts[id] = (voteCounts[id] || 0) + 1; });
-  const sortedByVotes = [...visibleDishes].sort((a, b) => (voteCounts[b.id] || 0) - (voteCounts[a.id] || 0));
-  const top3Ids = sortedByVotes
-    .filter(d => (voteCounts[d.id] || 0) > 0)
-    .slice(0, 3)
-    .map(d => String(d.id));
-
-  filtered.forEach(dish => {
-    const isVoted = currentVotes.includes(dish.id);
-    const rankIndex = top3Ids.indexOf(String(dish.id));
-    let badgeHtml = '';
-    if (rankIndex === 0) badgeHtml = '<div class="rank-badge rank-1">🥇 第一名</div>';
-    else if (rankIndex === 1) badgeHtml = '<div class="rank-badge rank-2">🥈 第二名</div>';
-    else if (rankIndex === 2) badgeHtml = '<div class="rank-badge rank-3">🥉 第三名</div>';
-
-    const chefDisplay = [dish.chef1, dish.chef2].filter(Boolean).join(' & ') || '待填写';
-
-    // ===== 方案 A：无图片时显示灰色占位 =====
-    const placeholder = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
-        <rect width="400" height="300" fill="#242430"/>
-        <text x="50%" y="50%" font-family="sans-serif" font-size="18" fill="#666" text-anchor="middle" dominant-baseline="middle">暂无图片</text>
-      </svg>
-    `);
-    const imgSrc = dish.img && dish.img.trim() ? dish.img : placeholder;
-    const isRealImg = dish.img && dish.img.trim();
-
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card-img-wrap">
-        ${badgeHtml}
-        <button class="card-delete-btn" onclick="event.stopPropagation(); deleteDish(${dish.id})" title="隐藏这道菜">✕</button>
-        <img src="${imgSrc}"
-             ${isRealImg ? `onclick="openImageViewer('${imgSrc}')"` : ''}
-             onerror="this.src='${placeholder}'">
-      </div>
-      <div class="card-body">
-        <div class="card-title">${dish.name}</div>
-        <div class="card-meta">👨‍🍳 ${chefDisplay}</div>
-        <div class="card-desc">📅 ${dish.date || '未知日期'}</div>
-        <button class="vote-btn ${isVoted ? 'voted' : ''}"
-                onclick="toggleVote(${dish.id})"
-                ${currentVotes.length >= VOTE_LIMIT && !isVoted ? 'disabled' : ''}>
-          ${isVoted ? '✅ 已投' : (currentVotes.length >= VOTE_LIMIT ? '票数已满' : '投一票')}
-        </button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-/* ================= 投票 ================= */
-function toggleVote(dishId) {
-  const id = typeof dishId === 'string' ? parseInt(dishId) : dishId;
-  if (currentVotes.includes(id)) {
-    currentVotes = currentVotes.filter(v => v !== id);
-  } else {
-    if (currentVotes.length >= VOTE_LIMIT) {
-      showToast(`最多只能投 ${VOTE_LIMIT} 票`);
-      return;
-    }
-    currentVotes.push(id);
-  }
-  localStorage.setItem(VOTE_KEY, JSON.stringify(currentVotes));
-  renderDishes();
-}
-
-function resetVote() {
-  if (confirm('确定要清空你的投票记录吗？')) {
-    localStorage.removeItem(VOTE_KEY);
-    currentVotes = [];
-    renderDishes();
-    showToast('🗑️ 已重置投票');
-  }
-}
-
-/* ================= 图片查看器 ================= */
-function openImageViewer(src) {
-  const viewer = document.getElementById('imageViewer');
-  document.getElementById('viewerImg').src = src;
-  viewer.classList.add('show');
-}
-function closeImageViewer() {
-  document.getElementById('imageViewer').classList.remove('show');
-}
-
-/* ================= Toast ================= */
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-/* ================= 初始化 ================= */
-function init() {
-  initTheme();
-  document.getElementById('limitTip').textContent = VOTE_LIMIT;
-
-  // 恢复投票记录
-  try {
-    const saved = localStorage.getItem(VOTE_KEY);
-    if (saved) currentVotes = JSON.parse(saved).map(v => typeof v === 'string' ? parseInt(v) : v);
-  } catch (e) { currentVotes = []; }
-
-  // 恢复隐藏记录
-  try {
-    const savedHidden = localStorage.getItem(HIDDEN_KEY);
-    if (savedHidden) hiddenIds = new Set(JSON.parse(savedHidden).map(v => typeof v === 'string' ? parseInt(v) : v));
-  } catch (e) { hiddenIds = new Set(); }
-
-  document.getElementById('searchInput').addEventListener('input', renderDishes);
-  loadDishes();
-}
-
-init();
-</script>
+        // 页面加载时执行
+        loadDishes();
+    </script>
 </body>
 </html>
