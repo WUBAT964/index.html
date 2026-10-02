@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>月度好菜 | 美食投票</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入腾讯云 CloudBase SDK -->
+    <script src="https://static.cloudbase.net/cloudbase-js-sdk/2.17.3/cloudbase.full.js"></script>
     <style>
         :root {
             --primary-color: #FF6B6B;
@@ -19,161 +21,38 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0 0 30px 0;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+            background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0 0 30px 0; line-height: 1.5; -webkit-font-smoothing: antialiased;
         }
-        .header {
-            text-align: center;
-            padding: 30px 16px 20px;
-            background: #FFFFFF;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            margin-bottom: 16px;
-        }
-        .header h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 0 0 6px 0;
-            letter-spacing: 1px;
-        }
+        .header { text-align: center; padding: 30px 16px 20px; background: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 16px; }
+        .header h1 { font-size: 1.6rem; font-weight: 700; color: var(--text-main); margin: 0 0 6px 0; letter-spacing: 1px; }
         .header h1 span { color: var(--primary-color); }
         .header p { color: var(--text-sub); font-size: 0.85rem; margin: 0; }
 
-        /* 强制桌面端3列，手机端2列 */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 桌面端默认3列 */
-            gap: 16px;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 16px;
-        }
-
-        /* 手机端（屏幕宽度 ≤ 600px）自动变为 2 列 */
+        /* 桌面端 3 列，手机端 2 列 */
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto; padding: 0 16px; }
         @media (max-width: 600px) {
-            .grid-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-                padding: 0 8px;
-            }
+            .grid-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 8px; }
         }
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* 固定图片比例，即使没图，卡片也不会变形得太离谱 */
-        .card-image-wrapper {
-            width: 100%;
-            aspect-ratio: 4 / 3; 
-            overflow: hidden;
-            position: relative;
-            background: linear-gradient(135deg, #fdfbf7 0%, #f0ebe4 100%);
-        }
-        .card-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .image-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #bdc3c7;
-        }
+        .card { background-color: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; }
+        .card-image-wrapper { width: 100%; aspect-ratio: 4 / 3; overflow: hidden; position: relative; background: linear-gradient(135deg, #fdfbf7 0%, #f0ebe4 100%); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; }
+        .image-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #bdc3c7; }
         .image-placeholder .icon { font-size: 2rem; }
         .image-placeholder .text { font-size: 0.75rem; color: #95a5a6; margin-top: 4px; }
-
-        .card-content {
-            padding: 12px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 0 0 6px 0;
-            line-height: 1.3;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .card-info {
-            display: flex;
-            align-items: center;
-            font-size: 0.78rem;
-            color: var(--text-sub);
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-        }
+        .card-content { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin: 0 0 6px 0; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-info { display: flex; align-items: center; font-size: 0.78rem; color: var(--text-sub); margin-bottom: 4px; white-space: nowrap; overflow: hidden; }
         .card-info svg { width: 12px; height: 12px; margin-right: 4px; fill: var(--text-sub); flex-shrink: 0; }
-        .card-date {
-            font-size: 0.72rem;
-            color: #95a5a6;
-            margin-top: 2px;
-        }
-
-        .vote-area {
-            margin-top: auto;
-            padding-top: 10px;
-            border-top: 1px solid #F0F0F0;
-        }
-        .vote-btn {
-            background: var(--bg-color);
-            border: none;
-            border-radius: 16px;
-            padding: 8px 10px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-        }
+        .card-date { font-size: 0.72rem; color: #95a5a6; margin-top: 2px; }
+        .vote-area { margin-top: auto; padding-top: 10px; border-top: 1px solid #F0F0F0; }
+        .vote-btn { background: var(--bg-color); border: none; border-radius: 16px; padding: 8px 10px; font-size: 0.82rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.2s ease; width: 100%; }
         .vote-btn:active { transform: scale(0.96); }
-        .vote-btn.voted {
-            background: var(--primary-gradient);
-            color: #FFFFFF;
-            box-shadow: 0 3px 8px rgba(255, 107, 107, 0.25);
-        }
+        .vote-btn.voted { background: var(--primary-gradient); color: #FFFFFF; box-shadow: 0 3px 8px rgba(255, 107, 107, 0.25); }
         .vote-btn.voted svg { fill: #FFFFFF; }
-        .vote-btn svg {
-            width: 15px; height: 15px; fill: var(--text-sub);
-            transition: fill 0.2s ease;
-            flex-shrink: 0;
-        }
-        .vote-count {
-            font-size: 0.82rem;
-            font-weight: 700;
-        }
-
-        .loading, .error {
-            text-align: center;
-            grid-column: 1 / -1;
-            padding: 60px 20px;
-            color: var(--text-sub);
-            font-size: 1rem;
-        }
+        .vote-btn svg { width: 15px; height: 15px; fill: var(--text-sub); transition: fill 0.2s ease; flex-shrink: 0; }
+        .vote-count { font-size: 0.82rem; font-weight: 700; }
+        .loading, .error { text-align: center; grid-column: 1 / -1; padding: 60px 20px; color: var(--text-sub); font-size: 1rem; }
         .error { color: var(--primary-color); }
     </style>
 </head>
@@ -189,7 +68,12 @@
     </main>
 
     <script>
-        const WORKER_URL = 'https://jolly-hill-31ae.1556577675.workers.dev';
+        // ==================== 替换为你自己的 CloudBase 环境 ID ====================
+        // 如果你环境名不同，请在这里修改
+        const ENV_ID = 'monthly-dishes-d7gu69s4x8964e12e';
+
+        let app, db, _;
+        let isReady = false;
 
         function isRealImage(url) {
             if (!url) return false;
@@ -204,9 +88,32 @@
             localStorage.setItem('voted_dish_ids', JSON.stringify(ids));
         }
 
+        // 初始化 CloudBase 并匿名登录
+        async function initCloudBase() {
+            try {
+                app = cloudbase.init({ env: ENV_ID });
+                const auth = app.auth();
+                await auth.signInAnonymously(); // 匿名登录，用户无需注册
+                db = app.database();
+                _ = db.command;
+                isReady = true;
+                console.log('CloudBase 连接成功');
+                return true;
+            } catch (e) {
+                console.error('CloudBase 初始化失败:', e);
+                return false;
+            }
+        }
+
         async function loadDishes() {
             const container = document.getElementById('app');
             const votedIds = getLocalVotedIds();
+
+            const ready = await initCloudBase();
+            if (!ready) {
+                container.innerHTML = '<div class="error">❌ 云服务连接失败，请刷新页面重试。</div>';
+                return;
+            }
 
             try {
                 const response = await fetch('dishes.json?v=' + new Date().getTime());
@@ -218,13 +125,13 @@
                     return;
                 }
 
+                // 从 CloudBase 获取所有票数
                 let voteCounts = {};
                 try {
-                    const voteRes = await fetch(`${WORKER_URL}/api/votes`);
-                    const voteData = await voteRes.json();
-                    voteData.forEach(v => { voteCounts[v.dish_id] = v.count; });
+                    const voteRes = await db.collection('votes').get();
+                    voteRes.data.forEach(v => { voteCounts[v.dishId] = v.count || 0; });
                 } catch (e) {
-                    console.warn('获取云端票数失败', e);
+                    console.warn('获取云端票数失败，将从 0 开始', e);
                 }
 
                 container.innerHTML = '';
@@ -282,36 +189,48 @@
             if (btn.disabled) return;
             btn.disabled = true;
 
+            if (votedIds.includes(dishId)) {
+                alert('您今天已经投过这道菜啦！');
+                btn.disabled = false;
+                return;
+            }
+
             try {
-                const response = await fetch(`${WORKER_URL}/api/vote`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dishId: dishId })
-                });
+                // 查询是否已有该菜品的投票记录
+                const queryRes = await db.collection('votes').where({ dishId: dishId }).get();
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    alert(data.error || '投票失败，请稍后再试');
-                    return;
-                }
-
-                if (votedIds.includes(dishId)) {
-                    alert('您今天已经投过这道菜啦！');
+                let newCount = 1;
+                if (queryRes.data.length > 0) {
+                    // 已有记录，票数 +1
+                    const doc = queryRes.data[0];
+                    newCount = (doc.count || 0) + 1;
+                    await db.collection('votes').doc(doc._id).update({
+                        count: newCount
+                    });
                 } else {
-                    votedIds.push(dishId);
-                    saveLocalVotedIds(votedIds);
-                    
-                    btn.classList.add('voted');
-                    voteTextSpan.textContent = '已投票';
-                    voteCountSpan.textContent = data.count;
-                    
-                    btn.style.transform = 'scale(1.1)';
-                    setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
+                    // 没有记录，创建新文档
+                    await db.collection('votes').add({
+                        dishId: dishId,
+                        count: 1,
+                        createdAt: new Date()
+                    });
                 }
+
+                // 更新本地记录
+                votedIds.push(dishId);
+                saveLocalVotedIds(votedIds);
+
+                // 更新 UI
+                btn.classList.add('voted');
+                voteTextSpan.textContent = '已投票';
+                voteCountSpan.textContent = newCount;
+
+                btn.style.transform = 'scale(1.1)';
+                setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
+
             } catch (e) {
                 console.error('投票失败:', e);
-                alert('网络错误，请检查网络后重试');
+                alert('网络错误或权限不足，请检查数据库权限设置后重试');
             } finally {
                 btn.disabled = false;
             }
