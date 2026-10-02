@@ -10,40 +10,22 @@ from playwright.async_api import async_playwright
 
 DOC_URL = "https://docs.qq.com/smartsheet/DYUVLcnVzemtsREVw?tab=WMypN4&viewId=vabcde"
 AUTH_FILE = "tencent_auth.json"
-
-# 本地 Edge 路径
 EDGE_PATH = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 
-# 判断当前是不是 GitHub Actions 环境
 IS_GITHUB_ACTIONS = os.environ.get("GITHUB_ACTIONS") == "true"
 
-
-# ==================== 字段 ID -> 中文名 ====================
 FIELD_MAP = {
-    "fp1Vev": "记录编号",
-    "feFvUO": "提交时间",
-    "foxB4n": "提交时间年月日",
-    "fz8Mdv": "二维码名称",
-    "f9rQNe": "二维码地址",
-    "fM0osq": "填表人",
-    "fC49nw": "提交日期",
-    "flZwvw": "做菜日期",
-    "f8mRtK": "厨师1",
-    "ff6IOQ": "厨师2",
-    "fGmSN7": "菜名",
-    "fbZb4u": "菜图",
+    "fp1Vev": "记录编号", "feFvUO": "提交时间", "foxB4n": "提交时间年月日",
+    "fz8Mdv": "二维码名称", "f9rQNe": "二维码地址", "fM0osq": "填表人",
+    "fC49nw": "提交日期", "flZwvw": "做菜日期", "f8mRtK": "厨师1",
+    "ff6IOQ": "厨师2", "fGmSN7": "菜名", "fbZb4u": "菜图",
 }
 
-
-# ==================== 工具函数 ====================
 def b64_fix(s):
-    s = s.strip().replace("\n", "").replace("\r", "")
-    s = s.replace("-", "+").replace("_", "/")
+    s = s.strip().replace("\n", "").replace("\r", "").replace("-", "+").replace("_", "/")
     pad = (-len(s)) % 4
-    if pad:
-        s += "=" * pad
+    if pad: s += "=" * pad
     return s
-
 
 def decode_chunk(b64_str):
     raw = base64.b64decode(b64_fix(b64_str))
@@ -53,53 +35,39 @@ def decode_chunk(b64_str):
         text = zlib.decompress(raw, -zlib.MAX_WBITS).decode("utf-8", errors="replace")
     return json.loads(text)
 
-
 def ts_to_date(ts_ms):
     try:
-        ts = int(ts_ms) / 1000
-        return datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+        return datetime.fromtimestamp(int(ts_ms) / 1000).strftime("%Y-%m-%d")
     except Exception:
         return ""
 
-
 def extract_text(cell):
-    if not cell:
-        return ""
+    if not cell: return ""
     if "k1" in cell and isinstance(cell["k1"], list):
         for item in cell["k1"]:
-            if isinstance(item, dict) and "k2" in item:
-                return item["k2"]
+            if isinstance(item, dict) and "k2" in item: return item["k2"]
     return ""
 
-
 def extract_value(field_id, cell, option_map):
-    if not cell:
-        return ""
+    if not cell: return ""
     text = extract_text(cell)
-    if text:
-        return text
-    if "k4" in cell:
-        return ts_to_date(cell["k4"])
+    if text: return text
+    if "k4" in cell: return ts_to_date(cell["k4"])
     if "k8" in cell and isinstance(cell["k8"], list):
         for item in cell["k8"]:
-            if isinstance(item, dict) and "k3" in item:
-                return item["k3"]
+            if isinstance(item, dict) and "k3" in item: return item["k3"]
     if "k17" in cell:
         opts = cell["k17"]
         if isinstance(opts, list) and opts:
             return option_map.get(field_id, {}).get(opts[0], opts[0])
     return ""
 
-
-# ==================== 登录态处理 ====================
 def prepare_auth():
     if IS_GITHUB_ACTIONS:
         auth_json = os.environ.get("TENCENT_AUTH")
         if not auth_json:
-            print("❌ 未找到 TENCENT_AUTH 环境变量")
-            sys.exit(1)
-        with open(AUTH_FILE, "w", encoding="utf-8") as f:
-            f.write(auth_json)
+            print("❌ 未找到 TENCENT_AUTH 环境变量"); sys.exit(1)
+        with open(AUTH_FILE, "w", encoding="utf-8") as f: f.write(auth_json)
         print("✅ 已从 Secrets 还原登录态")
     else:
         if not os.path.exists(AUTH_FILE):
@@ -108,13 +76,9 @@ def prepare_auth():
         else:
             print(f"✅ 发现本地登录态 {AUTH_FILE}")
 
-
 async def local_login():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=False,
-            executable_path=EDGE_PATH,
-        )
+        browser = await p.chromium.launch(headless=False, executable_path=EDGE_PATH)
         context = await browser.new_context(viewport={"width": 1600, "height": 900})
         page = await context.new_page()
         await page.goto(DOC_URL, wait_until="domcontentloaded")
@@ -124,25 +88,15 @@ async def local_login():
         print(f"✅ 登录态已保存到 {AUTH_FILE}")
         await browser.close()
 
-
-# ==================== 抓取 ====================
 async def scrape_all_chunks():
     all_chunks = []
     async with async_playwright() as p:
         if IS_GITHUB_ACTIONS:
-            print("🌐 使用 Playwright 内置 Chromium")
             browser = await p.chromium.launch(headless=True)
         else:
-            print("🌐 使用本地 Edge")
-            browser = await p.chromium.launch(
-                headless=True,
-                executable_path=EDGE_PATH,
-            )
+            browser = await p.chromium.launch(headless=True, executable_path=EDGE_PATH)
 
-        context = await browser.new_context(
-            viewport={"width": 1600, "height": 900},
-            storage_state=AUTH_FILE,
-        )
+        context = await browser.new_context(viewport={"width": 1600, "height": 900}, storage_state=AUTH_FILE)
         page = await context.new_page()
 
         async def on_response(response):
@@ -152,19 +106,16 @@ async def scrape_all_chunks():
                     body = await response.text()
                     start = body.find("{")
                     end = body.rfind("}")
-                    if start < 0 or end < 0:
-                        return
+                    if start < 0 or end < 0: return
                     data = json.loads(body[start:end + 1])
                     cv = data.get("clientVars", {})
                     ccv = cv.get("collab_client_vars", {})
                     iat = ccv.get("initialAttributedText")
-                    if not iat:
-                        return
+                    if not iat: return
                     for chunk in iat.get("text", []):
                         if chunk.get("smartsheet"):
                             all_chunks.append(chunk)
-                            print(f"📥 分块: max_row={chunk.get('max_row')}, "
-                                  f"row[{chunk.get('start_row_index')}~{chunk.get('end_row_index')}]")
+                            print(f"📥 分块: max_row={chunk.get('max_row')}, row[{chunk.get('start_row_index')}~{chunk.get('end_row_index')}]")
                 except Exception as e:
                     print(f"处理响应失败: {e}")
 
@@ -177,12 +128,9 @@ async def scrape_all_chunks():
         for i in range(10):
             await page.mouse.wheel(0, 4000)
             await page.wait_for_timeout(1500)
-
         await browser.close()
     return all_chunks
 
-
-# ==================== 解析 ====================
 def parse_all_chunks(decoded_chunks):
     option_map = {}
     for chunk in decoded_chunks:
@@ -210,150 +158,101 @@ def parse_all_chunks(decoded_chunks):
                         all_rows.append(parsed)
     return all_rows
 
-
 def to_dishes_json(rows):
     dishes = []
     for i, row in enumerate(rows):
         name = row.get("菜名", "").strip()
-        if not name:
-            continue
+        if not name: continue
         dishes.append({
-            "id": i + 1,
-            "name": name,
-            "chef1": row.get("厨师1", "").strip(),
-            "chef2": row.get("厨师2", "").strip(),
-            "date": row.get("做菜日期", "").strip(),
-            "img": row.get("菜图", "").strip(),
+            "id": i + 1, "name": name,
+            "chef1": row.get("厨师1", "").strip(), "chef2": row.get("厨师2", "").strip(),
+            "date": row.get("做菜日期", "").strip(), "img": row.get("菜图", "").strip(),
             "_raw": row,
         })
     return dishes
 
-
 # ==================== 新增：处理图片下载 ====================
 async def process_images(dishes):
-    """遍历 dishes，如果是 cli.im 链接则尝试下载图片到本地"""
-    if not dishes:
-        return
-
+    if not dishes: return
     has_web_link = any("cli.im" in d.get("img", "") for d in dishes)
-    if not has_web_link:
-        print("ℹ️ 没有发现需要处理的 cli.im 图片链接")
-        return
+    if not has_web_link: return
 
     os.makedirs("images", exist_ok=True)
     print(f"📸 开始处理图片下载，共 {len(dishes)} 道菜...")
 
     async with async_playwright() as p:
-        if IS_GITHUB_ACTIONS:
-            browser = await p.chromium.launch(headless=True)
-        else:
-            browser = await p.chromium.launch(headless=True, executable_path=EDGE_PATH)
-
-        # 本地下载图片不需要登录态，开启新 context
+        browser = await p.chromium.launch(headless=True) if IS_GITHUB_ACTIONS else await p.chromium.launch(headless=True, executable_path=EDGE_PATH)
         context = await browser.new_context(viewport={"width": 1280, "height": 800})
         page = await context.new_page()
 
         for dish in dishes:
             img_url = dish.get("img", "")
-            if not img_url or "cli.im" not in img_url:
-                continue
+            if not img_url or "cli.im" not in img_url: continue
 
             print(f"  -> 正在解析图片: {dish['name']}")
             try:
                 await page.goto(img_url, wait_until="domcontentloaded", timeout=15000)
-                # 草料二维码的预览页，图片在 img 标签里，等它加载出来
-                await page.wait_for_selector("img", timeout=5000)
-                # 获取所有 img，找到真实的图片（通常是最大那张，或者直接取第一个）
+                await page.wait_for_timeout(3000) # 强制等待 JS 渲染
+                
+                # 提取面积最大的可见图片
                 real_img_url = await page.evaluate('''() => {
-                    const imgs = document.querySelectorAll('img');
-                    for (let img of imgs) {
-                        if (img.src && (img.src.includes('.jpg') || img.src.includes('.png') || img.src.includes('show'))) {
-                            return img.src;
-                        }
+                    const imgs = Array.from(document.querySelectorAll('img'));
+                    const visibleImgs = imgs.filter(img => img.offsetWidth > 100 && img.offsetHeight > 100);
+                    if (visibleImgs.length === 0) return null;
+                    let largestImg = visibleImgs[0];
+                    let maxArea = visibleImgs[0].offsetWidth * visibleImgs[0].offsetHeight;
+                    for (let img of visibleImgs) {
+                        let area = img.offsetWidth * img.offsetHeight;
+                        if (area > maxArea) { maxArea = area; largestImg = img; }
                     }
-                    return null;
+                    return largestImg.src;
                 }''')
 
                 if real_img_url:
-                    # 构造本地路径
                     filename = f"{dish['id']}_{dish['name']}.jpg"
                     filepath = os.path.join("images", filename)
-                    
-                    # 下载图片
-                    req = urllib.request.Request(
-                        real_img_url,
-                        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-                    )
+                    req = urllib.request.Request(real_img_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
                     with urllib.request.urlopen(req, timeout=10) as resp:
-                        with open(filepath, "wb") as f:
-                            f.write(resp.read())
-                    
-                    # 更新 img 字段为本地相对路径
+                        with open(filepath, "wb") as f: f.write(resp.read())
                     dish["img"] = f"images/{filename}"
                     print(f"     ✅ 已下载到 {filepath}")
                 else:
                     print(f"     ⚠️ 未提取到真实图片链接")
             except Exception as e:
                 print(f"     ❌ 处理失败: {e}")
-
         await browser.close()
-
 
 # ==================== 主流程 ====================
 def main():
     print("=" * 50)
-    print("腾讯智能表格抓取工具")
     print(f"运行环境: {'GitHub Actions' if IS_GITHUB_ACTIONS else '本地'}")
     print(f"运行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 50)
 
-    # 1) 准备登录态
     prepare_auth()
-
-    # 2) 抓取
     chunks = asyncio.run(scrape_all_chunks())
     print(f"\n✅ 共抓到 {len(chunks)} 个分块")
-    if not chunks:
-        print("❌ 没有抓到任何分块，可能表格是空的或登录态失效")
-        sys.exit(1)
+    if not chunks: sys.exit(1)
 
-    # 3) 解码
     decoded = []
     for i, chunk in enumerate(chunks):
         try:
             data = decode_chunk(chunk.get("smartsheet", ""))
-            decoded.append({
-                "max_row": chunk.get("max_row"),
-                "max_col": chunk.get("max_col"),
-                "start_row": chunk.get("start_row_index"),
-                "end_row": chunk.get("end_row_index"),
-                "data": data,
-            })
+            decoded.append({"max_row": chunk.get("max_row"), "max_col": chunk.get("max_col"), "start_row": chunk.get("start_row_index"), "end_row": chunk.get("end_row_index"), "data": data})
             print(f"✅ 分块#{i} 解码成功")
         except Exception as e:
             print(f"❌ 分块#{i} 解码失败: {e}")
 
-    # 4) 解析
     rows = parse_all_chunks(decoded)
-    print(f"\n✅ 解析出 {len(rows)} 行数据")
-
-    # 5) 生成 dishes 数据
     dishes = to_dishes_json(rows)
     print(f"✅ 原始生成 {len(dishes)} 道菜")
 
-    # 6) 【新增】处理图片下载和本地路径替换
     asyncio.run(process_images(dishes))
 
-    # 7) 写入 dishes.json
     with open("dishes.json", "w", encoding="utf-8") as f:
         json.dump(dishes, f, ensure_ascii=False, indent=2)
 
     print(f"\n🎉 最终生成 {len(dishes)} 道菜")
-    print("📁 dishes.json 已生成")
-    print("\n===== 内容预览 =====")
-    print(json.dumps(dishes, ensure_ascii=False, indent=2)[:1000])
-    print("\n✅ 全部完成")
-
 
 if __name__ == "__main__":
     main()
