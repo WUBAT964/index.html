@@ -4,6 +4,7 @@ import base64
 import zlib
 import os
 import sys
+import urllib.request
 from datetime import datetime
 from playwright.async_api import async_playwright
 
@@ -92,7 +93,6 @@ def extract_value(field_id, cell, option_map):
 
 # ==================== 登录态处理 ====================
 def prepare_auth():
-    """在 GitHub Actions 里从环境变量还原登录态；本地检查文件是否存在"""
     if IS_GITHUB_ACTIONS:
         auth_json = os.environ.get("TENCENT_AUTH")
         if not auth_json:
@@ -110,7 +110,6 @@ def prepare_auth():
 
 
 async def local_login():
-    """本地首次登录（用 Edge）"""
     async with async_playwright() as p:
         browser = await p.chromium.launch(
             headless=False,
@@ -130,7 +129,6 @@ async def local_login():
 async def scrape_all_chunks():
     all_chunks = []
     async with async_playwright() as p:
-        # GitHub Actions 用默认 Chromium，本地用 Edge
         if IS_GITHUB_ACTIONS:
             print("🌐 使用 Playwright 内置 Chromium")
             browser = await p.chromium.launch(headless=True)
@@ -231,6 +229,76 @@ def to_dishes_json(rows):
     return dishes
 
 
+# ==================== 新增：处理图片下载 ====================
+async def process_images(dishes):
+    """遍历 dishes，如果是 cli.im 链接则尝试下载图片到本地"""
+    if not dishes:
+        return
+
+    has_web_link = any("cli.im" in d.get("img", "") for d in dishes)
+    if not has_web_link:
+        print("ℹ️ 没有发现需要处理的 cli.im 图片链接")
+        return
+
+    os.makedirs("images", exist_ok=True)
+    print(f"📸 开始处理图片下载，共 {len(dishes)} 道菜...")
+
+    async with async_playwright() as p:
+        if IS_GITHUB_ACTIONS:
+            browser = await p.chromium.launch(headless=True)
+        else:
+            browser = await p.chromium.launch(headless=True, executable_path=EDGE_PATH)
+
+        # 本地下载图片不需要登录态，开启新 context
+        context = await browser.new_context(viewport={"width": 1280, "height": 800})
+        page = await context.new_page()
+
+        for dish in dishes:
+            img_url = dish.get("img", "")
+            if not img_url or "cli.im" not in img_url:
+                continue
+
+            print(f"  -> 正在解析图片: {dish['name']}")
+            try:
+                await page.goto(img_url, wait_until="domcontentloaded", timeout=15000)
+                # 草料二维码的预览页，图片在 img 标签里，等它加载出来
+                await page.wait_for_selector("img", timeout=5000)
+                # 获取所有 img，找到真实的图片（通常是最大那张，或者直接取第一个）
+                real_img_url = await page.evaluate('''() => {
+                    const imgs = document.querySelectorAll('img');
+                    for (let img of imgs) {
+                        if (img.src && (img.src.includes('.jpg') || img.src.includes('.png') || img.src.includes('show'))) {
+                            return img.src;
+                        }
+                    }
+                    return null;
+                }''')
+
+                if real_img_url:
+                    # 构造本地路径
+                    filename = f"{dish['id']}_{dish['name']}.jpg"
+                    filepath = os.path.join("images", filename)
+                    
+                    # 下载图片
+                    req = urllib.request.Request(
+                        real_img_url,
+                        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+                    )
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        with open(filepath, "wb") as f:
+                            f.write(resp.read())
+                    
+                    # 更新 img 字段为本地相对路径
+                    dish["img"] = f"images/{filename}"
+                    print(f"     ✅ 已下载到 {filepath}")
+                else:
+                    print(f"     ⚠️ 未提取到真实图片链接")
+            except Exception as e:
+                print(f"     ❌ 处理失败: {e}")
+
+        await browser.close()
+
+
 # ==================== 主流程 ====================
 def main():
     print("=" * 50)
@@ -269,8 +337,14 @@ def main():
     rows = parse_all_chunks(decoded)
     print(f"\n✅ 解析出 {len(rows)} 行数据")
 
-    # 5) 生成 dishes.json
+    # 5) 生成 dishes 数据
     dishes = to_dishes_json(rows)
+    print(f"✅ 原始生成 {len(dishes)} 道菜")
+
+    # 6) 【新增】处理图片下载和本地路径替换
+    asyncio.run(process_images(dishes))
+
+    # 7) 写入 dishes.json
     with open("dishes.json", "w", encoding="utf-8") as f:
         json.dump(dishes, f, ensure_ascii=False, indent=2)
 
