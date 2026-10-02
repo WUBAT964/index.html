@@ -13,56 +13,53 @@
             --card-bg: #FFFFFF;
             --text-main: #2C3E50;
             --text-sub: #7F8C8D;
-            --shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            --radius: 16px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
         }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* 移除手机点击高亮 */
-        }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 0 0 40px 0;
-            line-height: 1.6;
+            line-height: 1.5;
             -webkit-font-smoothing: antialiased;
         }
-
-        /* 顶部横幅 */
         .header {
             text-align: center;
-            padding: 40px 20px 30px;
+            padding: 30px 16px 20px;
             background: #FFFFFF;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            margin-bottom: 16px;
         }
         .header h1 {
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: var(--text-main);
-            margin: 0 0 8px 0;
+            margin: 0 0 6px 0;
             letter-spacing: 1px;
         }
         .header h1 span { color: var(--primary-color); }
-        .header p {
-            color: var(--text-sub);
-            font-size: 0.9rem;
-            margin: 0;
-        }
+        .header p { color: var(--text-sub); font-size: 0.85rem; margin: 0; }
 
-        /* 卡片列表 */
+        /* ===== 核心修改：网格布局，一行至少3张 ===== */
         .grid-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 0 16px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 默认一行3列 */
+            gap: 12px;
+            padding: 0 12px;
         }
 
-        /* 卡片设计 */
+        /* 手机小屏时自动降为2列，避免卡片过窄 */
+        @media (max-width: 600px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 0 8px;
+            }
+        }
+
         .card {
             background-color: var(--card-bg);
             border-radius: var(--radius);
@@ -73,7 +70,6 @@
             position: relative;
         }
 
-        /* 图片容器 */
         .card-image-wrapper {
             width: 100%;
             aspect-ratio: 4 / 3;
@@ -85,7 +81,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.3s ease;
         }
+        .card:hover .card-img { transform: scale(1.05); }
         .image-placeholder {
             width: 100%;
             height: 100%;
@@ -95,88 +93,82 @@
             justify-content: center;
             color: #bdc3c7;
         }
-        .image-placeholder .icon { font-size: 3rem; margin-bottom: 8px; }
-        .image-placeholder .text { font-size: 0.85rem; color: #95a5a6; }
+        .image-placeholder .icon { font-size: 2rem; margin-bottom: 4px; }
+        .image-placeholder .text { font-size: 0.7rem; color: #95a5a6; }
 
-        /* 卡片内容 */
         .card-content {
-            padding: 16px;
+            padding: 10px 10px 12px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
         .card-title {
-            font-size: 1.25rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: var(--text-main);
-            margin: 0 0 8px 0;
+            margin: 0 0 4px 0;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         .card-info {
             display: flex;
             align-items: center;
-            font-size: 0.85rem;
+            font-size: 0.72rem;
             color: var(--text-sub);
-            margin-bottom: 6px;
+            margin-bottom: 3px;
         }
-        .card-info svg {
-            width: 14px; height: 14px; margin-right: 6px; fill: var(--text-sub);
-        }
+        .card-info svg { width: 11px; height: 11px; margin-right: 4px; fill: var(--text-sub); flex-shrink: 0; }
         .card-date {
-            font-size: 0.8rem;
+            font-size: 0.68rem;
             color: #95a5a6;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
-        /* 投票区域 */
         .vote-area {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 16px;
-            padding-top: 16px;
+            margin-top: auto;
+            padding-top: 8px;
             border-top: 1px solid #F0F0F0;
         }
         .vote-btn {
             background: var(--bg-color);
             border: none;
-            border-radius: 20px;
-            padding: 10px 20px;
-            font-size: 0.95rem;
+            border-radius: 16px;
+            padding: 7px 10px;
+            font-size: 0.78rem;
             font-weight: 600;
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 4px;
             cursor: pointer;
             transition: all 0.2s ease;
-            flex-grow: 1; /* 按钮占满剩余空间，便于手机点击 */
-            justify-content: center;
+            width: 100%;
         }
-        .vote-btn:active {
-            transform: scale(0.96);
-        }
-        /* 已投票状态 */
+        .vote-btn:active { transform: scale(0.96); }
         .vote-btn.voted {
             background: var(--primary-gradient);
             color: #FFFFFF;
-            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 3px 8px rgba(255, 107, 107, 0.25);
         }
-        .vote-btn.voted svg {
-            fill: #FFFFFF;
-        }
+        .vote-btn.voted svg { fill: #FFFFFF; }
         .vote-btn svg {
-            width: 18px; height: 18px; fill: var(--text-sub);
+            width: 14px; height: 14px; fill: var(--text-sub);
             transition: fill 0.2s ease;
+            flex-shrink: 0;
         }
         .vote-count {
-            font-size: 0.95rem;
+            font-size: 0.78rem;
             font-weight: 700;
-            margin-left: 4px;
+            margin-left: 1px;
         }
 
-        /* 加载与错误状态 */
         .loading, .error {
             text-align: center;
+            grid-column: 1 / -1;
             padding: 60px 20px;
             color: var(--text-sub);
             font-size: 1rem;
@@ -196,64 +188,65 @@
     </main>
 
     <script>
-        // 判断是否是真正的图片
+        const WORKER_URL = 'https://jolly-hill-31ae.1556577675.workers.dev';
+
         function isRealImage(url) {
             if (!url) return false;
             return /\.(jpeg|jpg|gif|png|webp|bmp|svg)($|\?)/i.test(url) || url.startsWith('images/');
         }
 
-        // 获取本地投票数据
-        function getLocalVotes() {
-            const votes = localStorage.getItem('dish_votes');
-            return votes ? JSON.parse(votes) : {};
+        function getLocalVotedIds() {
+            const voted = localStorage.getItem('voted_dish_ids');
+            return voted ? JSON.parse(voted) : [];
         }
-
-        // 保存投票数据
-        function saveLocalVotes(votes) {
-            localStorage.setItem('dish_votes', JSON.stringify(votes));
+        function saveLocalVotedIds(ids) {
+            localStorage.setItem('voted_dish_ids', JSON.stringify(ids));
         }
 
         async function loadDishes() {
             const container = document.getElementById('app');
-            const localVotes = getLocalVotes();
+            const votedIds = getLocalVotedIds();
 
             try {
                 const response = await fetch('dishes.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
                 const dishes = await response.json();
-                
+
                 if (!dishes || dishes.length === 0) {
                     container.innerHTML = '<div class="loading">暂时还没有菜品数据哦~</div>';
                     return;
                 }
 
+                let voteCounts = {};
+                try {
+                    const voteRes = await fetch(`${WORKER_URL}/api/votes`);
+                    const voteData = await voteRes.json();
+                    voteData.forEach(v => { voteCounts[v.dish_id] = v.count; });
+                } catch (e) {
+                    console.warn('获取云端票数失败', e);
+                }
+
                 container.innerHTML = '';
 
                 dishes.forEach(dish => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-
-                    // --- 处理图片 ---
                     let imgHtml = '';
                     const imgUrl = dish.img ? dish.img.trim() : '';
                     if (!imgUrl) {
                         imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder"><div class="icon">🍽️</div><span class="text">暂无图片</span></div></div>`;
                     } else if (isRealImage(imgUrl)) {
-                        imgHtml = `<div class="card-image-wrapper"><img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'image-placeholder\'><div class=\'icon\'>🥘</div><span class=\'text\'>图片加载失败</span></div>'"></div>`;
+                        imgHtml = `<div class="card-image-wrapper"><img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'image-placeholder\'><div class=\'icon\'>🥘</div><span class=\'text\'>加载失败</span></div>'"></div>`;
                     } else {
-                        imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')"><div class="icon">🌿</div><span class="text">点击查看原图</span></div></div>`;
+                        imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')"><div class="icon">🌿</div><span class="text">查看原图</span></div></div>`;
                     }
 
-                    // --- 处理厨师信息 ---
                     let chefText = dish.chef1 || '未知厨师';
                     if (dish.chef2 && dish.chef2.trim() !== '') chefText += ` & ${dish.chef2}`;
 
-                    // --- 处理投票状态 ---
-                    const dishId = dish.id;
-                    const hasVoted = localVotes[dishId] === true;
-                    const voteCount = hasVoted ? 1 : 0; // 本地单次投票
+                    const hasVoted = votedIds.includes(dish.id);
+                    const voteCount = voteCounts[dish.id] || 0;
 
+                    const card = document.createElement('div');
+                    card.className = 'card';
                     card.innerHTML = `
                         ${imgHtml}
                         <div class="card-content">
@@ -263,9 +256,8 @@
                                 ${chefText}
                             </div>
                             <div class="card-date">📅 ${dish.date || '未知日期'}</div>
-                            
                             <div class="vote-area">
-                                <button class="vote-btn ${hasVoted ? 'voted' : ''}" onclick="toggleVote(this, ${dishId})">
+                                <button class="vote-btn ${hasVoted ? 'voted' : ''}" onclick="toggleVote(this, ${dish.id})">
                                     <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                                     <span class="vote-text">${hasVoted ? '已投票' : '投一票'}</span>
                                     <span class="vote-count">${voteCount > 0 ? voteCount : ''}</span>
@@ -273,41 +265,55 @@
                             </div>
                         </div>
                     `;
-
                     container.appendChild(card);
                 });
-
             } catch (error) {
-                console.error('加载 dishes.json 失败:', error);
-                container.innerHTML = `<div class="error">❌ 数据加载失败，请刷新页面或稍后再试。<br><small>${error.message}</small></div>`;
+                console.error('加载失败:', error);
+                container.innerHTML = `<div class="error">❌ 数据加载失败，请刷新页面。<br><small>${error.message}</small></div>`;
             }
         }
 
-        // 投票切换函数
-        function toggleVote(btn, dishId) {
-            const localVotes = getLocalVotes();
+        async function toggleVote(btn, dishId) {
+            const votedIds = getLocalVotedIds();
             const voteCountSpan = btn.querySelector('.vote-count');
             const voteTextSpan = btn.querySelector('.vote-text');
 
-            if (localVotes[dishId]) {
-                // 取消投票
-                delete localVotes[dishId];
-                btn.classList.remove('voted');
-                voteTextSpan.textContent = '投一票';
-                voteCountSpan.textContent = '';
-            } else {
-                // 投票
-                localVotes[dishId] = true;
-                btn.classList.add('voted');
-                voteTextSpan.textContent = '已投票';
-                voteCountSpan.textContent = '1';
-                
-                // 简单的点赞动画
-                btn.style.transform = 'scale(1.1)';
-                setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
+            if (btn.disabled) return;
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${WORKER_URL}/api/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dishId: dishId })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.error || '投票失败，请稍后再试');
+                    return;
+                }
+
+                if (votedIds.includes(dishId)) {
+                    alert('您今天已经投过这道菜啦！');
+                } else {
+                    votedIds.push(dishId);
+                    saveLocalVotedIds(votedIds);
+                    
+                    btn.classList.add('voted');
+                    voteTextSpan.textContent = '已投票';
+                    voteCountSpan.textContent = data.count;
+                    
+                    btn.style.transform = 'scale(1.1)';
+                    setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
+                }
+            } catch (e) {
+                console.error('投票失败:', e);
+                alert('网络错误，请检查网络后重试');
+            } finally {
+                btn.disabled = false;
             }
-            
-            saveLocalVotes(localVotes);
         }
 
         loadDishes();
