@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>月度好菜 | 美食记录</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -18,273 +16,82 @@
             --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08);
             --radius: 16px;
         }
-        
-        * {
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
             font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
+            background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6;
             -webkit-font-smoothing: antialiased;
         }
-
-        /* 顶部导航/横幅 */
-        .header {
-            text-align: center;
-            padding: 60px 20px 40px;
-            background: linear-gradient(135deg, #FFF9F5 0%, #FDFBF7 100%);
-        }
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 0 0 10px 0;
-            letter-spacing: 2px;
-        }
-        .header h1 span {
-            color: var(--primary-color);
-        }
-        .header p {
-            color: var(--text-sub);
-            font-size: 1rem;
-            margin: 0;
-            font-weight: 500;
-        }
-
-        /* 内容网格 */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto 60px;
-            padding: 0 20px;
-        }
-
-        /* 卡片设计 */
-        .card {
-            background-color: var(--card-bg);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        .card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* 图片容器 */
-        .card-image-wrapper {
-            width: 100%;
-            aspect-ratio: 4 / 3; /* 统一图片比例 */
-            overflow: hidden;
-            position: relative;
-            background: linear-gradient(135deg, #fdfbf7 0%, #f0ebe4 100%);
-        }
-        .card-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .card:hover .card-img {
-            transform: scale(1.05); /* 鼠标悬停轻微放大 */
-        }
-
-        /* 优雅的图片占位/兜底 */
-        .image-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #bdc3c7;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .image-placeholder:hover {
-            background: linear-gradient(135deg, #f4eee8 0%, #e8e0d5 100%);
-        }
-        .image-placeholder .icon {
-            font-size: 3rem;
-            margin-bottom: 8px;
-            opacity: 0.8;
-        }
-        .image-placeholder .text {
-            font-size: 0.85rem;
-            color: #95a5a6;
-            font-weight: 500;
-        }
-
-        /* 卡片内容区 */
-        .card-content {
-            padding: 22px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 0 0 12px 0;
-            line-height: 1.3;
-        }
-
-        /* 信息行（厨师、日期） */
-        .info-row {
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-            color: var(--text-sub);
-            margin-bottom: 8px;
-        }
-        .info-row:last-child {
-            margin-bottom: 0;
-        }
-        .info-icon {
-            width: 16px;
-            height: 16px;
-            margin-right: 8px;
-            fill: var(--text-sub);
-            flex-shrink: 0;
-        }
-        
-        /* 底部日期加一点分隔 */
-        .card-footer {
-            margin-top: auto;
-            padding-top: 15px;
-            border-top: 1px solid #F0F0F0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            color: #999;
-        }
-
-        /* 加载与错误状态 */
-        .loading, .error {
-            text-align: center;
-            grid-column: 1 / -1;
-            padding: 80px 20px;
-            color: var(--text-sub);
-            font-size: 1.1rem;
-        }
+        .header { text-align: center; padding: 60px 20px 40px; background: linear-gradient(135deg, #FFF9F5 0%, #FDFBF7 100%); }
+        .header h1 { font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin: 0 0 10px 0; letter-spacing: 2px; }
+        .header h1 span { color: var(--primary-color); }
+        .header p { color: var(--text-sub); font-size: 1rem; margin: 0; font-weight: 500; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto 60px; padding: 0 20px; }
+        .card { background-color: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; position: relative; }
+        .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+        .card-image-wrapper { width: 100%; aspect-ratio: 4 / 3; overflow: hidden; position: relative; background: linear-gradient(135deg, #fdfbf7 0%, #f0ebe4 100%); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .card:hover .card-img { transform: scale(1.05); }
+        .image-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #bdc3c7; cursor: pointer; transition: background 0.3s ease; }
+        .image-placeholder:hover { background: linear-gradient(135deg, #f4eee8 0%, #e8e0d5 100%); }
+        .image-placeholder .icon { font-size: 3rem; margin-bottom: 8px; opacity: 0.8; }
+        .image-placeholder .text { font-size: 0.85rem; color: #95a5a6; font-weight: 500; }
+        .card-content { padding: 22px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-title { font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin: 0 0 12px 0; line-height: 1.3; }
+        .info-row { display: flex; align-items: center; font-size: 0.9rem; color: var(--text-sub); margin-bottom: 8px; }
+        .info-icon { width: 16px; height: 16px; margin-right: 8px; fill: var(--text-sub); flex-shrink: 0; }
+        .card-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid #F0F0F0; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #999; }
+        .loading, .error { text-align: center; grid-column: 1 / -1; padding: 80px 20px; color: var(--text-sub); font-size: 1.1rem; }
         .error { color: var(--primary-color); }
     </style>
 </head>
 <body>
-
     <header class="header">
         <h1>🍲 月度<span>好菜</span></h1>
         <p>记录每一顿用心烹饪的美食</p>
     </header>
-
-    <main id="app" class="grid-container">
-        <div class="loading">正在准备美味佳肴...</div>
-    </main>
-
+    <main id="app" class="grid-container"><div class="loading">正在准备美味佳肴...</div></main>
     <script>
-        // 判断是否是真正的图片文件（包含图片扩展名，或者指向本地 images 目录）
         function isRealImage(url) {
             if (!url) return false;
-            // 兼容本地相对路径 images/xxx.jpg 和网络图片
             return /\.(jpeg|jpg|gif|png|webp|bmp|svg)($|\?)/i.test(url) || url.startsWith('images/');
         }
-
         async function loadDishes() {
             const container = document.getElementById('app');
-            
             try {
-                // 附加时间戳，强制绕过 CDN 缓存
                 const response = await fetch('dishes.json?v=' + new Date().getTime());
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const dishes = await response.json();
-                
-                if (!dishes || dishes.length === 0) {
-                    container.innerHTML = '<div class="loading">暂时还没有菜品数据哦~</div>';
-                    return;
-                }
-
+                if (!dishes || dishes.length === 0) { container.innerHTML = '<div class="loading">暂时还没有菜品数据哦~</div>'; return; }
                 container.innerHTML = '';
-
                 dishes.forEach(dish => {
                     const card = document.createElement('div');
                     card.className = 'card';
-
                     let imgHtml = '';
                     const imgUrl = dish.img ? dish.img.trim() : '';
-
                     if (!imgUrl) {
-                        // 没有图片链接：优雅显示占位图
-                        imgHtml = `
-                            <div class="card-image-wrapper">
-                                <div class="image-placeholder">
-                                    <div class="icon">🍽️</div>
-                                    <span class="text">暂无图片</span>
-                                </div>
-                            </div>`;
+                        imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder"><div class="icon">🍽️</div><span class="text">暂无图片</span></div></div>`;
                     } else if (isRealImage(imgUrl)) {
-                        // 真实图片（包含本地下载好的图片）
-                        imgHtml = `
-                            <div class="card-image-wrapper">
-                                <img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" 
-                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'image-placeholder\'><div class=\'icon\'>🥘</div><span class=\'text\'>图片加载失败</span></div>'">
-                            </div>`;
+                        imgHtml = `<div class="card-image-wrapper"><img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'image-placeholder\'><div class=\'icon\'>🥘</div><span class=\'text\'>图片加载失败</span></div>'"></div>`;
                     } else {
-                        // 网页链接（没抓取成功的 cli.im 链接）：不再像广告，而是低调的点击查看
-                        imgHtml = `
-                            <div class="card-image-wrapper">
-                                <div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')" title="点击查看原图">
-                                    <div class="icon">🌿</div>
-                                    <span class="text">点击查看原图</span>
-                                </div>
-                            </div>`;
+                        imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')" title="点击查看原图"><div class="icon">🌿</div><span class="text">点击查看原图</span></div></div>`;
                     }
-
-                    // 处理厨师信息
                     let chefText = dish.chef1 || '未知厨师';
-                    if (dish.chef2 && dish.chef2.trim() !== '') {
-                        chefText += ` & ${dish.chef2}`;
-                    }
-
+                    if (dish.chef2 && dish.chef2.trim() !== '') chefText += ` & ${dish.chef2}`;
                     card.innerHTML = `
                         ${imgHtml}
                         <div class="card-content">
                             <h2 class="card-title">${dish.name}</h2>
-                            <div class="info-row">
-                                <svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-                                ${chefText}
-                            </div>
-                            <div class="card-footer">
-                                <span>📅 ${dish.date || '未知日期'}</span>
-                            </div>
-                        </div>
-                    `;
-
+                            <div class="info-row"><svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>${chefText}</div>
+                            <div class="card-footer"><span>📅 ${dish.date || '未知日期'}</span></div>
+                        </div>`;
                     container.appendChild(card);
                 });
-
             } catch (error) {
                 console.error('加载 dishes.json 失败:', error);
                 container.innerHTML = `<div class="error">❌ 数据加载失败，请刷新页面或稍后再试。<br><small>${error.message}</small></div>`;
             }
         }
-
         loadDishes();
     </script>
 </body>
