@@ -43,15 +43,17 @@
         .header h1 span { color: var(--primary-color); }
         .header p { color: var(--text-sub); font-size: 0.85rem; margin: 0; }
 
-        /* ===== 桌面端 3 列，手机端 2 列 ===== */
+        /* 强制桌面端3列，手机端2列 */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            padding: 0 12px;
+            grid-template-columns: repeat(3, 1fr); /* 桌面端默认3列 */
+            gap: 16px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 16px;
         }
 
-        /* 手机端（宽度 ≤ 600px）自动变为 2 列 */
+        /* 手机端（屏幕宽度 ≤ 600px）自动变为 2 列 */
         @media (max-width: 600px) {
             .grid-container {
                 grid-template-columns: repeat(2, 1fr);
@@ -70,9 +72,10 @@
             position: relative;
         }
 
+        /* 固定图片比例，即使没图，卡片也不会变形得太离谱 */
         .card-image-wrapper {
             width: 100%;
-            aspect-ratio: 1 / 1;      /* 正方形，手机端看着更舒服 */
+            aspect-ratio: 4 / 3; 
             overflow: hidden;
             position: relative;
             background: linear-gradient(135deg, #fdfbf7 0%, #f0ebe4 100%);
@@ -91,20 +94,20 @@
             justify-content: center;
             color: #bdc3c7;
         }
-        .image-placeholder .icon { font-size: 1.8rem; }
-        .image-placeholder .text { font-size: 0.7rem; color: #95a5a6; margin-top: 4px; }
+        .image-placeholder .icon { font-size: 2rem; }
+        .image-placeholder .text { font-size: 0.75rem; color: #95a5a6; margin-top: 4px; }
 
         .card-content {
-            padding: 10px 10px 12px;
+            padding: 12px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
         .card-title {
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--text-main);
-            margin: 0 0 5px 0;
+            margin: 0 0 6px 0;
             line-height: 1.3;
             white-space: nowrap;
             overflow: hidden;
@@ -113,15 +116,15 @@
         .card-info {
             display: flex;
             align-items: center;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             color: var(--text-sub);
             margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
         }
-        .card-info svg { width: 11px; height: 11px; margin-right: 4px; fill: var(--text-sub); flex-shrink: 0; }
+        .card-info svg { width: 12px; height: 12px; margin-right: 4px; fill: var(--text-sub); flex-shrink: 0; }
         .card-date {
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             color: #95a5a6;
             margin-top: 2px;
         }
@@ -136,13 +139,13 @@
             border: none;
             border-radius: 16px;
             padding: 8px 10px;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 600;
             color: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
             width: 100%;
@@ -155,12 +158,12 @@
         }
         .vote-btn.voted svg { fill: #FFFFFF; }
         .vote-btn svg {
-            width: 14px; height: 14px; fill: var(--text-sub);
+            width: 15px; height: 15px; fill: var(--text-sub);
             transition: fill 0.2s ease;
             flex-shrink: 0;
         }
         .vote-count {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 700;
         }
 
@@ -234,7 +237,7 @@
                     } else if (isRealImage(imgUrl)) {
                         imgHtml = `<div class="card-image-wrapper"><img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'image-placeholder\'><div class=\'icon\'>🥘</div><span class=\'text\'>加载失败</span></div>'"></div>`;
                     } else {
-                        imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')"><div class="icon">🌿</div><span class="text">查看原图</span></div></div>`;
+                        imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')"><div class="icon">🌿</div><span class="text">点击查看原图</span></div></div>`;
                     }
 
                     let chefText = dish.chef1 || '未知厨师';
