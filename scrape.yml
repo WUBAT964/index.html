@@ -1,0 +1,45 @@
+name: 每日抓取月度好菜
+
+on:
+  schedule:
+    # UTC 14:00 = 北京时间 22:00
+    - cron: '0 14 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Run scraper
+        env:
+          TENCENT_AUTH: ${{ secrets.TENCENT_AUTH }}
+        run: python 123.py
+
+      - name: Commit and push dishes.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dishes.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto update dishes.json [skip ci]"
+            git push
+          else
+            echo "没有变化，跳过提交"
+          fi
