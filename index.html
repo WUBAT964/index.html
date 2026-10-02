@@ -63,10 +63,15 @@
             height: 200px;
             background-color: #f0f0f0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #bbb;
+            color: #888;
+            font-size: 1rem;
+        }
+        .card-img-placeholder .icon {
             font-size: 3rem;
+            margin-bottom: 10px;
         }
         .card-content {
             padding: 16px;
@@ -118,11 +123,17 @@
     </main>
 
     <script>
+        // 判断链接是不是真正的图片文件（以 .jpg, .png 等结尾）
+        function isRealImage(url) {
+            if (!url) return false;
+            // 简单的正则判断，也兼容带有参数的图片链接
+            return /\.(jpeg|jpg|gif|png|webp|bmp|svg)($|\?)/i.test(url);
+        }
+
         async function loadDishes() {
             const container = document.getElementById('app');
             
             try {
-                // 加上 ?v=时间戳 来强制绕过浏览器和 CDN 缓存
                 const response = await fetch('dishes.json?v=' + new Date().getTime());
                 
                 if (!response.ok) {
@@ -131,28 +142,35 @@
                 
                 const dishes = await response.json();
                 
-                // 如果数组为空
                 if (!dishes || dishes.length === 0) {
                     container.innerHTML = '<div class="loading">暂时还没有菜品数据哦~</div>';
                     return;
                 }
 
-                // 清空加载提示
                 container.innerHTML = '';
 
-                // 遍历数据生成卡片
                 dishes.forEach(dish => {
                     const card = document.createElement('div');
                     card.className = 'card';
 
-                    // 处理图片
+                    // 智能处理图片链接
                     let imgHtml = '';
-                    if (dish.img && dish.img.trim() !== '') {
-                        // 核心修复：加入 referrerpolicy="no-referrer" 突破防盗链
-                        imgHtml = `<img src="${dish.img}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
-                        imgHtml += `<div class="card-img-placeholder" style="display:none;">🍽️</div>`;
+                    const imgUrl = dish.img ? dish.img.trim() : '';
+
+                    if (!imgUrl) {
+                        // 没有图片链接
+                        imgHtml = `<div class="card-img-placeholder"><div class="icon">🍽️</div>暂无图片</div>`;
+                    } else if (isRealImage(imgUrl)) {
+                        // 是真正的图片文件，用 img 标签渲染
+                        imgHtml = `<img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\'card-img-placeholder\'><div class=\'icon\'>🍽️</div>图片加载失败</div>'">`;
                     } else {
-                        imgHtml = `<div class="card-img-placeholder">🍽️</div>`;
+                        // 是网页链接（比如腾讯/草料二维码的预览页），显示一个可点击的占位符
+                        imgHtml = `
+                            <div class="card-img-placeholder" style="cursor: pointer;" onclick="window.open('${imgUrl}', '_blank')">
+                                <div class="icon">🌐</div>
+                                <span style="color: #ff6b6b; font-weight: bold;">点击查看图片网页</span>
+                            </div>
+                        `;
                     }
 
                     // 处理厨师信息
@@ -179,7 +197,6 @@
             }
         }
 
-        // 页面加载时执行
         loadDishes();
     </script>
 </body>
