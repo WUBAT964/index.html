@@ -8,7 +8,7 @@ on:
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04   # 已修复：这里改成了 22.04
     permissions:
       contents: write
 
@@ -43,4 +43,3 @@ jobs:
           else
             echo "没有变化，跳过提交"
           fi
-          
