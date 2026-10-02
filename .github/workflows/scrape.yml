@@ -2,13 +2,12 @@ name: 每日抓取月度好菜
 
 on:
   schedule:
-    # UTC 14:00 = 北京时间 22:00
     - cron: '0 14 * * *'
   workflow_dispatch: {}
 
 jobs:
   scrape:
-    runs-on: ubuntu-22.04   # 已修复：这里改成了 22.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
 
@@ -32,13 +31,13 @@ jobs:
           TENCENT_AUTH: ${{ secrets.TENCENT_AUTH }}
         run: python 123.py
 
-      - name: Commit and push dishes.json
+      - name: Commit and push dishes.json and images
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dishes.json
+          git add dishes.json images/    # 【已修改】添加 images 目录
           if ! git diff --cached --quiet; then
-            git commit -m "chore: auto update dishes.json [skip ci]"
+            git commit -m "chore: auto update dishes.json and images [skip ci]"
             git push
           else
             echo "没有变化，跳过提交"
