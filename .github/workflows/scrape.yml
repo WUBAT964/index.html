@@ -35,7 +35,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dishes.json images/    # 【已修改】添加 images 目录
+          git add dishes.json images/
           if ! git diff --cached --quiet; then
             git commit -m "chore: auto update dishes.json and images [skip ci]"
             git push
