@@ -6,16 +6,7 @@
     <title>月度好菜 | 美食投票</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #FF6B6B;
-            --primary-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
-            --bg-color: #F7F9FC;
-            --card-bg: #FFFFFF;
-            --text-main: #2C3E50;
-            --text-sub: #7F8C8D;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-            --radius: 12px;
-        }
+        :root { --primary-color: #FF6B6B; --primary-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%); --bg-color: #F7F9FC; --card-bg: #FFFFFF; --text-main: #2C3E50; --text-sub: #7F8C8D; --shadow: 0 4px 12px rgba(0, 0, 0, 0.06); --radius: 12px; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0 0 30px 0; line-height: 1.5; -webkit-font-smoothing: antialiased; }
         .header { text-align: center; padding: 30px 16px 20px; background: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 16px; }
@@ -47,46 +38,28 @@
     </style>
 </head>
 <body>
-
     <header class="header">
         <h1>🍲 月度<span>好菜</span></h1>
         <p>记录每一顿用心烹饪的美食</p>
     </header>
-
     <main id="app" class="grid-container">
         <div class="loading">正在加载美味佳肴...</div>
     </main>
-
     <script>
-        // ==================== 替换为你自己的 Token ====================
-        // 把下面这行的 ghp_xxxxxxxxxxxx 替换成你刚才在 GitHub 生成的真实 Token
-        const GH_TOKEN = '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';
+        // ==================== 替换为你验证成功的真实 Token ====================
+        const GH_TOKEN = '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';
 
-        // 仓库信息（已帮你填好，不用改）
         const VOTE_REPO = 'wubat964/dish-votes';
         const VOTE_FILE = 'votes.json';
         const GH_API = `https://api.github.com/repos/${VOTE_REPO}/contents/${VOTE_FILE}`;
 
-        function isRealImage(url) {
-            if (!url) return false;
-            return /\.(jpeg|jpg|gif|png|webp|bmp|svg)($|\?)/i.test(url) || url.startsWith('images/');
-        }
+        function isRealImage(url) { if (!url) return false; return /\.(jpeg|jpg|gif|png|webp|bmp|svg)($|\?)/i.test(url) || url.startsWith('images/'); }
+        function getLocalVotedIds() { const voted = localStorage.getItem('voted_dish_ids'); return voted ? JSON.parse(voted) : []; }
+        function saveLocalVotedIds(ids) { localStorage.setItem('voted_dish_ids', JSON.stringify(ids)); }
 
-        function getLocalVotedIds() {
-            const voted = localStorage.getItem('voted_dish_ids');
-            return voted ? JSON.parse(voted) : [];
-        }
-        function saveLocalVotedIds(ids) {
-            localStorage.setItem('voted_dish_ids', JSON.stringify(ids));
-        }
-
-        // 从 GitHub 读取 votes.json
         async function fetchVotes() {
             const res = await fetch(`${GH_API}?t=${Date.now()}`, {
-                headers: {
-                    'Authorization': `token ${GH_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
+                headers: { 'Authorization': `Bearer ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
             });
             if (res.status === 404) return { votes: {}, sha: null };
             if (!res.ok) throw new Error('读取失败：' + res.status);
@@ -95,81 +68,45 @@
             return { votes: content, sha: json.sha };
         }
 
-        // 写回 votes.json
         async function saveVotes(votes, sha) {
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(votes, null, 2))));
             const res = await fetch(GH_API, {
                 method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GH_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: `vote update`,
-                    content: content,
-                    sha: sha
-                })
+                headers: { 'Authorization': `Bearer ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: `vote update`, content: content, sha: sha })
             });
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error('保存失败：' + res.status + ' ' + errText);
-            }
+            if (!res.ok) { const errText = await res.text(); throw new Error('保存失败：' + res.status + ' ' + errText); }
             return await res.json();
         }
 
         async function loadDishes() {
             const container = document.getElementById('app');
             const votedIds = getLocalVotedIds();
-
             try {
                 const response = await fetch('dishes.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const dishes = await response.json();
-
-                if (!dishes || dishes.length === 0) {
-                    container.innerHTML = '<div class="loading">暂时还没有菜品数据哦~</div>';
-                    return;
-                }
-
-                // 从 GitHub 读取票数
+                if (!dishes || dishes.length === 0) { container.innerHTML = '<div class="loading">暂时还没有菜品数据哦~</div>'; return; }
                 let voteCounts = {};
-                try {
-                    const result = await fetchVotes();
-                    voteCounts = result.votes || {};
-                } catch (e) {
-                    console.warn('获取云端票数失败', e);
-                }
-
+                try { const result = await fetchVotes(); voteCounts = result.votes || {}; } catch (e) { console.warn('获取云端票数失败', e); }
                 container.innerHTML = '';
-
                 dishes.forEach(dish => {
                     let imgHtml = '';
                     const imgUrl = dish.img ? dish.img.trim() : '';
-                    if (!imgUrl) {
-                        imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder"><div class="icon">🍽️</div><span class="text">暂无图片</span></div></div>`;
-                    } else if (isRealImage(imgUrl)) {
-                        imgHtml = `<div class="card-image-wrapper"><img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'image-placeholder\'><div class=\'icon\'>🥘</div><span class=\'text\'>加载失败</span></div>'"></div>`;
-                    } else {
-                        imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')"><div class="icon">🌿</div><span class="text">点击查看原图</span></div></div>`;
-                    }
-
+                    if (!imgUrl) { imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder"><div class="icon">🍽️</div><span class="text">暂无图片</span></div></div>`; }
+                    else if (isRealImage(imgUrl)) { imgHtml = `<div class="card-image-wrapper"><img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'image-placeholder\'><div class=\'icon\'>🥘</div><span class=\'text\'>加载失败</span></div>'"></div>`; }
+                    else { imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')"><div class="icon">🌿</div><span class="text">点击查看原图</span></div></div>`; }
                     let chefText = dish.chef1 || '未知厨师';
                     if (dish.chef2 && dish.chef2.trim() !== '') chefText += ` & ${dish.chef2}`;
-
                     const hasVoted = votedIds.includes(dish.id);
                     const voteCount = voteCounts[dish.id] || 0;
-
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `
                         ${imgHtml}
                         <div class="card-content">
                             <h2 class="card-title" title="${dish.name}">${dish.name}</h2>
-                            <div class="card-info">
-                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-                                ${chefText}
-                            </div>
+                            <div class="card-info"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>${chefText}</div>
                             <div class="card-date">📅 ${dish.date || '未知日期'}</div>
                             <div class="vote-area">
                                 <button class="vote-btn ${hasVoted ? 'voted' : ''}" onclick="toggleVote(this, ${dish.id})">
@@ -182,49 +119,29 @@
                     `;
                     container.appendChild(card);
                 });
-            } catch (error) {
-                console.error('加载失败:', error);
-                container.innerHTML = `<div class="error">❌ 数据加载失败，请刷新页面。<br><small>${error.message}</small></div>`;
-            }
+            } catch (error) { console.error('加载失败:', error); container.innerHTML = `<div class="error">❌ 数据加载失败，请刷新页面。<br><small>${error.message}</small></div>`; }
         }
 
         async function toggleVote(btn, dishId) {
             const votedIds = getLocalVotedIds();
             const voteCountSpan = btn.querySelector('.vote-count');
             const voteTextSpan = btn.querySelector('.vote-text');
-
             if (btn.disabled) return;
             btn.disabled = true;
-
-            if (votedIds.includes(dishId)) {
-                alert('您今天已经投过这道菜啦！');
-                btn.disabled = false;
-                return;
-            }
-
+            if (votedIds.includes(dishId)) { alert('您今天已经投过这道菜啦！'); btn.disabled = false; return; }
             try {
-                // 读取 → 修改 → 写回（防止覆盖别人的票）
                 const { votes, sha } = await fetchVotes();
                 votes[dishId] = (votes[dishId] || 0) + 1;
                 await saveVotes(votes, sha);
-
                 votedIds.push(dishId);
                 saveLocalVotedIds(votedIds);
-
                 btn.classList.add('voted');
                 voteTextSpan.textContent = '已投票';
                 voteCountSpan.textContent = votes[dishId];
-
                 btn.style.transform = 'scale(1.1)';
                 setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
-            } catch (e) {
-                console.error('投票失败:', e);
-                alert('投票失败：' + e.message);
-            } finally {
-                btn.disabled = false;
-            }
+            } catch (e) { console.error('投票失败:', e); alert('投票失败：' + e.message); } finally { btn.disabled = false; }
         }
-
         loadDishes();
     </script>
 </body>
