@@ -38,13 +38,25 @@
     </div>
 
     <script>
-        // ⚠️⚠️⚠️ 必须是你最新的 Cloudflare 隧道地址 ⚠️⚠️⚠️
+        // ⚠️ 必须是你最新的 Cloudflare 隧道地址 ⚠️
         const API_BASE_URL = 'https://professor-foto-ben-thorough.trycloudflare.com'; 
         const BASE_URL = 'https://wubat964.github.io/index.html'; 
-        // 图片走服务器隧道（不再走 GitHub Pages）
-        const IMG_BASE_URL = API_BASE_URL; 
+        const IMG_BASE_URL = API_BASE_URL; // 图片走服务器隧道加速
 
         let allVotes = {};
+
+        // 图片加载错误处理（智能回退）
+        window.handleImgError = function(img, originalUrl, fallback) {
+            img.onerror = null; // 防止死循环
+            if (img.src.includes('.webp')) {
+                // 如果webp加载失败，尝试加载原图
+                img.src = originalUrl;
+            } else {
+                // 原图也失败了，显示"暂无图片"
+                img.src = fallback;
+                img.style.animation = 'none';
+            }
+        };
 
         async function init() {
             try {
@@ -73,22 +85,28 @@
                 const voteCount = allVotes[dishId] || 0;
                 
                 let rawImg = dish.image || dish.img || dish.pic || dish.图片 || '';
-                let imageUrl = '';
-                
+                let originalUrl = '';
+                let webpUrl = '';
+
                 if (rawImg && typeof rawImg === 'string') {
                     if (!rawImg.includes('images/') && !rawImg.startsWith('http')) {
                         rawImg = 'images/' + rawImg; 
                     }
-                    // 🚀 核心改变：图片直接指向你的服务器！
-                    imageUrl = rawImg.startsWith('http') ? rawImg : `${IMG_BASE_URL}/${rawImg}`;
+                    originalUrl = rawImg.startsWith('http') ? rawImg : `${IMG_BASE_URL}/${rawImg}`;
+                    // 尝试将后缀替换为 webp
+                    webpUrl = originalUrl.replace(/\.(jpg|jpeg|png)$/i, '.webp');
                 } else {
-                    imageUrl = fallbackImg;
+                    originalUrl = fallbackImg;
+                    webpUrl = fallbackImg;
                 }
 
                 const card = document.createElement('div');
                 card.className = 'card';
+                // 优先加载 webp 格式，如果失败自动回退到原图
                 card.innerHTML = `
-                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" onload="this.style.animation='none'; this.style.background='#eee';" onerror="this.onerror=null; this.src='${fallbackImg}'; this.style.animation='none';">
+                    <img src="${encodeURI(webpUrl)}" alt="${dish.name}" loading="lazy" decoding="async"
+                         onload="this.style.animation='none'; this.style.background='#eee';" 
+                         onerror="handleImgError(this, '${encodeURI(originalUrl)}', '${fallbackImg}')">
                     <div class="card-content">
                         <div class="card-title">${dish.name || '未命名'}</div>
                         <div class="vote-count" id="count-${dishId}">当前票数：<strong>${voteCount}</strong></div>
