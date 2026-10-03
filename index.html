@@ -11,7 +11,6 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-5px); }
-        /* 图片骨架屏动画 */
         .card img { 
             width: 100%; height: 200px; object-fit: cover; 
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -40,16 +39,14 @@
     </div>
 
     <script>
-        // ⚠️ 必须是你最新的 Cloudflare 隧道地址
         const API_BASE_URL = 'https://hurricane-lightbox-funky-kitchen.trycloudflare.com'; 
         const BASE_URL = 'https://wubat964.github.io/index.html'; 
         const IMG_BASE_URL = API_BASE_URL; 
 
         let allVotes = {};
 
-        // 极简错误处理：直接显示“暂无图片”，绝不循环请求
         window.handleImgError = function(img, fallback) {
-            img.onerror = null; // 关键：防止死循环！
+            img.onerror = null;
             img.src = fallback;
             img.style.animation = 'none';
             img.style.background = '#eee';
@@ -75,16 +72,26 @@
             grid.innerHTML = '';
             if (!Array.isArray(dishes)) return;
 
-            // 内联 SVG “暂无图片”占位符（瞬间显示）
             const fallbackImg = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%223em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
 
             dishes.forEach(dish => {
                 const dishId = String(dish.id);
                 const voteCount = allVotes[dishId] || 0;
-                // ⚠️ 获取厨师名字，兼容多种字段名
-                const chefName = dish.chef || dish.厨师 || '未知厨师'; 
                 
-                let rawImg = dish.image || dish.img || dish.pic || dish.图片 || '';
+                // ⚠️ 核心修复：自动拼接 chef1 和 chef2
+                let chefName = '';
+                if (dish.chef1 && dish.chef2) {
+                    chefName = `${dish.chef1} & ${dish.chef2}`;
+                } else if (dish.chef1) {
+                    chefName = dish.chef1;
+                } else if (dish.chef2) {
+                    chefName = dish.chef2;
+                } else {
+                    chefName = '未知厨师';
+                }
+
+                // ⚠️ 图片字段也修复为 img，并兼容 image
+                let rawImg = dish.img || dish.image || dish.pic || '';
                 let imageUrl = '';
                 
                 if (rawImg && typeof rawImg === 'string') {
@@ -93,12 +100,11 @@
                     }
                     imageUrl = rawImg.startsWith('http') ? rawImg : `${IMG_BASE_URL}/${rawImg}`;
                 } else {
-                    imageUrl = fallbackImg;
+                    imageUrl = fallbackImg; // 如果 img 为空字符串，直接使用灰色占位图
                 }
 
                 const card = document.createElement('div');
                 card.className = 'card';
-                // 图片下方加入厨师名字
                 card.innerHTML = `
                     <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async"
                          onload="this.style.animation='none'; this.style.background='#eee';" 
@@ -117,7 +123,6 @@
             });
         }
 
-        // 局部更新票数，彻底解决页面闪烁问题！
         async function handleVote(dishId, action) {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/vote`, {
