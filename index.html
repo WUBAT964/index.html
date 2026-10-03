@@ -8,17 +8,18 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; color: #333; margin-bottom: 10px; }
+        .mode-desc { text-align: center; color: #d9534f; font-weight: bold; margin-bottom: 30px; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; display: flex; flex-direction: column; position: relative; }
         .card:hover { transform: translateY(-5px); }
         
-        /* 领奖模式特效 */
+        /* 前三名特效 */
         .card.rank-1 { border: 3px solid #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
         .card.rank-2 { border: 3px solid #C0C0C0; box-shadow: 0 0 15px rgba(192, 192, 192, 0.5); }
         .card.rank-3 { border: 3px solid #CD7F32; box-shadow: 0 0 15px rgba(205, 127, 50, 0.5); }
         
-        .rank-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 15px; font-weight: bold; z-index: 10; }
+        .rank-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 15px; font-weight: bold; z-index: 10; font-size: 0.9em; }
         .rank-1 .rank-badge { background: #FFD700; color: #333; }
         .rank-2 .rank-badge { background: #C0C0C0; color: #333; }
         .rank-3 .rank-badge { background: #CD7F32; color: white; }
@@ -37,28 +38,13 @@
         .unvote-btn { flex: 1; background-color: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
         .unvote-btn:hover { background-color: #5a6268; }
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-
-        /* 底部模式切换按钮 */
-        .mode-switch-bottom { text-align: center; margin-top: 40px; margin-bottom: 20px; }
-        .mode-btn { background-color: #ff9800; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1.1em; cursor: pointer; transition: background 0.3s; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .mode-btn:hover { background-color: #e68a00; }
-        .mode-btn.prize { background-color: #2196F3; }
-        .mode-btn.prize:hover { background-color: #0b7dda; }
-        .mode-desc { color: #d9534f; font-weight: bold; margin-top: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 id="page-title">🍽️ 月度好菜投票</h1>
-        <p id="mode-desc" class="mode-desc" style="text-align: center;">每人最多只能投 3 票</p>
-        
-        <!-- 菜品展示区 -->
+        <h1>🍽️ 月度好菜投票</h1>
+        <p class="mode-desc">每人最多只能投 3 票</p>
         <div class="grid" id="dish-grid"></div>
-        
-        <!-- 模式切换按钮移到了最下面 -->
-        <div class="mode-switch-bottom">
-            <button class="mode-btn" id="mode-btn" onclick="toggleMode()">切换到领奖模式 🏆</button>
-        </div>
     </div>
 
     <script>
@@ -69,7 +55,6 @@
 
         let allVotes = {};
         let dishesData = [];
-        let isPrizeMode = false;
         const MAX_VOTES = 3;
         let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
 
@@ -87,65 +72,37 @@
                 dishesData = await dishesRes.json();
                 allVotes = await votesRes.json();
                 
-                renderCurrentMode();
+                // 按日期先后顺序排序（早 -> 晚）
+                dishesData.sort((a, b) => {
+                    const dateA = a.date ? new Date(a.date).getTime() : 0;
+                    const dateB = b.date ? new Date(b.date).getTime() : 0;
+                    return dateA - dateB; 
+                });
+                
+                renderDishes(dishesData);
             } catch (error) {
                 console.error('初始化失败:', error);
                 document.getElementById('dish-grid').innerHTML = '<p style="text-align:center;color:red;">数据加载失败，请刷新重试</p>';
             }
         }
 
-        // 切换模式
-        function toggleMode() {
-            isPrizeMode = !isPrizeMode;
-            const btn = document.getElementById('mode-btn');
-            const title = document.getElementById('page-title');
-            const desc = document.getElementById('mode-desc');
-
-            if (isPrizeMode) {
-                btn.textContent = '切换回投票模式 🗳️';
-                btn.classList.add('prize');
-                title.textContent = '🏆 月度好菜颁奖典礼';
-                desc.textContent = '恭喜以下获奖菜品及厨师！';
-                desc.style.color = '#28a745';
-            } else {
-                btn.textContent = '切换到领奖模式 🏆';
-                btn.classList.remove('prize');
-                title.textContent = '🍽️ 月度好菜投票';
-                desc.textContent = '每人最多只能投 3 票';
-                desc.style.color = '#d9534f';
-            }
-            renderCurrentMode();
-        }
-
-        // 根据当前模式渲染
-        function renderCurrentMode() {
-            let sortedDishes = [...dishesData];
-            let displayDishes = [];
-
-            if (isPrizeMode) {
-                // 领奖模式：按总票数从高到低排序
-                sortedDishes.sort((a, b) => {
-                    const voteA = allVotes[String(a.id)] || 0;
-                    const voteB = allVotes[String(b.id)] || 0;
-                    return voteB - voteA;
-                });
-                // 只取前3名（且票数大于0）
-                displayDishes = sortedDishes.filter(d => (allVotes[String(d.id)] || 0) > 0).slice(0, 3);
-            } else {
-                // 投票模式：按日期先后顺序排序（早 -> 晚）
-                sortedDishes.sort((a, b) => {
-                    const dateA = a.date ? new Date(a.date).getTime() : 0;
-                    const dateB = b.date ? new Date(b.date).getTime() : 0;
-                    return dateA - dateB; 
-                });
-                displayDishes = sortedDishes;
-            }
-            
-            renderDishes(displayDishes);
-        }
-
         function getUsedVotes() {
             return Object.values(userVotes).reduce((sum, count) => sum + count, 0);
+        }
+
+        // 计算前三名的票数阈值
+        function getTopThreeVotes() {
+            const voteCounts = dishesData
+                .map(d => allVotes[String(d.id)] || 0)
+                .filter(v => v > 0)
+                .sort((a, b) => b - a);
+            
+            const uniqueVotes = [...new Set(voteCounts)];
+            return {
+                first: uniqueVotes[0] || 0,
+                second: uniqueVotes[1] || 0,
+                third: uniqueVotes[2] || 0
+            };
         }
 
         function renderDishes(dishes) {
@@ -155,8 +112,9 @@
 
             const usedVotes = getUsedVotes();
             const isMaxed = usedVotes >= MAX_VOTES;
+            const topThree = getTopThreeVotes();
 
-            dishes.forEach((dish, index) => {
+            dishes.forEach(dish => {
                 const dishId = String(dish.id);
                 const voteCount = allVotes[dishId] || 0;
                 const myVoteCount = userVotes[dishId] || 0;
@@ -189,32 +147,25 @@
                     imageUrl = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%223em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
                 }
 
-                // 领奖模式下的排名徽章样式（直接根据索引和票数判断）
+                // 计算排名标识
                 let rankClass = '';
                 let rankBadge = '';
-                if (isPrizeMode && voteCount > 0) {
-                    if (index === 0) {
+                if (voteCount > 0) {
+                    if (voteCount === topThree.first && topThree.first > 0) {
                         rankClass = 'rank-1';
-                        rankBadge = '<div class="rank-badge">🥇 冠军</div>';
-                    } else if (index === 1) {
+                        rankBadge = '<div class="rank-badge">🥇 第一</div>';
+                    } else if (voteCount === topThree.second && topThree.second > 0) {
                         rankClass = 'rank-2';
-                        rankBadge = '<div class="rank-badge">🥈 亚军</div>';
-                    } else if (index === 2) {
+                        rankBadge = '<div class="rank-badge">🥈 第二</div>';
+                    } else if (voteCount === topThree.third && topThree.third > 0) {
                         rankClass = 'rank-3';
-                        rankBadge = '<div class="rank-badge">🥉 季军</div>';
+                        rankBadge = '<div class="rank-badge">🥉 第三</div>';
                     }
                 }
 
                 const card = document.createElement('div');
                 card.className = `card ${rankClass}`;
                 
-                // 领奖模式隐藏投票按钮
-                const buttonsHtml = isPrizeMode ? '' : `
-                        <div class="btn-group">
-                            <button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button>
-                            <button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button>
-                        </div>`;
-
                 card.innerHTML = `
                     ${rankBadge}
                     <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async"
@@ -226,7 +177,10 @@
                         <div class="card-date">📅 ${dishDate}</div>
                         <div class="my-vote" id="my-vote-${dishId}">我的投票：${myVoteCount} 票</div>
                         <div class="vote-count" id="count-${dishId}">总票数：<strong>${voteCount}</strong></div>
-                        ${buttonsHtml}
+                        <div class="btn-group">
+                            <button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button>
+                            <button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -234,8 +188,6 @@
         }
 
         async function handleVote(dishId, action) {
-            if (isPrizeMode) return;
-
             const usedVotes = getUsedVotes();
             if (action === 'add' && usedVotes >= MAX_VOTES) {
                 alert(`您最多只能投 ${MAX_VOTES} 票，请先取消其他菜的投票！`);
@@ -272,13 +224,8 @@
                     document.getElementById(`count-${dishId}`).innerHTML = `总票数：<strong>${result.count}</strong>`;
                     document.getElementById(`my-vote-${dishId}`).innerHTML = `我的投票：${userVotes[dishId] || 0} 票`;
                     
-                    const used = getUsedVotes();
-                    const isMaxed = used >= MAX_VOTES;
-                    document.querySelectorAll('.vote-btn').forEach(btn => btn.disabled = isMaxed);
-                    document.querySelectorAll('.unvote-btn').forEach(btn => {
-                        const dId = btn.id.replace('remove-btn-', '');
-                        btn.disabled = (userVotes[dId] || 0) <= 0;
-                    });
+                    // 重新渲染整页，实时更新金银铜牌
+                    renderDishes(dishesData);
                 } else {
                     alert('操作失败：' + result.error);
                     if (addBtn) addBtn.disabled = false;
