@@ -29,16 +29,16 @@
     </div>
 
     <script>
-        // ⚠️ 必须确认这是你最新的 Cloudflare 隧道地址 ⚠️
+        // ⚠️ 必须是你最新的 Cloudflare 隧道地址 ⚠️
         const API_BASE_URL = 'https://professor-foto-ben-thorough.trycloudflare.com'; 
 
         let allVotes = {};
 
         async function init() {
             try {
-                // 获取菜品列表和票数
+                // ⚠️ 修复 404：这里使用了绝对路径，防止路径解析错误
                 const [dishesRes, votesRes] = await Promise.all([
-                    fetch('dishes.json'),
+                    fetch('https://wubat964.github.io/dishes.json'), 
                     fetch(`${API_BASE_URL}/api/votes`)
                 ]);
                 const dishes = await dishesRes.json();
@@ -53,19 +53,26 @@
         function renderDishes(dishes) {
             const grid = document.getElementById('dish-grid');
             grid.innerHTML = '';
+            if (!Array.isArray(dishes)) return; // 防御性检查
+
             dishes.forEach(dish => {
                 const dishId = String(dish.id);
                 const voteCount = allVotes[dishId] || 0;
-                // 拼接正确的图片路径（针对 GitHub Pages 路径）
-                let imageUrl = dish.image;
-                if (!imageUrl.startsWith('http')) {
-                    imageUrl = `https://wubat964.github.io/index.html/${imageUrl}`; 
+                
+                // ⚠️ 修复 TypeError：兼容多种可能的字段名
+                let rawImg = dish.image || dish.img || dish.pic || '';
+                let imageUrl = '';
+                
+                if (rawImg) {
+                    imageUrl = rawImg.startsWith('http') ? rawImg : `https://wubat964.github.io/index.html/${rawImg}`;
+                } else {
+                    imageUrl = 'https://via.placeholder.com/250x200?text=No+Image'; // 如果没找到图片字段，给个默认图
                 }
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${imageUrl}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
+                    <img src="${imageUrl}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=Image+Error'">
                     <div class="card-content">
                         <div class="card-title">${dish.name}</div>
                         <div class="vote-count" id="count-${dishId}">当前票数：<strong>${voteCount}</strong></div>
@@ -79,7 +86,7 @@
             });
         }
 
-        // 这个函数只更新局部票数，绝不刷新整个页面，彻底解决闪烁！
+        // 局部更新，彻底解决闪烁问题！
         async function handleVote(dishId, action) {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/vote`, {
@@ -89,7 +96,6 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    // 只更新文字，不重绘页面
                     document.getElementById(`count-${dishId}`).innerHTML = `当前票数：<strong>${result.count}</strong>`;
                 } else {
                     alert('操作失败：' + result.error);
