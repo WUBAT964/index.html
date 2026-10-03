@@ -29,16 +29,16 @@
     </div>
 
     <script>
-        // ⚠️⚠️⚠️ 这里必须是你最新的 Cloudflare 隧道地址 ⚠️⚠️⚠️
+        // ⚠️⚠️⚠️ 必须是你最新的 Cloudflare 隧道地址 ⚠️⚠️⚠️
         const API_BASE_URL = 'https://professor-foto-ben-thorough.trycloudflare.com'; 
-        // 基础路径，用于加载图片和json
+        // 仓库基础路径（用于获取图片和 JSON）
         const BASE_URL = 'https://wubat964.github.io/index.html'; 
 
         let allVotes = {};
 
         async function init() {
             try {
-                // 修复 404：强制使用绝对路径获取数据
+                // 使用绝对路径解决 404 问题
                 const [dishesRes, votesRes] = await Promise.all([
                     fetch(`${BASE_URL}/dishes.json`), 
                     fetch(`${API_BASE_URL}/api/votes`)
@@ -57,25 +57,31 @@
             grid.innerHTML = '';
             if (!Array.isArray(dishes)) return;
 
+            // 优雅的灰色占位图（彻底避免访问被墙的 placeholder.com）
+            const fallbackImg = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
+
             dishes.forEach(dish => {
                 const dishId = String(dish.id);
                 const voteCount = allVotes[dishId] || 0;
                 
-                // 兼容多种图片字段名，并且拼接绝对路径
+                // 兼容多种字段名，并自动补全 images/ 路径
                 let rawImg = dish.image || dish.img || dish.pic || dish.图片 || '';
                 let imageUrl = '';
                 
                 if (rawImg && typeof rawImg === 'string') {
+                    if (!rawImg.includes('images/') && !rawImg.startsWith('http')) {
+                        rawImg = 'images/' + rawImg; 
+                    }
                     imageUrl = rawImg.startsWith('http') ? rawImg : `${BASE_URL}/${rawImg}`;
                 } else {
-                    imageUrl = 'https://via.placeholder.com/250x200?text=No+Image';
+                    imageUrl = fallbackImg;
                 }
 
                 const card = document.createElement('div');
                 card.className = 'card';
-                // encodeURI 处理中文图片名
+                // 关键：onerror 加上 this.onerror=null，彻底杜绝死循环！
                 card.innerHTML = `
-                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=Image+Error'">
+                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.onerror=null; this.src='${fallbackImg}';">
                     <div class="card-content">
                         <div class="card-title">${dish.name || '未命名'}</div>
                         <div class="vote-count" id="count-${dishId}">当前票数：<strong>${voteCount}</strong></div>
@@ -89,7 +95,7 @@
             });
         }
 
-        // 局部更新，彻底解决闪烁问题！
+        // 局部更新 DOM，彻底解决页面闪烁问题！
         async function handleVote(dishId, action) {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/vote`, {
