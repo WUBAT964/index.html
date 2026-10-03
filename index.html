@@ -8,8 +8,6 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; color: #333; margin-bottom: 10px; }
-        
-        /* 领奖台区域样式 */
         .podium-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 40px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
         .podium-title { text-align: center; color: #ff9800; font-size: 1.5em; font-weight: bold; margin-bottom: 20px; }
         .podium-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
@@ -23,12 +21,9 @@
         .podium-badge.rank-3 { background: #CD7F32; color: white; }
         .podium-card img { width: 100%; height: 180px; object-fit: cover; background: #eee; }
         .podium-content { padding: 15px; text-align: center; }
-        /* 领奖台突出厨师名字 */
         .podium-chef-name { font-size: 1.4em; font-weight: bold; color: #d9534f; margin-bottom: 5px; }
         .podium-dish-name { font-size: 0.9em; color: #666; margin-bottom: 10px; }
         .podium-votes { font-size: 1.2em; color: #ff9800; font-weight: bold; }
-
-        /* 投票区 */
         .vote-section-title { text-align: center; color: #333; font-size: 1.3em; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; display: flex; flex-direction: column; }
@@ -52,24 +47,18 @@
 <body>
     <div class="container">
         <h1>🍽️ 月度好菜投票</h1>
-        
-        <!-- 领奖台区域 -->
         <div class="podium-section" id="podium-section" style="display: none;">
             <div class="podium-title">🏆 票数最高的前三名 🏆</div>
             <div class="podium-grid" id="podium-grid"></div>
         </div>
-
-        <!-- 投票区 -->
         <div class="vote-section-title">🗳️ 全部菜品投票（每人限3票）</div>
         <div class="grid" id="dish-grid"></div>
     </div>
 
     <script>
-        // ⚠️⚠️⚠️ 请确认这是你最新的 Cloudflare 隧道地址 ⚠️⚠️⚠️
         const API_BASE_URL = 'https://hurricane-lightbox-funky-kitchen.trycloudflare.com'; 
         const BASE_URL = 'https://wubat964.github.io/index.html'; 
         const IMG_BASE_URL = API_BASE_URL; 
-
         let allVotes = {};
         let dishesData = [];
         const MAX_VOTES = 3;
@@ -80,17 +69,13 @@
             img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%223em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
         };
 
-        // 获取图片URL的通用函数
         function getImageUrl(imgField) {
             if (!imgField || imgField.trim() === '') return null;
             let finalPath = imgField.trim();
-            if (!finalPath.startsWith('http') && !finalPath.includes('images/')) {
-                finalPath = 'images/' + finalPath;
-            }
+            if (!finalPath.startsWith('http') && !finalPath.includes('images/')) finalPath = 'images/' + finalPath;
             return finalPath.startsWith('http') ? finalPath : `${IMG_BASE_URL}/${finalPath}`;
         }
 
-        // 获取厨师名字的通用函数
         function getChefName(dish) {
             if (dish.chef1 && dish.chef2) return `${dish.chef1} & ${dish.chef2}`;
             if (dish.chef1) return dish.chef1;
@@ -106,14 +91,7 @@
                 ]);
                 dishesData = await dishesRes.json();
                 allVotes = await votesRes.json();
-                
-                // 按日期先后顺序排序（早 -> 晚）
-                dishesData.sort((a, b) => {
-                    const dateA = a.date ? new Date(a.date).getTime() : 0;
-                    const dateB = b.date ? new Date(b.date).getTime() : 0;
-                    return dateA - dateB; 
-                });
-                
+                dishesData.sort((a, b) => (new Date(a.date || 0) - new Date(b.date || 0)));
                 renderAll();
             } catch (error) {
                 console.error('初始化失败:', error);
@@ -130,79 +108,53 @@
             renderDishes();
         }
 
-        // 渲染领奖台（票数最高的前3个人/团队）
         function renderPodium() {
-            // 1. 按票数排序
-            const sortedByVotes = [...dishesData]
-                .map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 }))
-                .filter(d => d.votes > 0)
-                .sort((a, b) => b.votes - a.votes);
-            
+            const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes);
             const topThree = sortedByVotes.slice(0, 3);
             const podiumSection = document.getElementById('podium-section');
             const podiumGrid = document.getElementById('podium-grid');
-            
-            if (topThree.length === 0) {
-                podiumSection.style.display = 'none';
-                return;
-            }
-            
+            if (topThree.length === 0) { podiumSection.style.display = 'none'; return; }
             podiumSection.style.display = 'block';
             podiumGrid.innerHTML = '';
-
             topThree.forEach((dish, index) => {
                 const rank = index + 1;
                 const badgeText = rank === 1 ? '🥇 第一名' : rank === 2 ? '🥈 第二名' : '🥉 第三名';
-                
-                const chefName = getChefName(dish);
                 const imageUrl = getImageUrl(dish.img) || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%223em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
-
                 const card = document.createElement('div');
                 card.className = `podium-card rank-${rank}`;
                 card.innerHTML = `
                     <div class="podium-badge rank-${rank}">${badgeText}</div>
                     <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="handleImgError(this)">
                     <div class="podium-content">
-                        <!-- 重点突出厨师名字 -->
-                        <div class="podium-chef-name">👨‍🍳 ${chefName}</div>
+                        <div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div>
                         <div class="podium-dish-name">菜品：${dish.name || '未命名'}</div>
                         <div class="podium-votes">${dish.votes} 票</div>
-                    </div>
-                `;
+                    </div>`;
                 podiumGrid.appendChild(card);
             });
         }
 
-        // 渲染投票区（所有菜品）
         function renderDishes() {
             const grid = document.getElementById('dish-grid');
             grid.innerHTML = '';
-            
-            const usedVotes = getUsedVotes();
-            const isMaxed = usedVotes >= MAX_VOTES;
-
+            const isMaxed = getUsedVotes() >= MAX_VOTES;
             dishesData.forEach(dish => {
                 const dishId = String(dish.id);
                 const voteCount = allVotes[dishId] || 0;
                 const myVoteCount = userVotes[dishId] || 0;
-                
-                const chefName = getChefName(dish);
-
                 let dishDate = dish.date || '未知日期';
                 if (dish.date && dish.date.includes('-')) {
                     const parts = dish.date.split('-');
                     if (parts.length >= 3) dishDate = `${parts[1]}月${parts[2]}日`;
                 }
-
                 const imageUrl = getImageUrl(dish.img) || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%223em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
-
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="handleImgError(this)">
                     <div class="card-content">
                         <div class="card-title">${dish.name || '未命名'}</div>
-                        <div class="card-chef">👨‍🍳 ${chefName}</div>
+                        <div class="card-chef">👨‍🍳 ${getChefName(dish)}</div>
                         <div class="card-date">📅 ${dishDate}</div>
                         <div class="my-vote" id="my-vote-${dishId}">我的投票：${myVoteCount} 票</div>
                         <div class="vote-count" id="count-${dishId}">总票数：<strong>${voteCount}</strong></div>
@@ -210,28 +162,36 @@
                             <button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button>
                             <button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 grid.appendChild(card);
             });
         }
 
+        // 🚀 核心：乐观更新 + 后台异步
         async function handleVote(dishId, action) {
             const usedVotes = getUsedVotes();
-            if (action === 'add' && usedVotes >= MAX_VOTES) {
-                alert(`您最多只能投 ${MAX_VOTES} 票，请先取消其他菜的投票！`);
-                return;
-            }
-            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) {
-                alert('您还没有给这道菜投过票哦！');
-                return;
-            }
+            if (action === 'add' && usedVotes >= MAX_VOTES) { alert(`您最多只能投 ${MAX_VOTES} 票，请先取消其他菜的投票！`); return; }
+            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert('您还没有给这道菜投过票哦！'); return; }
 
-            const addBtn = document.getElementById(`add-btn-${dishId}`);
-            const removeBtn = document.getElementById(`remove-btn-${dishId}`);
-            if (addBtn) addBtn.disabled = true;
-            if (removeBtn) removeBtn.disabled = true;
+            // 1. 保存旧状态以便回滚
+            const oldVotes = { ...allVotes };
+            const oldUserVotes = { ...userVotes };
 
+            // 2. 立即在本地更新数据（乐观更新）
+            if (action === 'add') {
+                userVotes[dishId] = (userVotes[dishId] || 0) + 1;
+                allVotes[dishId] = (allVotes[dishId] || 0) + 1;
+            } else {
+                userVotes[dishId] = (userVotes[dishId] || 0) - 1;
+                if (userVotes[dishId] <= 0) delete userVotes[dishId];
+                allVotes[dishId] = Math.max(0, (allVotes[dishId] || 0) - 1);
+            }
+            localStorage.setItem('userVotes', JSON.stringify(userVotes));
+            
+            // 3. 立即渲染界面，用户感知不到延迟！
+            renderAll();
+
+            // 4. 后台悄悄发请求给服务器
             try {
                 const response = await fetch(`${API_BASE_URL}/api/vote`, {
                     method: 'POST',
@@ -239,28 +199,17 @@
                     body: JSON.stringify({ dish_id: dishId, action: action })
                 });
                 const result = await response.json();
-                
-                if (result.success) {
-                    if (action === 'add') {
-                        userVotes[dishId] = (userVotes[dishId] || 0) + 1;
-                    } else {
-                        userVotes[dishId] = (userVotes[dishId] || 0) - 1;
-                        if (userVotes[dishId] <= 0) delete userVotes[dishId];
-                    }
-                    localStorage.setItem('userVotes', JSON.stringify(userVotes));
-                    allVotes[dishId] = result.count;
-
-                    // 全局重新渲染，领奖台和投票区实时同步
-                    renderAll();
-                } else {
-                    alert('操作失败：' + result.error);
-                    if (addBtn) addBtn.disabled = false;
-                    if (removeBtn) removeBtn.disabled = false;
-                }
+                if (!result.success) throw new Error(result.error);
+                // 如果服务器返回成功，我们就用服务器返回的最新票数刷新一下数据（防止并发冲突导致的微小偏差）
+                allVotes[dishId] = result.count;
             } catch (error) {
-                alert('网络请求失败，请刷新重试');
-                if (addBtn) addBtn.disabled = false;
-                if (removeBtn) removeBtn.disabled = false;
+                // 5. 如果失败，回滚界面并提示
+                console.error('投票失败，正在回滚:', error);
+                alert('投票失败，请检查网络重试！');
+                allVotes = oldVotes;
+                userVotes = oldUserVotes;
+                localStorage.setItem('userVotes', JSON.stringify(userVotes));
+                renderAll();
             }
         }
 
