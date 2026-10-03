@@ -55,16 +55,14 @@
                 let dishes = await dishesRes.json();
                 allVotes = await votesRes.json();
                 
-                // ==================== 🎯 核心：按日期排序 ====================
-                // 采用倒序排列（最新日期排在最前面）
-                // 如果缺失日期，则将其排在最后
+                // ==================== 🎯 核心：按日期先后顺序排列 ====================
+                // 正序排列：先做的排前面，后做的排后面
                 dishes.sort((a, b) => {
                     const dateA = a.date ? new Date(a.date).getTime() : 0;
                     const dateB = b.date ? new Date(b.date).getTime() : 0;
-                    return dateB - dateA; // 倒序（最新的在前）
-                    // 如果想按正序（最早的在前），请改成：return dateA - dateB;
+                    return dateA - dateB; // 正序（早 -> 晚）
                 });
-                // ===========================================================
+                // ==================================================================
                 
                 renderDishes(dishes);
             } catch (error) {
@@ -96,12 +94,12 @@
                     chefName = '未知厨师';
                 }
 
-                // 2. 做菜时间逻辑（匹配 date），只显示日
+                // 2. 做菜时间逻辑（匹配 date），格式化为 09月30日
                 let dishDate = dish.date || '未知日期';
                 if (dish.date && dish.date.includes('-')) {
                     const parts = dish.date.split('-');
                     if (parts.length >= 3) {
-                        dishDate = `${parts[1]}月${parts[2]}日`; // 把 2026-09-30 格式化为 09月30日
+                        dishDate = `${parts[1]}月${parts[2]}日`; 
                     }
                 }
 
