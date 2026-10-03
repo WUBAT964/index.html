@@ -9,11 +9,9 @@
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; color: #333; margin-bottom: 10px; }
         
-        /* 领奖台区域 */
         .podium-section { background: white; border-radius: 16px; padding: 15px; margin-bottom: 30px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
         .podium-title { text-align: center; color: #ff9800; font-size: 1.3em; font-weight: bold; margin-bottom: 15px; }
         
-        /* 领奖台淡入动画 */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -53,7 +51,6 @@
         .unvote-btn:hover { background-color: #5a6268; }
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* 📱 手机端极致优化：全部一行3个，按钮加大，图片缩小 */
         @media (max-width: 768px) {
             body { padding: 8px; }
             h1 { font-size: 1.3em; }
@@ -75,11 +72,7 @@
             .vote-count { font-size: 0.6em !important; margin-bottom: 3px; }
             
             .btn-group { flex-direction: column; gap: 4px; }
-            .vote-btn, .unvote-btn { 
-                padding: 8px 0 !important; 
-                font-size: 0.65em !important; 
-                border-radius: 5px;
-            }
+            .vote-btn, .unvote-btn { padding: 8px 0 !important; font-size: 0.65em !important; border-radius: 5px; }
         }
     </style>
 </head>
@@ -95,7 +88,6 @@
     </div>
 
     <script>
-        // 最新的隧道地址，无需修改
         const API_BASE_URL = 'https://hurricane-lightbox-funky-kitchen.trycloudflare.com'; 
         let allVotes = {};
         let dishesData = [];
@@ -103,7 +95,6 @@
         let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
         let isVoting = false;
 
-        // 完美垂直居中的“暂无图片”SVG
         const PLACEHOLDER_IMG = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%25%22%20height%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20250%20200%22%3E%3Crect%20width%3D%22250%22%20height%3D%22200%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%22125%22%20y%3D%22100%22%20font-family%3D%22Arial%22%20font-size%3D%2216%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
 
         function getImageUrl(imgField) {
@@ -130,7 +121,7 @@
                 allVotes = await votesRes.json();
                 dishesData.sort((a, b) => (new Date(a.date || 0) - new Date(b.date || 0)));
                 
-                updatePodium(); // 修复了报错，这里统一调用 updatePodium
+                updatePodium(); // 绝对正确的调用
                 renderDishes();
                 setInterval(autoRefreshVotes, 15000);
             } catch (error) {
@@ -164,7 +155,6 @@
             return Object.values(userVotes).reduce((sum, count) => sum + count, 0);
         }
 
-        // 领奖台平滑更新（包含淡入动画，只在排名变化时重绘）
         function updatePodium() {
             const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes);
             const topThree = sortedByVotes.slice(0, 3);
@@ -195,7 +185,6 @@
                     podiumGrid.appendChild(card);
                 });
             } else {
-                // 如果数据没变，仅更新票数文字，避免闪烁
                 const cards = podiumGrid.querySelectorAll('.podium-card');
                 topThree.forEach((dish, index) => {
                     if (cards[index]) {
