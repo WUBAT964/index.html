@@ -9,51 +9,49 @@
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; color: #333; margin-bottom: 30px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
-        .card-content { padding: 15px; text-align: center; }
+        .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+        .card-content { padding: 15px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
         .card-title { font-size: 1.2em; font-weight: bold; color: #333; margin-bottom: 10px; }
-        .vote-count { color: #666; margin-bottom: 15px; }
-        .vote-btn { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1em; width: 100%; transition: background 0.2s; }
+        .vote-count { color: #666; margin-bottom: 15px; font-size: 1.1em; }
+        .btn-group { display: flex; gap: 10px; margin-top: auto; }
+        .vote-btn { flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
         .vote-btn:hover { background-color: #0056b3; }
-        .vote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .unvote-btn { flex: 1; background-color: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
+        .unvote-btn:hover { background-color: #5a6268; }
+        .vote-btn:disabled, .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🍽️ 月度好菜投票</h1>
-        <div class="grid" id="dish-grid">
-            <!-- 菜品卡片会通过 JS 动态生成 -->
-        </div>
+        <div class="grid" id="dish-grid"></div>
     </div>
 
     <script>
-        // ⚠️⚠️⚠️ 在这里填入你 Cloudflare Tunnel 的 HTTPS 地址 ⚠️⚠️⚠️
-        const API_BASE_URL = 'https://professor-foto-ben-thorough.trycloudflare.com';
+        // ⚠️ 在这里填入你的 Cloudflare Tunnel 地址 ⚠️
+        const API_BASE_URL = 'https://professor-foto-ben-thorough.trycloudflare.com'; 
 
-        let allVotes = {}; // 存放所有票数
+        let allVotes = {};
 
-        // 1. 初始化：获取菜品数据和票数
+        // 初始化：获取菜品和票数
         async function init() {
             try {
-                // 并行获取 dishes.json 和 票数
                 const [dishesRes, votesRes] = await Promise.all([
                     fetch('dishes.json'),
                     fetch(`${API_BASE_URL}/api/votes`)
                 ]);
-
                 const dishes = await dishesRes.json();
                 allVotes = await votesRes.json();
-
                 renderDishes(dishes);
             } catch (error) {
                 console.error('初始化失败:', error);
-                alert('数据加载失败，请检查网络或 API 地址');
+                document.getElementById('dish-grid').innerHTML = '<p style="text-align:center;color:red;">数据加载失败，请刷新重试</p>';
             }
         }
 
-        // 2. 渲染菜品卡片
+        // 渲染菜品
         function renderDishes(dishes) {
             const grid = document.getElementById('dish-grid');
             grid.innerHTML = '';
@@ -64,51 +62,56 @@
 
                 const card = document.createElement('div');
                 card.className = 'card';
+                // 处理图片路径：如果 dishes.json 里是 "images/xxx.jpg"，确保路径正确
+                let imageUrl = dish.image;
+                if (!imageUrl.startsWith('http')) {
+                    imageUrl = `https://wubat964.github.io/index.html/${imageUrl}`; // 拼接成绝对路径
+                }
+
                 card.innerHTML = `
-                    <img src="${dish.image}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
+                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
                     <div class="card-content">
                         <div class="card-title">${dish.name}</div>
                         <div class="vote-count" id="count-${dishId}">当前票数：<strong>${voteCount}</strong></div>
-                        <button class="vote-btn" onclick="vote('${dishId}', this)">投一票</button>
+                        <div class="btn-group">
+                            <button class="vote-btn" onclick="handleVote('${dishId}', 'add', this)">投一票</button>
+                            <button class="unvote-btn" onclick="handleVote('${dishId}', 'remove', this)">取消一票</button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // 3. 发送投票请求
-        async function vote(dishId, btnElement) {
-            btnElement.disabled = true; // 防止连点
-            btnElement.textContent = '投票中...';
+        // 处理投票/取消投票
+        async function handleVote(dishId, action, btnElement) {
+            // 获取按钮组并禁用防止连点
+            const btnGroup = btnElement.parentElement;
+            btnGroup.querySelectorAll('button').forEach(btn => btn.disabled = true);
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/vote`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dish_id: dishId })
+                    body: JSON.stringify({ dish_id: dishId, action: action })
                 });
-
                 const result = await response.json();
 
                 if (result.success) {
-                    // 更新页面上的票数
-                    const countEl = document.getElementById(`count-${dishId}`);
-                    countEl.innerHTML = `当前票数：<strong>${result.count}</strong>`;
-                    btnElement.textContent = '已投票 ✅';
+                    // 只更新局部DOM，避免页面闪烁
+                    document.getElementById(`count-${dishId}`).innerHTML = `当前票数：<strong>${result.count}</strong>`;
                 } else {
-                    alert('投票失败：' + result.error);
-                    btnElement.disabled = false;
-                    btnElement.textContent = '投一票';
+                    alert('操作失败：' + result.error);
                 }
             } catch (error) {
-                console.error('投票错误:', error);
-                alert('网络请求失败，请稍后再试');
-                btnElement.disabled = false;
-                btnElement.textContent = '投一票';
+                console.error('请求错误:', error);
+                alert('网络请求失败');
+            } finally {
+                // 恢复按钮状态
+                btnGroup.querySelectorAll('button').forEach(btn => btn.disabled = false);
             }
         }
 
-        // 页面加载时执行
         window.onload = init;
     </script>
 </body>
