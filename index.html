@@ -56,9 +56,8 @@
     </div>
 
     <script>
+        // ⚠️ 必须是你的最新隧道地址
         const API_BASE_URL = 'https://hurricane-lightbox-funky-kitchen.trycloudflare.com'; 
-        const BASE_URL = 'https://wubat964.github.io/index.html'; 
-        const IMG_BASE_URL = API_BASE_URL; 
         let allVotes = {};
         let dishesData = [];
         const MAX_VOTES = 3;
@@ -73,7 +72,7 @@
             if (!imgField || imgField.trim() === '') return null;
             let finalPath = imgField.trim();
             if (!finalPath.startsWith('http') && !finalPath.includes('images/')) finalPath = 'images/' + finalPath;
-            return finalPath.startsWith('http') ? finalPath : `${IMG_BASE_URL}/${finalPath}`;
+            return finalPath.startsWith('http') ? finalPath : `${API_BASE_URL}/${finalPath}`;
         }
 
         function getChefName(dish) {
@@ -85,8 +84,9 @@
 
         async function init() {
             try {
+                // ⚠️ 核心改变：直接从服务器拉取数据和票数！
                 const [dishesRes, votesRes] = await Promise.all([
-                    fetch(`${BASE_URL}/dishes.json`), 
+                    fetch(`${API_BASE_URL}/api/dishes`), 
                     fetch(`${API_BASE_URL}/api/votes`)
                 ]);
                 dishesData = await dishesRes.json();
@@ -167,17 +167,12 @@
             });
         }
 
-        // 🚀 核心：乐观更新 + 后台异步
         async function handleVote(dishId, action) {
             const usedVotes = getUsedVotes();
             if (action === 'add' && usedVotes >= MAX_VOTES) { alert(`您最多只能投 ${MAX_VOTES} 票，请先取消其他菜的投票！`); return; }
             if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert('您还没有给这道菜投过票哦！'); return; }
-
-            // 1. 保存旧状态以便回滚
             const oldVotes = { ...allVotes };
             const oldUserVotes = { ...userVotes };
-
-            // 2. 立即在本地更新数据（乐观更新）
             if (action === 'add') {
                 userVotes[dishId] = (userVotes[dishId] || 0) + 1;
                 allVotes[dishId] = (allVotes[dishId] || 0) + 1;
@@ -187,11 +182,7 @@
                 allVotes[dishId] = Math.max(0, (allVotes[dishId] || 0) - 1);
             }
             localStorage.setItem('userVotes', JSON.stringify(userVotes));
-            
-            // 3. 立即渲染界面，用户感知不到延迟！
             renderAll();
-
-            // 4. 后台悄悄发请求给服务器
             try {
                 const response = await fetch(`${API_BASE_URL}/api/vote`, {
                     method: 'POST',
@@ -200,10 +191,8 @@
                 });
                 const result = await response.json();
                 if (!result.success) throw new Error(result.error);
-                // 如果服务器返回成功，我们就用服务器返回的最新票数刷新一下数据（防止并发冲突导致的微小偏差）
                 allVotes[dishId] = result.count;
             } catch (error) {
-                // 5. 如果失败，回滚界面并提示
                 console.error('投票失败，正在回滚:', error);
                 alert('投票失败，请检查网络重试！');
                 allVotes = oldVotes;
