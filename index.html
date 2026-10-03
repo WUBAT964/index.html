@@ -2,147 +2,114 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>月度好菜 | 美食投票</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>月度好菜投票系统</title>
     <style>
-        :root { --primary-color: #FF6B6B; --primary-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%); --bg-color: #F7F9FC; --card-bg: #FFFFFF; --text-main: #2C3E50; --text-sub: #7F8C8D; --shadow: 0 4px 12px rgba(0, 0, 0, 0.06); --radius: 12px; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0 0 30px 0; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-        .header { text-align: center; padding: 30px 16px 20px; background: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 16px; }
-        .header h1 { font-size: 1.6rem; font-weight: 700; color: var(--text-main); margin: 0 0 6px 0; letter-spacing: 1px; }
-        .header h1 span { color: var(--primary-color); }
-        .header p { color: var(--text-sub); font-size: 0.85rem; margin: 0; }
-        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto; padding: 0 16px; }
-        @media (max-width: 600px) { .grid-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 8px; } }
-        .card { background-color: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; }
-        .card-image-wrapper { width: 100%; aspect-ratio: 4 / 3; overflow: hidden; position: relative; background: linear-gradient(135deg, #fdfbf7 0%, #f0ebe4 100%); }
-        .card-img { width: 100%; height: 100%; object-fit: cover; }
-        .image-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #bdc3c7; }
-        .image-placeholder .icon { font-size: 2rem; }
-        .image-placeholder .text { font-size: 0.75rem; color: #95a5a6; margin-top: 4px; }
-        .card-content { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin: 0 0 6px 0; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-info { display: flex; align-items: center; font-size: 0.78rem; color: var(--text-sub); margin-bottom: 4px; white-space: nowrap; overflow: hidden; }
-        .card-info svg { width: 12px; height: 12px; margin-right: 4px; fill: var(--text-sub); flex-shrink: 0; }
-        .card-date { font-size: 0.72rem; color: #95a5a6; margin-top: 2px; }
-        .vote-area { margin-top: auto; padding-top: 10px; border-top: 1px solid #F0F0F0; }
-        .vote-btn { background: var(--bg-color); border: none; border-radius: 16px; padding: 8px 10px; font-size: 0.82rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.2s ease; width: 100%; }
-        .vote-btn:active { transform: scale(0.96); }
-        .vote-btn.voted { background: var(--primary-gradient); color: #FFFFFF; box-shadow: 0 3px 8px rgba(255, 107, 107, 0.25); }
-        .vote-btn.voted svg { fill: #FFFFFF; }
-        .vote-btn svg { width: 15px; height: 15px; fill: var(--text-sub); transition: fill 0.2s ease; flex-shrink: 0; }
-        .vote-count { font-size: 0.82rem; font-weight: 700; }
-        .loading, .error { text-align: center; grid-column: 1 / -1; padding: 60px 20px; color: var(--text-sub); font-size: 1rem; }
-        .error { color: var(--primary-color); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-content { padding: 15px; text-align: center; }
+        .card-title { font-size: 1.2em; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .vote-count { color: #666; margin-bottom: 15px; }
+        .vote-btn { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1em; width: 100%; transition: background 0.2s; }
+        .vote-btn:hover { background-color: #0056b3; }
+        .vote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
-    <header class="header">
-        <h1>🍲 月度<span>好菜</span></h1>
-        <p>记录每一顿用心烹饪的美食</p>
-    </header>
-    <main id="app" class="grid-container">
-        <div class="loading">正在加载美味佳肴...</div>
-    </main>
+    <div class="container">
+        <h1>🍽️ 月度好菜投票</h1>
+        <div class="grid" id="dish-grid">
+            <!-- 菜品卡片会通过 JS 动态生成 -->
+        </div>
+    </div>
+
     <script>
-        // ==================== 替换为你验证成功的真实 Token ====================
-        const GH_TOKEN = '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';
+        // ⚠️⚠️⚠️ 在这里填入你 Cloudflare Tunnel 的 HTTPS 地址 ⚠️⚠️⚠️
+        const API_BASE_URL = 'https://你的-tunnel-地址.trycloudflare.com'; 
 
-        const VOTE_REPO = 'wubat964/dish-votes';
-        const VOTE_FILE = 'votes.json';
-        const GH_API = `https://api.github.com/repos/${VOTE_REPO}/contents/${VOTE_FILE}`;
+        let allVotes = {}; // 存放所有票数
 
-        function isRealImage(url) { if (!url) return false; return /\.(jpeg|jpg|gif|png|webp|bmp|svg)($|\?)/i.test(url) || url.startsWith('images/'); }
-        function getLocalVotedIds() { const voted = localStorage.getItem('voted_dish_ids'); return voted ? JSON.parse(voted) : []; }
-        function saveLocalVotedIds(ids) { localStorage.setItem('voted_dish_ids', JSON.stringify(ids)); }
-
-        async function fetchVotes() {
-            const res = await fetch(`${GH_API}?t=${Date.now()}`, {
-                headers: { 'Authorization': `Bearer ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-            });
-            if (res.status === 404) return { votes: {}, sha: null };
-            if (!res.ok) throw new Error('读取失败：' + res.status);
-            const json = await res.json();
-            const content = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\n/g, '')))));
-            return { votes: content, sha: json.sha };
-        }
-
-        async function saveVotes(votes, sha) {
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(votes, null, 2))));
-            const res = await fetch(GH_API, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: `vote update`, content: content, sha: sha })
-            });
-            if (!res.ok) { const errText = await res.text(); throw new Error('保存失败：' + res.status + ' ' + errText); }
-            return await res.json();
-        }
-
-        async function loadDishes() {
-            const container = document.getElementById('app');
-            const votedIds = getLocalVotedIds();
+        // 1. 初始化：获取菜品数据和票数
+        async function init() {
             try {
-                const response = await fetch('dishes.json?v=' + new Date().getTime());
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const dishes = await response.json();
-                if (!dishes || dishes.length === 0) { container.innerHTML = '<div class="loading">暂时还没有菜品数据哦~</div>'; return; }
-                let voteCounts = {};
-                try { const result = await fetchVotes(); voteCounts = result.votes || {}; } catch (e) { console.warn('获取云端票数失败', e); }
-                container.innerHTML = '';
-                dishes.forEach(dish => {
-                    let imgHtml = '';
-                    const imgUrl = dish.img ? dish.img.trim() : '';
-                    if (!imgUrl) { imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder"><div class="icon">🍽️</div><span class="text">暂无图片</span></div></div>`; }
-                    else if (isRealImage(imgUrl)) { imgHtml = `<div class="card-image-wrapper"><img src="${imgUrl}" alt="${dish.name}" class="card-img" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'image-placeholder\'><div class=\'icon\'>🥘</div><span class=\'text\'>加载失败</span></div>'"></div>`; }
-                    else { imgHtml = `<div class="card-image-wrapper"><div class="image-placeholder" onclick="window.open('${imgUrl}', '_blank')"><div class="icon">🌿</div><span class="text">点击查看原图</span></div></div>`; }
-                    let chefText = dish.chef1 || '未知厨师';
-                    if (dish.chef2 && dish.chef2.trim() !== '') chefText += ` & ${dish.chef2}`;
-                    const hasVoted = votedIds.includes(dish.id);
-                    const voteCount = voteCounts[dish.id] || 0;
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        ${imgHtml}
-                        <div class="card-content">
-                            <h2 class="card-title" title="${dish.name}">${dish.name}</h2>
-                            <div class="card-info"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>${chefText}</div>
-                            <div class="card-date">📅 ${dish.date || '未知日期'}</div>
-                            <div class="vote-area">
-                                <button class="vote-btn ${hasVoted ? 'voted' : ''}" onclick="toggleVote(this, ${dish.id})">
-                                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                    <span class="vote-text">${hasVoted ? '已投票' : '投一票'}</span>
-                                    <span class="vote-count">${voteCount > 0 ? voteCount : ''}</span>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(card);
+                // 并行获取 dishes.json 和 票数
+                const [dishesRes, votesRes] = await Promise.all([
+                    fetch('dishes.json'),
+                    fetch(`${API_BASE_URL}/api/votes`)
+                ]);
+
+                const dishes = await dishesRes.json();
+                allVotes = await votesRes.json();
+
+                renderDishes(dishes);
+            } catch (error) {
+                console.error('初始化失败:', error);
+                alert('数据加载失败，请检查网络或 API 地址');
+            }
+        }
+
+        // 2. 渲染菜品卡片
+        function renderDishes(dishes) {
+            const grid = document.getElementById('dish-grid');
+            grid.innerHTML = '';
+
+            dishes.forEach(dish => {
+                const dishId = String(dish.id);
+                const voteCount = allVotes[dishId] || 0;
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${dish.image}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
+                    <div class="card-content">
+                        <div class="card-title">${dish.name}</div>
+                        <div class="vote-count" id="count-${dishId}">当前票数：<strong>${voteCount}</strong></div>
+                        <button class="vote-btn" onclick="vote('${dishId}', this)">投一票</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 3. 发送投票请求
+        async function vote(dishId, btnElement) {
+            btnElement.disabled = true; // 防止连点
+            btnElement.textContent = '投票中...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dish_id: dishId })
                 });
-            } catch (error) { console.error('加载失败:', error); container.innerHTML = `<div class="error">❌ 数据加载失败，请刷新页面。<br><small>${error.message}</small></div>`; }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 更新页面上的票数
+                    const countEl = document.getElementById(`count-${dishId}`);
+                    countEl.innerHTML = `当前票数：<strong>${result.count}</strong>`;
+                    btnElement.textContent = '已投票 ✅';
+                } else {
+                    alert('投票失败：' + result.error);
+                    btnElement.disabled = false;
+                    btnElement.textContent = '投一票';
+                }
+            } catch (error) {
+                console.error('投票错误:', error);
+                alert('网络请求失败，请稍后再试');
+                btnElement.disabled = false;
+                btnElement.textContent = '投一票';
+            }
         }
 
-        async function toggleVote(btn, dishId) {
-            const votedIds = getLocalVotedIds();
-            const voteCountSpan = btn.querySelector('.vote-count');
-            const voteTextSpan = btn.querySelector('.vote-text');
-            if (btn.disabled) return;
-            btn.disabled = true;
-            if (votedIds.includes(dishId)) { alert('您今天已经投过这道菜啦！'); btn.disabled = false; return; }
-            try {
-                const { votes, sha } = await fetchVotes();
-                votes[dishId] = (votes[dishId] || 0) + 1;
-                await saveVotes(votes, sha);
-                votedIds.push(dishId);
-                saveLocalVotedIds(votedIds);
-                btn.classList.add('voted');
-                voteTextSpan.textContent = '已投票';
-                voteCountSpan.textContent = votes[dishId];
-                btn.style.transform = 'scale(1.1)';
-                setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
-            } catch (e) { console.error('投票失败:', e); alert('投票失败：' + e.message); } finally { btn.disabled = false; }
-        }
-        loadDishes();
+        // 页面加载时执行
+        window.onload = init;
     </script>
 </body>
 </html>
