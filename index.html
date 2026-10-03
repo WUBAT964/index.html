@@ -10,40 +10,41 @@
         h1 { text-align: center; color: #333; margin-bottom: 10px; }
         
         /* 领奖台区域 */
-        .podium-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 40px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
-        .podium-title { text-align: center; color: #ff9800; font-size: 1.5em; font-weight: bold; margin-bottom: 20px; }
+        .podium-section { background: white; border-radius: 16px; padding: 15px; margin-bottom: 30px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .podium-title { text-align: center; color: #ff9800; font-size: 1.3em; font-weight: bold; margin-bottom: 15px; }
         
-        /* 🎯 淡出淡入动画核心 */
-        .podium-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; transition: opacity 0.5s ease, transform 0.5s ease; opacity: 1; }
-        .podium-grid.fade-out { opacity: 0; transform: translateY(10px); }
-        .podium-grid.fade-in { opacity: 1; transform: translateY(0); }
+        /* CSS 原生淡入动画，JS 无需干预，只要 DOM 更新就会自动触发 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        .podium-card { width: 280px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.15); position: relative; border: 3px solid transparent; }
-        .podium-card.rank-1 { border-color: #FFD700; transform: scale(1.05); z-index: 2; }
+        .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .podium-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.15); position: relative; border: 3px solid transparent; animation: fadeInUp 0.6s ease-out; }
+        .podium-card.rank-1 { border-color: #FFD700; }
         .podium-card.rank-2 { border-color: #C0C0C0; }
         .podium-card.rank-3 { border-color: #CD7F32; }
-        .podium-badge { position: absolute; top: 10px; left: 10px; padding: 5px 15px; border-radius: 20px; font-weight: bold; color: #333; z-index: 10; font-size: 0.85em; }
+        .podium-badge { position: absolute; top: 8px; left: 8px; padding: 4px 10px; border-radius: 15px; font-weight: bold; color: #333; z-index: 10; font-size: 0.8em; }
         .podium-badge.rank-1 { background: #FFD700; }
         .podium-badge.rank-2 { background: #C0C0C0; }
         .podium-badge.rank-3 { background: #CD7F32; color: white; }
-        .podium-card img { width: 100%; height: 180px; object-fit: cover; background: #eee; }
-        .podium-content { padding: 15px; text-align: center; }
-        .podium-chef-name { font-size: 1.4em; font-weight: bold; color: #d9534f; margin-bottom: 5px; }
-        .podium-dish-name { font-size: 0.9em; color: #666; margin-bottom: 10px; }
-        .podium-votes { font-size: 1.2em; color: #ff9800; font-weight: bold; }
+        .podium-card img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
+        .podium-content { padding: 10px; text-align: center; }
+        .podium-chef-name { font-size: 1.2em; font-weight: bold; color: #d9534f; margin-bottom: 3px; }
+        .podium-dish-name { font-size: 0.8em; color: #666; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .podium-votes { font-size: 1.1em; color: #ff9800; font-weight: bold; }
 
-        .vote-section-title { text-align: center; color: #333; font-size: 1.3em; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .vote-section-title { text-align: center; color: #333; font-size: 1.2em; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-5px); }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
         .card-content { padding: 15px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
-        .card-title { font-size: 1.2em; font-weight: bold; color: #333; margin-bottom: 5px; }
-        .card-chef { font-size: 0.9em; color: #007bff; margin-bottom: 5px; font-weight: bold; }
-        .card-date { font-size: 0.85em; color: #888; margin-bottom: 5px; }
-        .my-vote { font-size: 0.9em; color: #28a745; margin-bottom: 5px; font-weight: bold; }
-        .vote-count { color: #666; margin-bottom: 15px; font-size: 1.1em; }
+        .card-title { font-size: 1.1em; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .card-chef { font-size: 0.85em; color: #007bff; margin-bottom: 5px; font-weight: bold; }
+        .card-date { font-size: 0.75em; color: #888; margin-bottom: 5px; }
+        .my-vote { font-size: 0.85em; color: #28a745; margin-bottom: 5px; font-weight: bold; }
+        .vote-count { color: #666; margin-bottom: 10px; font-size: 1em; }
         .btn-group { display: flex; gap: 10px; margin-top: auto; }
         .vote-btn { flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
         .vote-btn:hover { background-color: #0056b3; }
@@ -52,26 +53,36 @@
         .unvote-btn:hover { background-color: #5a6268; }
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* 📱 手机强制一行3个（加!important绝对生效） */
+        /* 📱 手机极致优化：领奖台和投票区全部一行3个，按钮调大 */
         @media (max-width: 768px) {
             body { padding: 8px; }
             h1 { font-size: 1.3em; }
-            .grid { 
-                grid-template-columns: repeat(3, 1fr) !important; 
-                gap: 6px !important; 
-            }
-            .card img { height: 75px !important; }
-            .card-content { padding: 5px 2px !important; }
-            .card-title { font-size: 0.75em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            
+            /* 领奖台也一行3个 */
+            .podium-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
+            .podium-card img { height: 70px !important; }
+            .podium-badge { font-size: 0.5em !important; padding: 2px 5px !important; top: 3px; left: 3px; }
+            .podium-chef-name { font-size: 0.65em !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .podium-dish-name { display: none !important; } /* 手机端领奖台空间太小，隐藏菜名，只保留厨师 */
+            .podium-votes { font-size: 0.65em !important; }
+
+            /* 投票区一行3个 */
+            .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
+            .card img { height: 70px !important; }
+            .card-content { padding: 4px 2px !important; }
+            .card-title { font-size: 0.7em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .card-chef { font-size: 0.55em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .card-date { font-size: 0.5em !important; margin-bottom: 2px; }
             .my-vote { font-size: 0.5em !important; margin-bottom: 2px; }
-            .vote-count { font-size: 0.65em !important; margin-bottom: 4px; }
-            .btn-group { flex-direction: column; gap: 2px; }
-            .vote-btn, .unvote-btn { padding: 3px 0 !important; font-size: 0.55em !important; border-radius: 3px; }
-            .podium-card { width: 100%; }
-            .podium-card img { height: 110px; }
-            .podium-chef-name { font-size: 1em; }
+            .vote-count { font-size: 0.6em !important; margin-bottom: 3px; }
+            
+            /* 按钮加大，方便点击 */
+            .btn-group { flex-direction: column; gap: 4px; }
+            .vote-btn, .unvote-btn { 
+                padding: 8px 0 !important; 
+                font-size: 0.65em !important; 
+                border-radius: 5px;
+            }
         }
     </style>
 </head>
@@ -87,6 +98,7 @@
     </div>
 
     <script>
+        // ⚠️ 必须换成你最新的隧道地址
         const API_BASE_URL = 'https://hurricane-lightbox-funky-kitchen.trycloudflare.com'; 
         let allVotes = {};
         let dishesData = [];
@@ -94,10 +106,8 @@
         let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
         let isVoting = false;
 
-        window.handleImgError = function(img) {
-            img.onerror = null;
-            img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%223em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
-        };
+        // 完美垂直居中的“暂无图片”SVG
+        const PLACEHOLDER_IMG = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%25%22%20height%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20250%20200%22%3E%3Crect%20width%3D%22250%22%20height%3D%22200%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%22125%22%20y%3D%22100%22%20font-family%3D%22Arial%22%20font-size%3D%2216%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
 
         function getImageUrl(imgField) {
             if (!imgField || imgField.trim() === '') return null;
@@ -125,7 +135,7 @@
                 
                 renderPodium();
                 renderDishes();
-                // 🚀 启动每15秒自动刷新
+                // 启动每15秒自动刷新
                 setInterval(autoRefreshVotes, 15000);
             } catch (error) {
                 console.error('初始化失败:', error);
@@ -133,7 +143,7 @@
             }
         }
 
-        // 🕒 每15秒自动刷新
+        // 🕒 自动刷新（不触发页面闪烁，只更新数字）
         async function autoRefreshVotes() {
             if (document.hidden || isVoting) return;
             try {
@@ -144,13 +154,13 @@
                     if (allVotes[id] !== count) { allVotes[id] = count; changed = true; }
                 }
                 if (changed) {
-                    console.log('检测到票数变化，自动刷新...');
+                    console.log('自动刷新：票数变化');
                     dishesData.forEach(dish => {
                         const dishId = String(dish.id);
                         const countEl = document.getElementById(`count-${dishId}`);
                         if (countEl) countEl.innerHTML = `总票数：<strong>${allVotes[dishId] || 0}</strong>`;
                     });
-                    renderPodium(); // 领奖台变化会触发淡入淡出
+                    updatePodium(); // 领奖台平滑更新
                 }
             } catch (e) { console.error('自动刷新失败:', e); }
         }
@@ -159,8 +169,8 @@
             return Object.values(userVotes).reduce((sum, count) => sum + count, 0);
         }
 
-        // 🏆 渲染领奖台（带有真正的淡出->更新->淡入动画）
-        async function renderPodium() {
+        // 🏆 领奖台平滑更新（不重绘，只改数字和顺序）
+        function updatePodium() {
             const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes);
             const topThree = sortedByVotes.slice(0, 3);
             const podiumSection = document.getElementById('podium-section');
@@ -169,33 +179,37 @@
             if (topThree.length === 0) { podiumSection.style.display = 'none'; return; }
             podiumSection.style.display = 'block';
 
-            // 1. 淡出
-            podiumGrid.classList.add('fade-out');
-            await new Promise(r => setTimeout(r, 500));
-
-            // 2. 更新DOM
-            podiumGrid.innerHTML = '';
-            topThree.forEach((dish, index) => {
-                const rank = index + 1;
-                const badgeText = rank === 1 ? '🥇 第一名' : rank === 2 ? '🥈 第二名' : '🥉 第三名';
-                const imageUrl = getImageUrl(dish.img) || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%223em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
-                const card = document.createElement('div');
-                card.className = `podium-card rank-${rank}`;
-                card.innerHTML = `
-                    <div class="podium-badge rank-${rank}">${badgeText}</div>
-                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="handleImgError(this)">
-                    <div class="podium-content">
-                        <div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div>
-                        <div class="podium-dish-name">菜品：${dish.name || '未命名'}</div>
-                        <div class="podium-votes">${dish.votes} 票</div>
-                    </div>`;
-                podiumGrid.appendChild(card);
-            });
-
-            // 3. 淡入
-            podiumGrid.classList.remove('fade-out');
-            podiumGrid.classList.add('fade-in');
-            setTimeout(() => podiumGrid.classList.remove('fade-in'), 500);
+            // 如果领奖台内容变了，重新构建DOM，触发CSS淡入动画
+            const newSignature = topThree.map(d => `${d.id}-${d.votes}`).join(',');
+            if (podiumGrid.dataset.signature !== newSignature) {
+                podiumGrid.dataset.signature = newSignature;
+                podiumGrid.innerHTML = '';
+                topThree.forEach((dish, index) => {
+                    const rank = index + 1;
+                    const badgeText = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
+                    const imageUrl = getImageUrl(dish.img) || PLACEHOLDER_IMG;
+                    const card = document.createElement('div');
+                    card.className = `podium-card rank-${rank}`;
+                    card.innerHTML = `
+                        <div class="podium-badge rank-${rank}">${badgeText}</div>
+                        <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.src='${PLACEHOLDER_IMG}'">
+                        <div class="podium-content">
+                            <div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div>
+                            <div class="podium-dish-name">${dish.name || '未命名'}</div>
+                            <div class="podium-votes">${dish.votes} 票</div>
+                        </div>`;
+                    podiumGrid.appendChild(card);
+                });
+            } else {
+                // 签名一样，说明只是票数变了，只更新票数文字，绝不重绘！
+                const cards = podiumGrid.querySelectorAll('.podium-card');
+                topThree.forEach((dish, index) => {
+                    if (cards[index]) {
+                        const voteEl = cards[index].querySelector('.podium-votes');
+                        if (voteEl) voteEl.textContent = `${dish.votes} 票`;
+                    }
+                });
+            }
         }
 
         function renderDishes() {
@@ -211,11 +225,11 @@
                     const parts = dish.date.split('-');
                     if (parts.length >= 3) dishDate = `${parts[1]}月${parts[2]}日`;
                 }
-                const imageUrl = getImageUrl(dish.img) || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22250%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%223em%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
+                const imageUrl = getImageUrl(dish.img) || PLACEHOLDER_IMG;
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="handleImgError(this)">
+                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.src='${PLACEHOLDER_IMG}'">
                     <div class="card-content">
                         <div class="card-title">${dish.name || '未命名'}</div>
                         <div class="card-chef">👨‍🍳 ${getChefName(dish)}</div>
@@ -231,6 +245,7 @@
             });
         }
 
+        // 局部更新数字，不重绘卡片，彻底消除闪烁
         function updateUIAfterVote(dishId) {
             const voteCount = allVotes[dishId] || 0;
             const myVoteCount = userVotes[dishId] || 0;
@@ -245,7 +260,7 @@
                 const dId = btn.id.replace('remove-btn-', '');
                 btn.disabled = (userVotes[dId] || 0) <= 0;
             });
-            renderPodium();
+            updatePodium(); // 平滑更新领奖台
         }
 
         async function handleVote(dishId, action) {
