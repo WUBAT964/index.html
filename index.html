@@ -11,16 +11,7 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-5px); }
-        .card img { 
-            width: 100%; height: 200px; object-fit: cover; 
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-        }
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
         .card-content { padding: 15px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
         .card-title { font-size: 1.2em; font-weight: bold; color: #333; margin-bottom: 5px; }
         .card-chef { font-size: 0.9em; color: #888; margin-bottom: 10px; }
@@ -39,16 +30,17 @@
     </div>
 
     <script>
+        // ⚠️ 确保这是你最新的隧道地址
         const API_BASE_URL = 'https://hurricane-lightbox-funky-kitchen.trycloudflare.com'; 
         const BASE_URL = 'https://wubat964.github.io/index.html'; 
         const IMG_BASE_URL = API_BASE_URL; 
 
         let allVotes = {};
 
+        // 图片加载错误处理，防止死循环
         window.handleImgError = function(img, fallback) {
             img.onerror = null;
             img.src = fallback;
-            img.style.animation = 'none';
             img.style.background = '#eee';
         };
 
@@ -78,7 +70,7 @@
                 const dishId = String(dish.id);
                 const voteCount = allVotes[dishId] || 0;
                 
-                // ⚠️ 核心修复：自动拼接 chef1 和 chef2
+                // 核心：匹配 chef1 和 chef2
                 let chefName = '';
                 if (dish.chef1 && dish.chef2) {
                     chefName = `${dish.chef1} & ${dish.chef2}`;
@@ -90,24 +82,14 @@
                     chefName = '未知厨师';
                 }
 
-                // ⚠️ 图片字段也修复为 img，并兼容 image
-                let rawImg = dish.img || dish.image || dish.pic || '';
-                let imageUrl = '';
-                
-                if (rawImg && typeof rawImg === 'string') {
-                    if (!rawImg.includes('images/') && !rawImg.startsWith('http')) {
-                        rawImg = 'images/' + rawImg; 
-                    }
-                    imageUrl = rawImg.startsWith('http') ? rawImg : `${IMG_BASE_URL}/${rawImg}`;
-                } else {
-                    imageUrl = fallbackImg; // 如果 img 为空字符串，直接使用灰色占位图
-                }
+                // 匹配 img，如果为空则显示灰色占位
+                let rawImg = dish.img || '';
+                let imageUrl = rawImg ? `${IMG_BASE_URL}/${rawImg.includes('images/') ? rawImg : 'images/' + rawImg}` : fallbackImg;
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async"
-                         onload="this.style.animation='none'; this.style.background='#eee';" 
                          onerror="handleImgError(this, '${fallbackImg}')">
                     <div class="card-content">
                         <div class="card-title">${dish.name || '未命名'}</div>
