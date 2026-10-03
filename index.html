@@ -20,7 +20,6 @@
         .vote-btn:hover { background-color: #0056b3; }
         .unvote-btn { flex: 1; background-color: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
         .unvote-btn:hover { background-color: #5a6268; }
-        .vote-btn:disabled, .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -30,14 +29,14 @@
     </div>
 
     <script>
-        // ⚠️ 在这里填入你的 Cloudflare Tunnel 地址 ⚠️
+        // ⚠️ 必须确认这是你最新的 Cloudflare 隧道地址 ⚠️
         const API_BASE_URL = 'https://professor-foto-ben-thorough.trycloudflare.com'; 
 
         let allVotes = {};
 
-        // 初始化：获取菜品和票数
         async function init() {
             try {
+                // 获取菜品列表和票数
                 const [dishesRes, votesRes] = await Promise.all([
                     fetch('dishes.json'),
                     fetch(`${API_BASE_URL}/api/votes`)
@@ -51,31 +50,28 @@
             }
         }
 
-        // 渲染菜品
         function renderDishes(dishes) {
             const grid = document.getElementById('dish-grid');
             grid.innerHTML = '';
-
             dishes.forEach(dish => {
                 const dishId = String(dish.id);
                 const voteCount = allVotes[dishId] || 0;
+                // 拼接正确的图片路径（针对 GitHub Pages 路径）
+                let imageUrl = dish.image;
+                if (!imageUrl.startsWith('http')) {
+                    imageUrl = `https://wubat964.github.io/index.html/${imageUrl}`; 
+                }
 
                 const card = document.createElement('div');
                 card.className = 'card';
-                // 处理图片路径：如果 dishes.json 里是 "images/xxx.jpg"，确保路径正确
-                let imageUrl = dish.image;
-                if (!imageUrl.startsWith('http')) {
-                    imageUrl = `https://wubat964.github.io/index.html/${imageUrl}`; // 拼接成绝对路径
-                }
-
                 card.innerHTML = `
-                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
+                    <img src="${imageUrl}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
                     <div class="card-content">
                         <div class="card-title">${dish.name}</div>
                         <div class="vote-count" id="count-${dishId}">当前票数：<strong>${voteCount}</strong></div>
                         <div class="btn-group">
-                            <button class="vote-btn" onclick="handleVote('${dishId}', 'add', this)">投一票</button>
-                            <button class="unvote-btn" onclick="handleVote('${dishId}', 'remove', this)">取消一票</button>
+                            <button class="vote-btn" onclick="handleVote('${dishId}', 'add')">投一票</button>
+                            <button class="unvote-btn" onclick="handleVote('${dishId}', 'remove')">取消一票</button>
                         </div>
                     </div>
                 `;
@@ -83,12 +79,8 @@
             });
         }
 
-        // 处理投票/取消投票
-        async function handleVote(dishId, action, btnElement) {
-            // 获取按钮组并禁用防止连点
-            const btnGroup = btnElement.parentElement;
-            btnGroup.querySelectorAll('button').forEach(btn => btn.disabled = true);
-
+        // 这个函数只更新局部票数，绝不刷新整个页面，彻底解决闪烁！
+        async function handleVote(dishId, action) {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/vote`, {
                     method: 'POST',
@@ -96,19 +88,14 @@
                     body: JSON.stringify({ dish_id: dishId, action: action })
                 });
                 const result = await response.json();
-
                 if (result.success) {
-                    // 只更新局部DOM，避免页面闪烁
+                    // 只更新文字，不重绘页面
                     document.getElementById(`count-${dishId}`).innerHTML = `当前票数：<strong>${result.count}</strong>`;
                 } else {
                     alert('操作失败：' + result.error);
                 }
             } catch (error) {
-                console.error('请求错误:', error);
-                alert('网络请求失败');
-            } finally {
-                // 恢复按钮状态
-                btnGroup.querySelectorAll('button').forEach(btn => btn.disabled = false);
+                alert('网络请求失败，请刷新重试');
             }
         }
 
