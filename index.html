@@ -51,6 +51,7 @@
         .modal-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
         .modal-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
         .modal-box h2 { margin-top: 0; color: #333; }
+        .modal-box p { color: #666; font-size: 0.9em; }
         .modal-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .modal-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 10px; }
         .modal-box .error-msg { color: red; font-size: 0.9em; margin-bottom: 10px; display: none; }
@@ -91,15 +92,15 @@
         <div class="grid" id="dish-grid"></div>
     </div>
 
-    <!-- 登录/注册弹窗（保留你的文案） -->
+    <!-- 登录/注册弹窗（手机号自动判断） -->
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>身份验证</h2>
-            <p style="color:#666; font-size:0.9em;">请先注册</p>
-            <input type="text" id="reg-name" placeholder="请输入姓名">
+            <p>手机号未注册将自动注册，已注册则直接登录。</p>
             <input type="tel" id="reg-phone" placeholder="请输入手机号">
+            <input type="text" id="reg-name" placeholder="请输入姓名（仅注册时需填写）">
             <div id="reg-error" class="error-msg"></div>
-            <button onclick="submitRegister()">注册并登录</button>
+            <button onclick="submitRegister()">登录 / 注册</button>
         </div>
     </div>
 
@@ -123,7 +124,6 @@
             const heightStyle = isPodium ? 'height:160px;' : 'height:200px;';
             let imgUrl = dish.img ? dish.img.trim() : '';
             
-            // ⚠️ 核心修复：如果是相对路径（不是 http 开头），自动拼接服务器地址
             if (imgUrl && !imgUrl.startsWith('http')) {
                 imgUrl = `${API_BASE_URL}/${imgUrl}`;
             }
@@ -151,6 +151,9 @@
                 
                 if (currentUser) {
                     await fetchUserVotes();
+                } else {
+                    // ⚠️ 如果没登录，页面加载后立刻弹出登录框
+                    setTimeout(showRegisterModal, 300);
                 }
                 
                 updatePodium(); 
@@ -174,6 +177,7 @@
                 } else {
                     localStorage.removeItem('chef_user');
                     currentUser = null;
+                    showRegisterModal(); // 本地存的账号失效了，重新弹窗
                 }
             } catch (e) { console.error('获取用户票数失败', e); }
         }
@@ -182,14 +186,20 @@
             document.getElementById('register-modal').style.display = 'flex';
         }
 
+        // 提交“登录/注册”请求（后端自动判断手机号是否已存在）
         async function submitRegister() {
-            const name = document.getElementById('reg-name').value.trim();
             const phone = document.getElementById('reg-phone').value.trim();
+            const name = document.getElementById('reg-name').value.trim();
             const errorEl = document.getElementById('reg-error');
             errorEl.style.display = 'none';
 
-            if (!name || !phone) {
-                errorEl.textContent = "姓名和手机号不能为空";
+            if (!phone) {
+                errorEl.textContent = "手机号不能为空";
+                errorEl.style.display = 'block';
+                return;
+            }
+            if (!name) {
+                errorEl.textContent = "首次注册必须填写姓名";
                 errorEl.style.display = 'block';
                 return;
             }
