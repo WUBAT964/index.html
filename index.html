@@ -26,16 +26,20 @@
 
         .vote-section-title { text-align: center; color: #333; font-size: 1.2em; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; text-align: center; }
-        .card-title { font-size: 1.2em; font-weight: bold; color: #333; margin-bottom: 5px; }
-        .card-chef { font-size: 0.9em; color: #007bff; margin-bottom: 5px; font-weight: bold; }
-        .card-date { font-size: 0.8em; color: #888; margin-bottom: 10px; }
-        .my-vote { font-size: 0.9em; color: #28a745; margin-bottom: 5px; font-weight: bold; }
-        .vote-count { color: #666; margin-bottom: 15px; font-size: 1.1em; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+        .card-content { padding: 15px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
+        .card-title { font-size: 1.1em; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .card-chef { font-size: 0.85em; color: #007bff; margin-bottom: 5px; font-weight: bold; }
+        .card-date { font-size: 0.75em; color: #888; margin-bottom: 5px; }
+        .my-vote { font-size: 0.85em; color: #28a745; margin-bottom: 5px; font-weight: bold; }
+        .vote-count { color: #666; margin-bottom: 10px; font-size: 1em; }
         .btn-group { display: flex; gap: 10px; margin-top: auto; }
-        .vote-btn { flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; }
+        .vote-btn { flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
+        .vote-btn:hover { background-color: #0056b3; }
         .vote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        .unvote-btn { flex: 1; background-color: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; }
+        .unvote-btn { flex: 1; background-color: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
+        .unvote-btn:hover { background-color: #5a6268; }
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
         /* 登录注册弹窗 */
@@ -53,14 +57,15 @@
             .podium-chef-name { font-size: 0.8em !important; }
             .podium-votes { font-size: 0.7em !important; }
             .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
-            .card { padding: 8px 4px !important; }
-            .card-title { font-size: 0.75em !important; }
-            .card-chef { font-size: 0.55em !important; }
-            .card-date { font-size: 0.5em !important; }
-            .my-vote { font-size: 0.5em !important; }
-            .vote-count { font-size: 0.6em !important; }
+            .card img { height: 70px !important; }
+            .card-content { padding: 4px 2px !important; }
+            .card-title { font-size: 0.7em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .card-chef { font-size: 0.55em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .card-date { font-size: 0.5em !important; margin-bottom: 2px; }
+            .my-vote { font-size: 0.5em !important; margin-bottom: 2px; }
+            .vote-count { font-size: 0.6em !important; margin-bottom: 3px; }
             .btn-group { flex-direction: column; gap: 4px; }
-            .vote-btn, .unvote-btn { padding: 6px 0 !important; font-size: 0.6em !important; }
+            .vote-btn, .unvote-btn { padding: 8px 0 !important; font-size: 0.65em !important; border-radius: 5px; }
         }
     </style>
 </head>
@@ -82,8 +87,8 @@
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>身份验证</h2>
-            <p style="color:#666; font-size:0.9em;">请先注册</p>
-            <input type="text" id="reg-name" placeholder="请输入姓名">
+            <p style="color:#666; font-size:0.9em;">请使用您的真实姓名注册（必须是厨师列表中的成员）</p>
+            <input type="text" id="reg-name" placeholder="请输入姓名（如：陈学文）">
             <input type="tel" id="reg-phone" placeholder="请输入手机号">
             <div id="reg-error" class="error-msg"></div>
             <button onclick="submitRegister()">注册并登录</button>
@@ -94,8 +99,8 @@
         const API_BASE_URL = 'https://hurricane-lightbox-funky-kitchen.trycloudflare.com'; 
         let allVotes = {};
         let dishesData = [];
-        let userVotes = {}; // 当前用户投的票
-        let totalVoted = 0; // 当前用户投的总票数
+        let userVotes = {};
+        let totalVoted = 0;
         let currentUser = JSON.parse(localStorage.getItem('chef_user')) || null; // {name, phone}
 
         function getChefName(dish) {
@@ -138,14 +143,12 @@
                     totalVoted = Object.values(userVotes).reduce((a, b) => a + b, 0);
                     document.getElementById('user-info').textContent = `当前用户：${data.name} (已投 ${totalVoted}/3 票)`;
                 } else {
-                    // 用户不存在，清除本地存储
                     localStorage.removeItem('chef_user');
                     currentUser = null;
                 }
             } catch (e) { console.error('获取用户票数失败', e); }
         }
 
-        // 弹出注册窗口
         function showRegisterModal() {
             document.getElementById('register-modal').style.display = 'flex';
         }
@@ -176,7 +179,7 @@
                     totalVoted = Object.values(userVotes).reduce((a, b) => a + b, 0);
                     document.getElementById('register-modal').style.display = 'none';
                     document.getElementById('user-info').textContent = `当前用户：${name} (已投 ${totalVoted}/3 票)`;
-                    updateUIAfterVote(); // 刷新界面
+                    updateUIAfterVote();
                 } else {
                     errorEl.textContent = data.error;
                     errorEl.style.display = 'block';
@@ -221,10 +224,12 @@
                 topThree.forEach((dish, index) => {
                     const rank = index + 1;
                     const badgeText = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
+                    const imageUrl = dish.img || 'https://via.placeholder.com/250x200?text=No+Image';
                     const card = document.createElement('div');
                     card.className = `podium-card rank-${rank}`;
                     card.innerHTML = `
                         <div class="podium-badge rank-${rank}">${badgeText}</div>
+                        <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
                         <div class="podium-content">
                             <div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div>
                             <div class="podium-votes">${dish.votes} 票</div>
@@ -255,17 +260,21 @@
                     const parts = dish.date.split('-');
                     if (parts.length >= 3) dishDate = `${parts[1]}月${parts[2]}日`;
                 }
+                const imageUrl = dish.img || 'https://via.placeholder.com/250x200?text=No+Image';
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div class="card-title">${dish.name || '未命名'}</div>
-                    <div class="card-chef">👨‍🍳 ${getChefName(dish)}</div>
-                    <div class="card-date">📅 ${dishDate}</div>
-                    <div class="my-vote" id="my-vote-${dishId}">我的投票：${myVoteCount} 票</div>
-                    <div class="vote-count" id="count-${dishId}">总票数：<strong>${voteCount}</strong></div>
-                    <div class="btn-group">
-                        <button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button>
-                        <button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button>
+                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
+                    <div class="card-content">
+                        <div class="card-title">${dish.name || '未命名'}</div>
+                        <div class="card-chef">👨‍🍳 ${getChefName(dish)}</div>
+                        <div class="card-date">📅 ${dishDate}</div>
+                        <div class="my-vote" id="my-vote-${dishId}">我的投票：${myVoteCount} 票</div>
+                        <div class="vote-count" id="count-${dishId}">总票数：<strong>${voteCount}</strong></div>
+                        <div class="btn-group">
+                            <button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button>
+                            <button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button>
+                        </div>
                     </div>`;
                 grid.appendChild(card);
             });
@@ -305,7 +314,6 @@
                 return;
             }
 
-            // 乐观更新
             if (action === 'add') {
                 userVotes[dishId] = (userVotes[dishId] || 0) + 1;
                 allVotes[dishId] = (allVotes[dishId] || 0) + 1;
@@ -326,7 +334,6 @@
                 });
                 const result = await response.json();
                 if (!result.success) throw new Error(result.error);
-                // 用后端返回的权威数据同步
                 allVotes[dishId] = result.count;
                 userVotes = result.myVotes;
                 totalVoted = result.totalVoted;
@@ -334,7 +341,6 @@
             } catch (error) {
                 console.error('投票失败，正在回滚:', error);
                 alert('投票失败：' + error.message);
-                // 重新拉取数据
                 fetchUserVotes().then(() => updateUIAfterVote());
             }
         }
