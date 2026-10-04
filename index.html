@@ -20,6 +20,12 @@
         .podium-badge.rank-1 { background: #FFD700; }
         .podium-badge.rank-2 { background: #C0C0C0; }
         .podium-badge.rank-3 { background: #CD7F32; color: white; }
+        
+        /* 图片容器与占位符样式 */
+        .card-img-wrapper { position: relative; width: 100%; height: 200px; background: #eee; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .no-img-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; color: #999; font-size: 1em; }
+
         .podium-content { padding: 15px; text-align: center; }
         .podium-chef-name { font-size: 1.3em; font-weight: bold; color: #d9534f; margin-bottom: 5px; }
         .podium-votes { font-size: 1.2em; color: #ff9800; font-weight: bold; }
@@ -27,7 +33,6 @@
         .vote-section-title { text-align: center; color: #333; font-size: 1.2em; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
         .card-content { padding: 15px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
         .card-title { font-size: 1.1em; font-weight: bold; color: #333; margin-bottom: 5px; }
         .card-chef { font-size: 0.85em; color: #007bff; margin-bottom: 5px; font-weight: bold; }
@@ -50,14 +55,17 @@
         .modal-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 10px; }
         .modal-box .error-msg { color: red; font-size: 0.9em; margin-bottom: 10px; display: none; }
 
+        /* 手机端优化 */
         @media (max-width: 768px) {
             body { padding: 8px; }
             h1 { font-size: 1.3em; }
             .podium-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
+            .podium-card .card-img-wrapper { height: 70px !important; }
             .podium-chef-name { font-size: 0.8em !important; }
             .podium-votes { font-size: 0.7em !important; }
             .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
-            .card img { height: 70px !important; }
+            .card .card-img-wrapper { height: 70px !important; }
+            .no-img-placeholder { font-size: 0.6em; }
             .card-content { padding: 4px 2px !important; }
             .card-title { font-size: 0.7em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .card-chef { font-size: 0.55em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -87,8 +95,8 @@
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>身份验证</h2>
-            <p style="color:#666; font-size:0.9em;">请使用您的真实姓名注册（必须是厨师列表中的成员）</p>
-            <input type="text" id="reg-name" placeholder="请输入姓名（如：陈学文）">
+            <p style="color:#666; font-size:0.9em;">请先注册</p>
+            <input type="text" id="reg-name" placeholder="请输入姓名">
             <input type="tel" id="reg-phone" placeholder="请输入手机号">
             <div id="reg-error" class="error-msg"></div>
             <button onclick="submitRegister()">注册并登录</button>
@@ -108,6 +116,21 @@
             if (dish.chef1) return dish.chef1;
             if (dish.chef2) return dish.chef2;
             return '未知厨师';
+        }
+
+        // 生成图片 HTML（彻底修复“暂无图片”显示问题）
+        function getImgHtml(dish, isPodium = false) {
+            const heightStyle = isPodium ? 'height:160px;' : 'height:200px;'; // 领奖台图片稍小
+            const imgUrl = dish.img ? encodeURI(dish.img.trim()) : '';
+            if (!imgUrl) {
+                return `<div class="card-img-wrapper" style="${heightStyle}">
+                            <div class="no-img-placeholder" style="display:flex;">暂无图片</div>
+                        </div>`;
+            }
+            return `<div class="card-img-wrapper" style="${heightStyle}">
+                        <img src="${imgUrl}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="no-img-placeholder" style="display:none;">暂无图片</div>
+                    </div>`;
         }
 
         async function init() {
@@ -224,12 +247,11 @@
                 topThree.forEach((dish, index) => {
                     const rank = index + 1;
                     const badgeText = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
-                    const imageUrl = dish.img || 'https://via.placeholder.com/250x200?text=No+Image';
                     const card = document.createElement('div');
                     card.className = `podium-card rank-${rank}`;
                     card.innerHTML = `
                         <div class="podium-badge rank-${rank}">${badgeText}</div>
-                        <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
+                        ${getImgHtml(dish, true)}
                         <div class="podium-content">
                             <div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div>
                             <div class="podium-votes">${dish.votes} 票</div>
@@ -260,11 +282,10 @@
                     const parts = dish.date.split('-');
                     if (parts.length >= 3) dishDate = `${parts[1]}月${parts[2]}日`;
                 }
-                const imageUrl = dish.img || 'https://via.placeholder.com/250x200?text=No+Image';
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.src='https://via.placeholder.com/250x200?text=No+Image'">
+                    ${getImgHtml(dish, false)}
                     <div class="card-content">
                         <div class="card-title">${dish.name || '未命名'}</div>
                         <div class="card-chef">👨‍🍳 ${getChefName(dish)}</div>
