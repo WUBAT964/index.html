@@ -91,7 +91,7 @@
         <div class="grid" id="dish-grid"></div>
     </div>
 
-    <!-- 登录/注册弹窗 -->
+    <!-- 登录/注册弹窗（保留你的文案） -->
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>身份验证</h2>
@@ -118,17 +118,23 @@
             return '未知厨师';
         }
 
-        // 生成图片 HTML（彻底修复“暂无图片”显示问题）
+        // 生成图片 HTML（支持服务器本地相对路径、彻底修复“暂无图片”显示问题）
         function getImgHtml(dish, isPodium = false) {
-            const heightStyle = isPodium ? 'height:160px;' : 'height:200px;'; // 领奖台图片稍小
-            const imgUrl = dish.img ? encodeURI(dish.img.trim()) : '';
+            const heightStyle = isPodium ? 'height:160px;' : 'height:200px;';
+            let imgUrl = dish.img ? dish.img.trim() : '';
+            
+            // ⚠️ 核心修复：如果是相对路径（不是 http 开头），自动拼接服务器地址
+            if (imgUrl && !imgUrl.startsWith('http')) {
+                imgUrl = `${API_BASE_URL}/${imgUrl}`;
+            }
+            
             if (!imgUrl) {
                 return `<div class="card-img-wrapper" style="${heightStyle}">
                             <div class="no-img-placeholder" style="display:flex;">暂无图片</div>
                         </div>`;
             }
             return `<div class="card-img-wrapper" style="${heightStyle}">
-                        <img src="${imgUrl}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="${encodeURI(imgUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="no-img-placeholder" style="display:none;">暂无图片</div>
                     </div>`;
         }
