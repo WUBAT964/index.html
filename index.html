@@ -21,9 +21,8 @@
         .podium-badge.rank-2 { background: #C0C0C0; }
         .podium-badge.rank-3 { background: #CD7F32; color: white; }
         
-        /* 图片容器与占位符样式 */
         .card-img-wrapper { position: relative; width: 100%; height: 200px; background: #eee; }
-        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
         .no-img-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; color: #999; font-size: 1em; }
 
         .podium-content { padding: 15px; text-align: center; }
@@ -47,7 +46,6 @@
         .unvote-btn:hover { background-color: #5a6268; }
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* 登录注册弹窗 */
         .modal-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
         .modal-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
         .modal-box h2 { margin-top: 0; color: #333; }
@@ -56,7 +54,27 @@
         .modal-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 10px; }
         .modal-box .error-msg { color: red; font-size: 0.9em; margin-bottom: 10px; display: none; }
 
-        /* 手机端优化 */
+        .lightbox {
+            display: none; position: fixed; z-index: 20000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
+            justify-content: center; align-items: center;
+            overflow: hidden; touch-action: none; user-select: none;
+        }
+        .lightbox img {
+            max-width: 95%; max-height: 95%;
+            object-fit: contain; border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease-out;
+            cursor: grab; transform-origin: center center;
+            will-change: transform;
+        }
+        .lightbox img:active { cursor: grabbing; }
+        .lightbox-close {
+            position: absolute; top: 15px; right: 20px;
+            color: white; font-size: 42px; font-weight: bold;
+            cursor: pointer; z-index: 20001; line-height: 1;
+        }
+
         @media (max-width: 768px) {
             body { padding: 8px; }
             h1 { font-size: 1.3em; }
@@ -92,16 +110,21 @@
         <div class="grid" id="dish-grid"></div>
     </div>
 
-    <!-- 登录/注册弹窗（手机号自动判断） -->
+    <!-- 登录/注册弹窗 -->
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>身份验证</h2>
-            <p>手机号未注册将自动注册，已注册则直接登录。</p>
+            <p id="modal-tip">请输入手机号登录，未注册的手机号将自动引导注册。</p>
             <input type="tel" id="reg-phone" placeholder="请输入手机号">
-            <input type="text" id="reg-name" placeholder="请输入姓名（仅注册时需填写）">
+            <input type="text" id="reg-name" placeholder="请输入姓名（首次注册需填写）" style="display:none;">
             <div id="reg-error" class="error-msg"></div>
             <button onclick="submitRegister()">登录 / 注册</button>
         </div>
+    </div>
+
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close" onclick="hideLightbox()">&times;</span>
+        <img id="lightbox-img" src="" alt="大图">
     </div>
 
     <script>
@@ -110,7 +133,7 @@
         let dishesData = [];
         let userVotes = {};
         let totalVoted = 0;
-        let currentUser = JSON.parse(localStorage.getItem('chef_user')) || null; // {name, phone}
+        let currentUser = JSON.parse(localStorage.getItem('chef_user')) || null;
 
         function getChefName(dish) {
             if (dish.chef1 && dish.chef2) return `${dish.chef1} & ${dish.chef2}`;
@@ -119,25 +142,126 @@
             return '未知厨师';
         }
 
-        // 生成图片 HTML（支持服务器本地相对路径、彻底修复“暂无图片”显示问题）
+        function resolveImgUrl(imgField) {
+            if (!imgField) return '';
+            let url = imgField.trim();
+            if (!url) return '';
+            if (!url.startsWith('http')) url = `${API_BASE_URL}/${url}`;
+            return url;
+        }
+
         function getImgHtml(dish, isPodium = false) {
             const heightStyle = isPodium ? 'height:160px;' : 'height:200px;';
-            let imgUrl = dish.img ? dish.img.trim() : '';
-            
-            if (imgUrl && !imgUrl.startsWith('http')) {
-                imgUrl = `${API_BASE_URL}/${imgUrl}`;
-            }
-            
+            const imgUrl = resolveImgUrl(dish.img);
             if (!imgUrl) {
                 return `<div class="card-img-wrapper" style="${heightStyle}">
                             <div class="no-img-placeholder" style="display:flex;">暂无图片</div>
                         </div>`;
             }
             return `<div class="card-img-wrapper" style="${heightStyle}">
-                        <img src="${encodeURI(imgUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="${encodeURI(imgUrl)}" alt="${dish.name}" loading="lazy" decoding="async" 
+                             onclick="showLightbox('${encodeURI(imgUrl)}')"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="no-img-placeholder" style="display:none;">暂无图片</div>
                     </div>`;
         }
+
+        // ==================== 灯箱与缩放逻辑 ====================
+        let currentScale = 1, translateX = 0, translateY = 0;
+        let startX = 0, startY = 0;
+        let isDragging = false, isPinching = false, initialDistance = 0;
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        window.showLightbox = function(src) {
+            if (!src || src.includes('data:image/svg')) return;
+            lightboxImg.src = src;
+            resetTransform();
+            lightbox.style.display = 'flex';
+        }
+        window.hideLightbox = function() {
+            lightbox.style.display = 'none';
+            lightboxImg.src = '';
+            resetTransform();
+        }
+        function resetTransform() {
+            currentScale = 1; translateX = 0; translateY = 0;
+            applyTransform();
+        }
+        function applyTransform() {
+            lightboxImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+        }
+
+        lightbox.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            currentScale *= delta;
+            if (currentScale < 1) currentScale = 1;
+            if (currentScale > 5) currentScale = 5;
+            if (currentScale === 1) { translateX = 0; translateY = 0; }
+            applyTransform();
+        }, { passive: false });
+
+        lightboxImg.addEventListener('mousedown', function(e) {
+            if (currentScale <= 1) return;
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            e.preventDefault();
+        });
+        window.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            applyTransform();
+        });
+        window.addEventListener('mouseup', function() { isDragging = false; });
+
+        lightbox.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                isPinching = true;
+                initialDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            } else if (e.touches.length === 1 && currentScale > 1) {
+                isDragging = true;
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        lightbox.addEventListener('touchmove', function(e) {
+            if (isPinching && e.touches.length === 2) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const scaleDelta = currentDistance / initialDistance;
+                currentScale *= scaleDelta;
+                if (currentScale < 1) currentScale = 1;
+                if (currentScale > 5) currentScale = 5;
+                if (currentScale === 1) { translateX = 0; translateY = 0; }
+                initialDistance = currentDistance;
+                applyTransform();
+            } else if (isDragging && e.touches.length === 1 && currentScale > 1) {
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                applyTransform();
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        lightbox.addEventListener('touchend', function(e) {
+            if (e.touches.length < 2) isPinching = false;
+            if (e.touches.length === 0) isDragging = false;
+        });
+
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) hideLightbox();
+        });
+        // ========================================================
 
         async function init() {
             try {
@@ -152,7 +276,6 @@
                 if (currentUser) {
                     await fetchUserVotes();
                 } else {
-                    // ⚠️ 如果没登录，页面加载后立刻弹出登录框
                     setTimeout(showRegisterModal, 300);
                 }
                 
@@ -177,7 +300,7 @@
                 } else {
                     localStorage.removeItem('chef_user');
                     currentUser = null;
-                    showRegisterModal(); // 本地存的账号失效了，重新弹窗
+                    showRegisterModal();
                 }
             } catch (e) { console.error('获取用户票数失败', e); }
         }
@@ -186,23 +309,15 @@
             document.getElementById('register-modal').style.display = 'flex';
         }
 
-        // 提交“登录/注册”请求（后端自动判断手机号是否已存在）
         async function submitRegister() {
             const phone = document.getElementById('reg-phone').value.trim();
-            const name = document.getElementById('reg-name').value.trim();
+            const nameInput = document.getElementById('reg-name');
+            const name = nameInput.value.trim();
             const errorEl = document.getElementById('reg-error');
+            const modalTip = document.getElementById('modal-tip');
             errorEl.style.display = 'none';
 
-            if (!phone) {
-                errorEl.textContent = "手机号不能为空";
-                errorEl.style.display = 'block';
-                return;
-            }
-            if (!name) {
-                errorEl.textContent = "首次注册必须填写姓名";
-                errorEl.style.display = 'block';
-                return;
-            }
+            if (!phone) { errorEl.textContent = "手机号不能为空"; errorEl.style.display = 'block'; return; }
 
             try {
                 const res = await fetch(`${API_BASE_URL}/api/register`, {
@@ -212,14 +327,20 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    currentUser = { name, phone };
+                    currentUser = { name: data.name, phone };
                     localStorage.setItem('chef_user', JSON.stringify(currentUser));
                     userVotes = data.votedDishes || {};
                     totalVoted = Object.values(userVotes).reduce((a, b) => a + b, 0);
                     document.getElementById('register-modal').style.display = 'none';
-                    document.getElementById('user-info').textContent = `当前用户：${name} (已投 ${totalVoted}/3 票)`;
+                    document.getElementById('user-info').textContent = `当前用户：${data.name} (已投 ${totalVoted}/3 票)`;
                     updateUIAfterVote();
                 } else {
+                    // 如果后端提示需要姓名，则动态显示姓名输入框
+                    if (data.needName) {
+                        nameInput.style.display = 'block';
+                        modalTip.textContent = "该手机号未注册，请填写姓名完成注册。";
+                        nameInput.focus();
+                    }
                     errorEl.textContent = data.error;
                     errorEl.style.display = 'block';
                 }
@@ -337,19 +458,9 @@
         }
 
         async function handleVote(dishId, action) {
-            if (!currentUser) {
-                showRegisterModal();
-                return;
-            }
-
-            if (action === 'add' && totalVoted >= 3) {
-                alert("您最多只能投 3 票，请先取消其他菜的投票！");
-                return;
-            }
-            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) {
-                alert("您还没有给这道菜投过票哦！");
-                return;
-            }
+            if (!currentUser) { showRegisterModal(); return; }
+            if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); return; }
+            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); return; }
 
             if (action === 'add') {
                 userVotes[dishId] = (userVotes[dishId] || 0) + 1;
