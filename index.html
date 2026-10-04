@@ -9,7 +9,6 @@
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; color: #333; margin-bottom: 10px; }
         
-        /* 领奖台区域 */
         .podium-section { background: white; border-radius: 16px; padding: 15px; margin-bottom: 30px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
         .podium-title { text-align: center; color: #ff9800; font-size: 1.3em; font-weight: bold; margin-bottom: 15px; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -32,7 +31,6 @@
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        /* 图片增加 cursor: pointer 提示可双击 */
         .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; cursor: pointer; transition: opacity 0.2s; }
         .card img:active { opacity: 0.8; }
         .card-content { padding: 15px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
@@ -49,7 +47,7 @@
         .unvote-btn:hover { background-color: #5a6268; }
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* 🖼️ 双击放大灯箱样式 */
+        /* 🖼️ 灯箱样式 */
         .lightbox {
             display: none;
             position: fixed;
@@ -59,18 +57,20 @@
             background-color: rgba(0,0,0,0.9);
             align-items: center;
             justify-content: center;
-            animation: fadeIn 0.3s ease;
+            overflow: hidden; /* 防止滚动 */
+            touch-action: none; /* 移动端禁止默认手势，防止页面滚动 */
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .lightbox img {
             max-width: 95%;
             max-height: 95%;
             object-fit: contain;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            animation: zoomIn 0.3s ease;
+            transition: transform 0.1s;
+            cursor: grab;
+            transform-origin: center center;
         }
-        @keyframes zoomIn { from { transform: scale(0.8); } to { transform: scale(1); } }
+        .lightbox img:active { cursor: grabbing; }
         .lightbox-close {
             position: absolute;
             top: 20px; right: 30px;
@@ -114,8 +114,8 @@
         <div class="grid" id="dish-grid"></div>
     </div>
 
-    <!-- 双击放大的灯箱容器 -->
-    <div id="lightbox" class="lightbox" ondblclick="hideLightbox()" onclick="hideLightbox()">
+    <!-- 灯箱容器 -->
+    <div id="lightbox" class="lightbox">
         <span class="lightbox-close" onclick="hideLightbox()">&times;</span>
         <img id="lightbox-img" src="" alt="大图">
     </div>
@@ -130,18 +130,115 @@
 
         const PLACEHOLDER_IMG = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%25%22%20height%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20250%20200%22%3E%3Crect%20width%3D%22250%22%20height%3D%22200%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%22125%22%20y%3D%22100%22%20font-family%3D%22Arial%22%20font-size%3D%2216%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
 
-        // 双击显示大图的函数
+        // ==================== 🖼️ 灯箱与手势逻辑 ====================
+        let currentScale = 1;
+        let translateX = 0, translateY = 0;
+        let startX = 0, startY = 0;
+        let isDragging = false;
+        let initialDistance = 0;
+        let isPinching = false;
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+
         window.showLightbox = function(src) {
-            // 如果图片是占位图，则不放大
             if (!src || src.includes('data:image/svg+xml')) return;
-            document.getElementById('lightbox-img').src = src;
-            document.getElementById('lightbox').style.display = 'flex';
+            lightboxImg.src = src;
+            resetTransform();
+            lightbox.style.display = 'flex';
         }
-        // 关闭大图
+
         window.hideLightbox = function() {
-            document.getElementById('lightbox').style.display = 'none';
-            document.getElementById('lightbox-img').src = '';
+            lightbox.style.display = 'none';
+            lightboxImg.src = '';
         }
+
+        function resetTransform() {
+            currentScale = 1;
+            translateX = 0;
+            translateY = 0;
+            applyTransform();
+        }
+
+        function applyTransform() {
+            lightboxImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+        }
+
+        // 🖱️ 鼠标滚轮缩放
+        lightbox.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            currentScale *= delta;
+            if (currentScale < 1) currentScale = 1;
+            if (currentScale > 5) currentScale = 5; // 最大放大5倍
+            if (currentScale === 1) { translateX = 0; translateY = 0; }
+            applyTransform();
+        }, { passive: false });
+
+        // 🖱️ 鼠标拖动
+        lightboxImg.addEventListener('mousedown', function(e) {
+            if (currentScale <= 1) return;
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            applyTransform();
+        });
+
+        window.addEventListener('mouseup', function() { isDragging = false; });
+
+        // 📱 移动端触摸手势（双指缩放、单指拖动）
+        lightboxImg.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                isPinching = true;
+                initialDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            } else if (e.touches.length === 1 && currentScale > 1) {
+                isDragging = true;
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        lightboxImg.addEventListener('touchmove', function(e) {
+            if (isPinching && e.touches.length === 2) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const scaleDelta = currentDistance / initialDistance;
+                currentScale *= scaleDelta;
+                if (currentScale < 1) currentScale = 1;
+                if (currentScale > 5) currentScale = 5;
+                if (currentScale === 1) { translateX = 0; translateY = 0; }
+                initialDistance = currentDistance;
+                applyTransform();
+            } else if (isDragging && e.touches.length === 1 && currentScale > 1) {
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                applyTransform();
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        lightboxImg.addEventListener('touchend', function(e) {
+            if (e.touches.length < 2) isPinching = false;
+            if (e.touches.length === 0) isDragging = false;
+        });
+
+        // 点击背景关闭（如果在图片上点击则忽略）
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) hideLightbox();
+        });
+        // ========================================================
 
         function getImageUrl(imgField) {
             if (!imgField || imgField.trim() === '') return null;
