@@ -9,14 +9,10 @@
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; color: #333; margin-bottom: 10px; }
         
+        /* 领奖台区域 */
         .podium-section { background: white; border-radius: 16px; padding: 15px; margin-bottom: 30px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
         .podium-title { text-align: center; color: #ff9800; font-size: 1.3em; font-weight: bold; margin-bottom: 15px; }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .podium-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.15); position: relative; border: 3px solid transparent; animation: fadeInUp 0.6s ease-out; }
         .podium-card.rank-1 { border-color: #FFD700; }
@@ -26,7 +22,7 @@
         .podium-badge.rank-1 { background: #FFD700; }
         .podium-badge.rank-2 { background: #C0C0C0; }
         .podium-badge.rank-3 { background: #CD7F32; color: white; }
-        .podium-card img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
+        .podium-card img { width: 100%; height: 160px; object-fit: cover; background: #eee; cursor: pointer; }
         .podium-content { padding: 10px; text-align: center; }
         .podium-chef-name { font-size: 1.2em; font-weight: bold; color: #d9534f; margin-bottom: 3px; }
         .podium-dish-name { font-size: 0.8em; color: #666; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -36,7 +32,9 @@
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+        /* 图片增加 cursor: pointer 提示可双击 */
+        .card img { width: 100%; height: 200px; object-fit: cover; background: #eee; cursor: pointer; transition: opacity 0.2s; }
+        .card img:active { opacity: 0.8; }
         .card-content { padding: 15px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
         .card-title { font-size: 1.1em; font-weight: bold; color: #333; margin-bottom: 5px; }
         .card-chef { font-size: 0.85em; color: #007bff; margin-bottom: 5px; font-weight: bold; }
@@ -51,17 +49,47 @@
         .unvote-btn:hover { background-color: #5a6268; }
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
+        /* 🖼️ 双击放大灯箱样式 */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .lightbox img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn { from { transform: scale(0.8); } to { transform: scale(1); } }
+        .lightbox-close {
+            position: absolute;
+            top: 20px; right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10000;
+        }
+
         @media (max-width: 768px) {
             body { padding: 8px; }
             h1 { font-size: 1.3em; }
-            
             .podium-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
             .podium-card img { height: 70px !important; }
             .podium-badge { font-size: 0.5em !important; padding: 2px 5px !important; top: 3px; left: 3px; }
             .podium-chef-name { font-size: 0.65em !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .podium-dish-name { display: none !important; }
             .podium-votes { font-size: 0.65em !important; }
-
             .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
             .card img { height: 70px !important; }
             .card-content { padding: 4px 2px !important; }
@@ -70,7 +98,6 @@
             .card-date { font-size: 0.5em !important; margin-bottom: 2px; }
             .my-vote { font-size: 0.5em !important; margin-bottom: 2px; }
             .vote-count { font-size: 0.6em !important; margin-bottom: 3px; }
-            
             .btn-group { flex-direction: column; gap: 4px; }
             .vote-btn, .unvote-btn { padding: 8px 0 !important; font-size: 0.65em !important; border-radius: 5px; }
         }
@@ -83,8 +110,14 @@
             <div class="podium-title">🏆 票数最高的前三名 🏆</div>
             <div class="podium-grid" id="podium-grid"></div>
         </div>
-        <div class="vote-section-title">🗳️ 全部菜品投票（每人限3票）</div>
+        <div class="vote-section-title"></div>
         <div class="grid" id="dish-grid"></div>
+    </div>
+
+    <!-- 双击放大的灯箱容器 -->
+    <div id="lightbox" class="lightbox" ondblclick="hideLightbox()" onclick="hideLightbox()">
+        <span class="lightbox-close" onclick="hideLightbox()">&times;</span>
+        <img id="lightbox-img" src="" alt="大图">
     </div>
 
     <script>
@@ -96,6 +129,19 @@
         let isVoting = false;
 
         const PLACEHOLDER_IMG = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%25%22%20height%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20250%20200%22%3E%3Crect%20width%3D%22250%22%20height%3D%22200%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%22125%22%20y%3D%22100%22%20font-family%3D%22Arial%22%20font-size%3D%2216%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%3E暂无图片%3C%2Ftext%3E%3C%2Fsvg%3E';
+
+        // 双击显示大图的函数
+        window.showLightbox = function(src) {
+            // 如果图片是占位图，则不放大
+            if (!src || src.includes('data:image/svg+xml')) return;
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+        // 关闭大图
+        window.hideLightbox = function() {
+            document.getElementById('lightbox').style.display = 'none';
+            document.getElementById('lightbox-img').src = '';
+        }
 
         function getImageUrl(imgField) {
             if (!imgField || imgField.trim() === '') return null;
@@ -121,7 +167,7 @@
                 allVotes = await votesRes.json();
                 dishesData.sort((a, b) => (new Date(a.date || 0) - new Date(b.date || 0)));
                 
-                updatePodium(); // 绝对正确的调用
+                updatePodium(); 
                 renderDishes();
                 setInterval(autoRefreshVotes, 15000);
             } catch (error) {
@@ -140,7 +186,6 @@
                     if (allVotes[id] !== count) { allVotes[id] = count; changed = true; }
                 }
                 if (changed) {
-                    console.log('自动刷新：票数变化');
                     dishesData.forEach(dish => {
                         const dishId = String(dish.id);
                         const countEl = document.getElementById(`count-${dishId}`);
@@ -151,19 +196,15 @@
             } catch (e) { console.error('自动刷新失败:', e); }
         }
 
-        function getUsedVotes() {
-            return Object.values(userVotes).reduce((sum, count) => sum + count, 0);
-        }
+        function getUsedVotes() { return Object.values(userVotes).reduce((sum, count) => sum + count, 0); }
 
         function updatePodium() {
             const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes);
             const topThree = sortedByVotes.slice(0, 3);
             const podiumSection = document.getElementById('podium-section');
             const podiumGrid = document.getElementById('podium-grid');
-            
             if (topThree.length === 0) { podiumSection.style.display = 'none'; return; }
             podiumSection.style.display = 'block';
-
             const newSignature = topThree.map(d => `${d.id}-${d.votes}`).join(',');
             if (podiumGrid.dataset.signature !== newSignature) {
                 podiumGrid.dataset.signature = newSignature;
@@ -176,7 +217,7 @@
                     card.className = `podium-card rank-${rank}`;
                     card.innerHTML = `
                         <div class="podium-badge rank-${rank}">${badgeText}</div>
-                        <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.src='${PLACEHOLDER_IMG}'">
+                        <img src="${encodeURI(imageUrl)}" alt="${dish.name}" onerror="this.src='${PLACEHOLDER_IMG}'" ondblclick="showLightbox(this.src)">
                         <div class="podium-content">
                             <div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div>
                             <div class="podium-dish-name">${dish.name || '未命名'}</div>
@@ -212,7 +253,7 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.src='${PLACEHOLDER_IMG}'">
+                    <img src="${encodeURI(imageUrl)}" alt="${dish.name}" loading="lazy" decoding="async" onerror="this.src='${PLACEHOLDER_IMG}'" ondblclick="showLightbox(this.src)">
                     <div class="card-content">
                         <div class="card-title">${dish.name || '未命名'}</div>
                         <div class="card-chef">👨‍🍳 ${getChefName(dish)}</div>
@@ -235,7 +276,6 @@
             const myVoteEl = document.getElementById(`my-vote-${dishId}`);
             if (countEl) countEl.innerHTML = `总票数：<strong>${voteCount}</strong>`;
             if (myVoteEl) myVoteEl.innerHTML = `我的投票：${myVoteCount} 票`;
-            
             const isMaxed = getUsedVotes() >= MAX_VOTES;
             document.querySelectorAll('.vote-btn').forEach(btn => btn.disabled = isMaxed);
             document.querySelectorAll('.unvote-btn').forEach(btn => {
