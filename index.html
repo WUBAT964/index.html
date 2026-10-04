@@ -291,6 +291,7 @@
             const modalTip = document.getElementById('modal-tip');
             errorEl.style.display = 'none';
 
+            // ⚠️ 只校验手机号！姓名交给后端判断！
             if (!phone) { errorEl.textContent = "手机号不能为空"; errorEl.style.display = 'block'; return; }
 
             try {
