@@ -113,10 +113,10 @@
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>身份验证</h2>
-            <p id="modal-tip">请输入手机号登录，未注册的手机号将自动引导注册。</p>
+            <p id="modal-tip">请输入手机号和姓名，未注册的手机号将自动注册，已注册则直接登录。</p>
             <input type="tel" id="reg-phone" placeholder="请输入手机号"
                    onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
-            <input type="text" id="reg-name" placeholder="请输入姓名（首次注册需填写）" style="display:none;"
+            <input type="text" id="reg-name" placeholder="请输入姓名（必须是厨师列表中的成员）"
                    onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
             <div id="reg-error" class="error-msg"></div>
             <button onclick="submitRegister()">登录 / 注册</button>
@@ -285,14 +285,12 @@
 
         async function submitRegister() {
             const phone = document.getElementById('reg-phone').value.trim();
-            const nameInput = document.getElementById('reg-name');
-            const name = nameInput.value.trim();
+            const name = document.getElementById('reg-name').value.trim();
             const errorEl = document.getElementById('reg-error');
-            const modalTip = document.getElementById('modal-tip');
             errorEl.style.display = 'none';
 
-            // ⚠️ 只校验手机号！姓名交给后端判断！
             if (!phone) { errorEl.textContent = "手机号不能为空"; errorEl.style.display = 'block'; return; }
+            if (!name) { errorEl.textContent = "姓名不能为空"; errorEl.style.display = 'block'; return; }
 
             try {
                 const res = await fetch(`${API_BASE_URL}/api/register`, {
@@ -310,11 +308,6 @@
                     document.getElementById('user-info').textContent = `当前用户：${data.name} (已投 ${totalVoted}/3 票)`;
                     updateUIAfterVote();
                 } else {
-                    if (data.needName) {
-                        nameInput.style.display = 'block';
-                        modalTip.textContent = "该手机号未注册，请填写姓名完成注册。";
-                        nameInput.focus();
-                    }
                     errorEl.textContent = data.error;
                     errorEl.style.display = 'block';
                 }
