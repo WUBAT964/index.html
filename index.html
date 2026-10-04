@@ -46,7 +46,6 @@
         .unvote-btn:hover { background-color: #5a6268; }
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* 登录注册弹窗 */
         .modal-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
         .modal-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
         .modal-box h2 { margin-top: 0; color: #333; }
@@ -55,7 +54,6 @@
         .modal-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 10px; }
         .modal-box .error-msg { color: red; font-size: 0.9em; margin-bottom: 10px; display: none; }
 
-        /* 灯箱（双击放大） */
         .lightbox {
             display: none; position: fixed; z-index: 20000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
@@ -116,8 +114,10 @@
         <div class="modal-box">
             <h2>身份验证</h2>
             <p id="modal-tip">请输入手机号登录，未注册的手机号将自动引导注册。</p>
-            <input type="tel" id="reg-phone" placeholder="请输入手机号">
-            <input type="text" id="reg-name" placeholder="请输入姓名（首次注册需填写）" style="display:none;">
+            <input type="tel" id="reg-phone" placeholder="请输入手机号"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
+            <input type="text" id="reg-name" placeholder="请输入姓名（首次注册需填写）" style="display:none;"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
             <div id="reg-error" class="error-msg"></div>
             <button onclick="submitRegister()">登录 / 注册</button>
         </div>
@@ -283,7 +283,6 @@
 
         function showRegisterModal() { document.getElementById('register-modal').style.display = 'flex'; }
 
-        // ⚠️ 修复后的注册/登录逻辑
         async function submitRegister() {
             const phone = document.getElementById('reg-phone').value.trim();
             const nameInput = document.getElementById('reg-name');
@@ -292,7 +291,6 @@
             const modalTip = document.getElementById('modal-tip');
             errorEl.style.display = 'none';
 
-            // 只校验手机号！不校验姓名！姓名交给后端判断！
             if (!phone) { errorEl.textContent = "手机号不能为空"; errorEl.style.display = 'block'; return; }
 
             try {
@@ -311,7 +309,6 @@
                     document.getElementById('user-info').textContent = `当前用户：${data.name} (已投 ${totalVoted}/3 票)`;
                     updateUIAfterVote();
                 } else {
-                    // 后端如果返回 needName=true，说明手机号未注册，动态显示姓名框
                     if (data.needName) {
                         nameInput.style.display = 'block';
                         modalTip.textContent = "该手机号未注册，请填写姓名完成注册。";
