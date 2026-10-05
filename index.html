@@ -167,7 +167,7 @@
                     </div>`;
         }
 
-        // ==================== 灯箱与缩放逻辑 (已修复双击缩小) ====================
+        // ==================== 灯箱与缩放逻辑 ====================
         let currentScale = 1, translateX = 0, translateY = 0;
         let startX = 0, startY = 0;
         let isDragging = false, isPinching = false, initialDistance = 0;
@@ -251,7 +251,7 @@
             if (e.touches.length === 0) isDragging = false;
         });
 
-        // 👇 核心修复：点击灯箱内图片，双击缩小/关闭逻辑
+        // 👇 核心修复：双击图片，如果放大了就重置，如果没放大什么都不做（等着按X关闭）
         lightboxImg.addEventListener('click', function(e) {
             const now = Date.now();
             if (now - lastTap < 300) {
@@ -259,9 +259,8 @@
                 e.preventDefault();
                 if (currentScale > 1) {
                     resetTransform(); // 如果放大了，双击恢复原样
-                } else {
-                    hideLightbox();   // 如果没放大，双击关闭灯箱
                 }
+                // 如果没放大，双击不做任何事，等待用户点击右上角的 X 关闭
             }
             lastTap = now;
         });
