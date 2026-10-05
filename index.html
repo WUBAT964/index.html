@@ -167,10 +167,13 @@
 
         let currentScale = 1, translateX = 0, translateY = 0, startX = 0, startY = 0;
         let isDragging = false, isPinching = false, initialDistance = 0, lastTap = 0, isLightboxOpening = false;
+        let justClosedLightbox = false; // ⚠️ 防止幽灵点击：灯箱刚关闭后短时间内忽略图片点击
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
 
         window.showLightbox = function(src) {
+            // ⚠️ 如果刚刚关闭过灯箱，忽略这次点击，防止误触
+            if (justClosedLightbox) return;
             if (isLightboxOpening) return;
             isLightboxOpening = true;
             setTimeout(() => { isLightboxOpening = false; }, 300);
@@ -179,9 +182,19 @@
         };
 
         window.hideLightbox = function(e) {
-            if (e) { e.stopPropagation(); }
+            if (e) {
+                e.stopPropagation();
+                // ⚠️ 核心修复：触摸事件直接 preventDefault，阻止后续 click 生成
+                if (e.type === 'touchstart') {
+                    e.preventDefault();
+                }
+            }
             lightbox.style.display = 'none';
-            lightboxImg.src = ''; resetTransform();
+            lightboxImg.src = '';
+            resetTransform();
+            // ⚠️ 设置标志，500ms 内忽略图片上的 click
+            justClosedLightbox = true;
+            setTimeout(() => { justClosedLightbox = false; }, 500);
         };
 
         function resetTransform() { currentScale = 1; translateX = 0; translateY = 0; applyTransform(); }
@@ -301,7 +314,6 @@
             } catch (e) { console.error('自动刷新失败:', e); }
         }
 
-        // ⚠️ 修改点：领奖台现在显示菜名 + 厨师 + 日期 + 票数
         function updatePodium() {
             const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes).slice(0, 3);
             const podiumSection = document.getElementById('podium-section'), podiumGrid = document.getElementById('podium-grid');
