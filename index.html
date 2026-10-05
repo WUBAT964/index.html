@@ -21,9 +21,12 @@
         .podium-badge.rank-2 { background: #C0C0C0; }
         .podium-badge.rank-3 { background: #CD7F32; color: white; }
         
-        .card-img-wrapper { position: relative; width: 100%; height: 200px; background: #eee; }
-        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
-        .no-img-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; color: #999; font-size: 1em; }
+        .card-img-wrapper { position: relative; width: 100%; height: 200px; background: #eee; overflow: hidden; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; position: absolute; top: 0; left: 0; }
+        .card-img-wrapper img.thumb { filter: blur(8px); transform: scale(1.05); transition: filter 0.3s; z-index: 1; }
+        .card-img-wrapper img.full { opacity: 0; transition: opacity 0.5s; z-index: 2; }
+        .card-img-wrapper img.full.loaded { opacity: 1; }
+        .no-img-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; color: #999; font-size: 1em; z-index: 3; }
 
         .podium-content { padding: 15px; text-align: center; }
         .podium-chef-name { font-size: 1.3em; font-weight: bold; color: #d9534f; margin-bottom: 5px; }
@@ -135,6 +138,7 @@
         let userVotes = {};
         let totalVoted = 0;
         let currentUser = JSON.parse(localStorage.getItem('chef_user')) || null;
+        let isVoting = false; // ⚠️ 防止连点的锁
 
         function getChefName(dish) {
             if (dish.chef1 && dish.chef2) return `${dish.chef1} & ${dish.chef2}`;
@@ -151,17 +155,23 @@
             return url;
         }
 
+        // 渐进式加载：先显示模糊缩略图，高清图加载完成后淡入替换
         function getImgHtml(dish, isPodium = false) {
             const heightStyle = isPodium ? 'height:160px;' : 'height:200px;';
-            const imgUrl = resolveImgUrl(dish.img);
-            if (!imgUrl) {
+            const fullUrl = resolveImgUrl(dish.img);
+            if (!fullUrl) {
                 return `<div class="card-img-wrapper" style="${heightStyle}">
                             <div class="no-img-placeholder" style="display:flex;">暂无图片</div>
                         </div>`;
             }
+            const thumbUrl = fullUrl.replace('/images/', '/images/thumbs/');
             return `<div class="card-img-wrapper" style="${heightStyle}">
-                        <img src="${encodeURI(imgUrl)}" alt="${dish.name}" loading="lazy" decoding="async" 
-                             onclick="showLightbox('${encodeURI(imgUrl)}')"
+                        <img class="thumb" src="${encodeURI(thumbUrl)}" alt="${dish.name}" 
+                             onerror="this.style.display='none';">
+                        <img class="full" src="${encodeURI(fullUrl)}" alt="${dish.name}" 
+                             loading="lazy" decoding="async"
+                             onclick="showLightbox('${encodeURI(fullUrl)}')"
+                             onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none';"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="no-img-placeholder" style="display:none;">暂无图片</div>
                     </div>`;
@@ -171,8 +181,8 @@
         let currentScale = 1, translateX = 0, translateY = 0;
         let startX = 0, startY = 0;
         let isDragging = false, isPinching = false, initialDistance = 0;
-        let lastTap = 0; // 用于检测双击
-        let isLightboxOpening = false; // 防止双击卡片时重复触发
+        let lastTap = 0;
+        let isLightboxOpening = false;
         
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
@@ -181,7 +191,6 @@
             if (isLightboxOpening) return;
             isLightboxOpening = true;
             setTimeout(() => { isLightboxOpening = false; }, 300);
-            
             if (!src || src.includes('data:image/svg')) return;
             lightboxImg.src = src;
             resetTransform();
@@ -195,7 +204,6 @@
         function resetTransform() { currentScale = 1; translateX = 0; translateY = 0; applyTransform(); }
         function applyTransform() { lightboxImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`; }
 
-        // 鼠标滚轮缩放
         lightbox.addEventListener('wheel', function(e) {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -206,7 +214,6 @@
             applyTransform();
         }, { passive: false });
 
-        // 鼠标拖动
         lightboxImg.addEventListener('mousedown', function(e) {
             if (currentScale <= 1) return;
             isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; e.preventDefault();
@@ -217,12 +224,9 @@
         });
         window.addEventListener('mouseup', function() { isDragging = false; });
 
-        // 触摸手势（双指缩放、单指拖拽）
         lightbox.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
-                isPinching = true;
-                isDragging = false;
-                lastTap = 0; // 双指接触，取消双击检测
+                isPinching = true; isDragging = false; lastTap = 0;
                 initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
             } else if (e.touches.length === 1 && currentScale > 1) {
                 isDragging = true;
@@ -251,24 +255,16 @@
             if (e.touches.length === 0) isDragging = false;
         });
 
-        // 👇 核心修复：双击图片，如果放大了就重置，如果没放大什么都不做（等着按X关闭）
         lightboxImg.addEventListener('click', function(e) {
             const now = Date.now();
             if (now - lastTap < 300) {
-                // 触发双击
                 e.preventDefault();
-                if (currentScale > 1) {
-                    resetTransform(); // 如果放大了，双击恢复原样
-                }
-                // 如果没放大，双击不做任何事，等待用户点击右上角的 X 关闭
+                if (currentScale > 1) { resetTransform(); }
             }
             lastTap = now;
         });
 
-        // 点击背景关闭（仅当点击的是背景时）
-        lightbox.addEventListener('click', function(e) { 
-            if (e.target === lightbox) hideLightbox(); 
-        });
+        lightbox.addEventListener('click', function(e) { if (e.target === lightbox) hideLightbox(); });
         // ========================================================
 
         async function init() {
@@ -457,8 +453,11 @@
 
         async function handleVote(dishId, action) {
             if (!currentUser) { showRegisterModal(); return; }
-            if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); return; }
-            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); return; }
+            if (isVoting) return; // ⚠️ 防止连点，保证一次只发一个请求
+            isVoting = true;
+
+            if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); isVoting = false; return; }
+            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); isVoting = false; return; }
 
             if (action === 'add') {
                 userVotes[dishId] = (userVotes[dishId] || 0) + 1;
@@ -488,6 +487,8 @@
                 console.error('投票失败，正在回滚:', error);
                 alert('投票失败：' + error.message);
                 fetchUserVotes().then(() => updateUIAfterVote());
+            } finally {
+                isVoting = false; // ⚠️ 无论如何，最后释放锁
             }
         }
 
