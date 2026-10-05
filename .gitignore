@@ -1,2 +1,6 @@
 tencent_auth.json
 venv/
+dishes.json
+images/
+*.log
+*.py
