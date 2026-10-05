@@ -167,14 +167,21 @@
                     </div>`;
         }
 
-        // ==================== 灯箱与缩放逻辑 ====================
+        // ==================== 灯箱与缩放逻辑 (已修复双击缩小) ====================
         let currentScale = 1, translateX = 0, translateY = 0;
         let startX = 0, startY = 0;
         let isDragging = false, isPinching = false, initialDistance = 0;
+        let lastTap = 0; // 用于检测双击
+        let isLightboxOpening = false; // 防止双击卡片时重复触发
+        
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
 
         window.showLightbox = function(src) {
+            if (isLightboxOpening) return;
+            isLightboxOpening = true;
+            setTimeout(() => { isLightboxOpening = false; }, 300);
+            
             if (!src || src.includes('data:image/svg')) return;
             lightboxImg.src = src;
             resetTransform();
@@ -188,6 +195,7 @@
         function resetTransform() { currentScale = 1; translateX = 0; translateY = 0; applyTransform(); }
         function applyTransform() { lightboxImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`; }
 
+        // 鼠标滚轮缩放
         lightbox.addEventListener('wheel', function(e) {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -198,6 +206,7 @@
             applyTransform();
         }, { passive: false });
 
+        // 鼠标拖动
         lightboxImg.addEventListener('mousedown', function(e) {
             if (currentScale <= 1) return;
             isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; e.preventDefault();
@@ -208,12 +217,16 @@
         });
         window.addEventListener('mouseup', function() { isDragging = false; });
 
+        // 触摸手势（双指缩放、单指拖拽）
         lightbox.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
                 isPinching = true;
+                isDragging = false;
+                lastTap = 0; // 双指接触，取消双击检测
                 initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
             } else if (e.touches.length === 1 && currentScale > 1) {
-                isDragging = true; startX = e.touches[0].clientX - translateX; startY = e.touches[0].clientY - translateY;
+                isDragging = true;
+                startX = e.touches[0].clientX - translateX; startY = e.touches[0].clientY - translateY;
             }
             e.preventDefault();
         }, { passive: false });
@@ -237,7 +250,26 @@
             if (e.touches.length < 2) isPinching = false;
             if (e.touches.length === 0) isDragging = false;
         });
-        lightbox.addEventListener('click', function(e) { if (e.target === lightbox) hideLightbox(); });
+
+        // 👇 核心修复：点击灯箱内图片，双击缩小/关闭逻辑
+        lightboxImg.addEventListener('click', function(e) {
+            const now = Date.now();
+            if (now - lastTap < 300) {
+                // 触发双击
+                e.preventDefault();
+                if (currentScale > 1) {
+                    resetTransform(); // 如果放大了，双击恢复原样
+                } else {
+                    hideLightbox();   // 如果没放大，双击关闭灯箱
+                }
+            }
+            lastTap = now;
+        });
+
+        // 点击背景关闭（仅当点击的是背景时）
+        lightbox.addEventListener('click', function(e) { 
+            if (e.target === lightbox) hideLightbox(); 
+        });
         // ========================================================
 
         async function init() {
