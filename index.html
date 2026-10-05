@@ -35,26 +35,22 @@
         .card-img-wrapper img.full.loaded { opacity: 1; }
         .no-img-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; color: #999; font-size: 1em; z-index: 3; }
 
-        /* 下载原图按钮 */
-        .download-btn {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            z-index: 5;
-            background: rgba(0,0,0,0.7);
+        .load-all-btn {
+            display: block;
+            margin: 0 auto 15px;
+            padding: 10px 24px;
+            background: #28a745;
             color: #fff;
             border: none;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75em;
+            border-radius: 24px;
+            font-size: 0.95em;
+            font-weight: bold;
             cursor: pointer;
-            -webkit-user-select: none;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+            transition: all 0.2s;
         }
-        .download-btn:active { background: rgba(0,0,0,0.9); }
+        .load-all-btn:active { transform: scale(0.97); }
+        .load-all-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
 
         .vote-section-title { text-align: center; color: #333; font-size: 1.2em; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #ddd; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
@@ -86,10 +82,41 @@
         /* 独立大图查看界面 */
         .image-viewer { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
         .image-viewer.open { display: block; }
-        .viewer-topbar { position: absolute; top: 0; left: 0; right: 0; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: linear-gradient(180deg, rgba(0,0,0,0.7), transparent); z-index: 10; color: #fff; font-size: 1em; }
-        .viewer-close-btn { font-size: 1.6em; font-weight: bold; cursor: pointer; padding: 8px 14px; line-height: 1; border-radius: 50%; -webkit-user-select: none; user-select: none; }
+        .viewer-topbar {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.7), transparent);
+            z-index: 10;
+            color: #fff;
+            font-size: 1em;
+        }
+        /* X 按钮在右上角 */
+        .viewer-close-btn {
+            font-size: 1.6em;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 8px 14px;
+            line-height: 1;
+            border-radius: 50%;
+            -webkit-user-select: none;
+            user-select: none;
+            order: 3; /* ⚠️ 确保 X 在最右边 */
+        }
         .viewer-close-btn:active { background: rgba(255,255,255,0.15); }
-        .viewer-title { flex: 1; text-align: center; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+        .viewer-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.95em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 10px;
+        }
         .viewer-stage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .viewer-stage img { max-width: 95vw; max-height: 90vh; object-fit: contain; transition: transform 0.08s ease-out; transform-origin: center center; will-change: transform; pointer-events: none; -webkit-user-drag: none; }
 
@@ -102,10 +129,10 @@
             .podium-chef-name { font-size: 0.65em !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .podium-date { font-size: 0.5em !important; }
             .podium-votes { font-size: 0.65em !important; }
+            .load-all-btn { font-size: 0.8em; padding: 8px 18px; margin-bottom: 10px; }
             .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
             .card .card-img-wrapper { height: 70px !important; }
             .no-img-placeholder { font-size: 0.6em; }
-            .download-btn { font-size: 0.45em !important; padding: 3px 6px; bottom: 3px; right: 3px; }
             .card-content { padding: 4px 2px !important; }
             .card-title { font-size: 0.7em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .card-chef { font-size: 0.55em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -128,6 +155,7 @@
             <div class="podium-grid" id="podium-grid"></div>
         </div>
         <div class="vote-section-title">🗳️ 全部菜品投票（每人限3票）</div>
+        <button class="load-all-btn" id="load-all-btn" onclick="loadAllHD()">📥 一键加载全部高清图</button>
         <div class="grid" id="dish-grid"></div>
     </div>
 
@@ -142,11 +170,12 @@
         </div>
     </div>
 
+    <!-- ⚠️ X 按钮已移到右上角 -->
     <div id="image-viewer" class="image-viewer">
         <div class="viewer-topbar">
-            <div class="viewer-close-btn" id="viewer-close" onclick="closeViewer()">✕</div>
-            <div class="viewer-title" id="viewer-title"></div>
-            <div style="width: 42px;"></div>
+            <div style="width: 42px; order: 1;"></div>
+            <div class="viewer-title" id="viewer-title" style="order: 2;"></div>
+            <div class="viewer-close-btn" id="viewer-close" onclick="closeViewer()" style="order: 3;">✕</div>
         </div>
         <div class="viewer-stage" id="viewer-stage">
             <img id="viewer-img" src="" alt="大图" draggable="false">
@@ -186,9 +215,6 @@
             return url;
         }
 
-        // ============ 图片 HTML 生成 ============
-        // 领奖台：自动加载高清（只有3个）
-        // 列表：默认显示模糊缩略图 + "下载原图"按钮
         function getImgHtml(dish, isPodium = false) {
             const heightStyle = isPodium ? 'height:160px;' : 'height:200px;';
             const fullUrl = resolveImgUrl(dish.img);
@@ -200,7 +226,6 @@
             const clickHandler = `onclick="openViewer('${safeUrl}', '${safeName}')"`;
             
             if (isPodium) {
-                // 领奖台：自动加载高清
                 return `<div class="card-img-wrapper" style="${heightStyle}">
                             <img class="thumb" src="${encodeURI(thumbUrl)}" onerror="this.style.display='none';">
                             <img class="full" src="${safeUrl}" loading="lazy" decoding="async" ${clickHandler}
@@ -209,30 +234,49 @@
                             <div class="no-img-placeholder" style="display:none;">暂无图片</div>
                         </div>`;
             } else {
-                // 列表：默认显示模糊缩略图 + 下载原图按钮
                 return `<div class="card-img-wrapper" style="${heightStyle}">
                             <img class="thumb" src="${encodeURI(thumbUrl)}" ${clickHandler} onerror="this.style.display='none';">
                             <img class="full" src="" data-src="${safeUrl}" ${clickHandler}
                                  onload="this.classList.add('loaded'); if(this.previousElementSibling) this.previousElementSibling.style.display='none';"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <button class="download-btn" onclick="downloadHD(event)">📥 下载原图</button>
                             <div class="no-img-placeholder" style="display:none;">暂无图片</div>
                         </div>`;
             }
         }
 
-        // 下载原图：把模糊缩略图替换成高清原图，按钮消失
-        window.downloadHD = function(event) {
-            if (event) event.stopPropagation();
-            const btn = event.target;
-            const wrapper = btn.parentElement;
-            const fullImg = wrapper.querySelector('img.full');
-            const thumbImg = wrapper.querySelector('img.thumb');
-            if (fullImg && fullImg.dataset.src) {
-                fullImg.src = fullImg.dataset.src;
+        window.loadAllHD = function() {
+            const btn = document.getElementById('load-all-btn');
+            btn.textContent = '⏳ 正在加载高清图...';
+            btn.disabled = true;
+            
+            const allFullImgs = document.querySelectorAll('#dish-grid img.full');
+            let loadedCount = 0;
+            const total = allFullImgs.length;
+            
+            if (total === 0) {
+                btn.textContent = '✅ 没有需要加载的图片';
+                btn.disabled = false;
+                return;
             }
-            if (thumbImg) thumbImg.style.display = 'none';
-            btn.style.display = 'none';
+            
+            allFullImgs.forEach(img => {
+                if (img.dataset.src && !img.src) {
+                    img.src = img.dataset.src;
+                    img.addEventListener('load', onOneLoaded);
+                    img.addEventListener('error', onOneLoaded);
+                } else {
+                    onOneLoaded();
+                }
+            });
+            
+            function onOneLoaded() {
+                loadedCount++;
+                if (loadedCount >= total) {
+                    btn.textContent = '✅ 全部高清图已加载';
+                    btn.style.background = '#6c757d';
+                    btn.style.boxShadow = 'none';
+                }
+            }
         };
 
         // ============ 大图查看界面 ============
@@ -438,6 +482,11 @@
                 card.innerHTML = `${getImgHtml(dish, false)}<div class="card-content"><div class="card-title">${dish.name || '未命名'}</div><div class="card-chef">👨‍🍳 ${getChefName(dish)}</div><div class="card-date">📅 ${dishDate}</div><div class="my-vote" id="my-vote-${dishId}">我的投票：${myVoteCount} 票</div><div class="vote-count" id="count-${dishId}">总票数：<strong>${voteCount}</strong></div><div class="btn-group"><button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button><button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button></div></div>`;
                 grid.appendChild(card);
             });
+            const btn = document.getElementById('load-all-btn');
+            btn.textContent = '📥 一键加载全部高清图';
+            btn.disabled = false;
+            btn.style.background = '#28a745';
+            btn.style.boxShadow = '0 4px 8px rgba(40,167,69,0.3)';
         }
 
         function updateUIAfterVote() {
@@ -453,19 +502,16 @@
             updatePodium();
         }
 
-        // ⚠️ 已取消防连点锁，按钮点击立即响应
         async function handleVote(dishId, action) {
             if (!currentUser) { showRegisterModal(); return; }
             
             if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); return; }
             if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); return; }
             
-            // 乐观更新（立即显示）
             if (action === 'add') { userVotes[dishId] = (userVotes[dishId] || 0) + 1; allVotes[dishId] = (allVotes[dishId] || 0) + 1; totalVoted++; }
             else { userVotes[dishId] = (userVotes[dishId] || 0) - 1; if (userVotes[dishId] <= 0) delete userVotes[dishId]; allVotes[dishId] = Math.max(0, (allVotes[dishId] || 0) - 1); totalVoted--; }
             updateUIAfterVote();
 
-            // 后台请求（不阻塞界面）
             try {
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('网络超时，请刷新页面重试')), 8000));
                 const fetchPromise = fetch(`${API_BASE_URL}/api/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dish_id: dishId, action: action, phone: currentUser.phone }) });
