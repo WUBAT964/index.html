@@ -22,8 +22,10 @@
         .podium-badge.rank-1 { background: #FFD700; }
         .podium-badge.rank-2 { background: #C0C0C0; }
         .podium-badge.rank-3 { background: #CD7F32; color: #fff; }
-        .podium-content { padding: 12px; text-align: center; }
-        .podium-chef-name { font-size: 1.2em; font-weight: bold; color: #d9534f; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .podium-content { padding: 10px; text-align: center; }
+        .podium-dish-name { font-size: 1em; font-weight: bold; color: #333; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .podium-chef-name { font-size: 1em; font-weight: bold; color: #d9534f; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .podium-date { font-size: 0.75em; color: #888; margin-bottom: 3px; }
         .podium-votes { font-size: 1.1em; color: #ff9800; font-weight: bold; }
 
         .card-img-wrapper { position: relative; width: 100%; height: 200px; background: #eee; overflow: hidden; }
@@ -70,8 +72,10 @@
             h1 { font-size: 1.3em; }
             .podium-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
             .podium-card .card-img-wrapper { height: 70px !important; }
-            .podium-chef-name { font-size: 0.8em !important; }
-            .podium-votes { font-size: 0.7em !important; }
+            .podium-dish-name { font-size: 0.7em !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .podium-chef-name { font-size: 0.65em !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .podium-date { font-size: 0.5em !important; }
+            .podium-votes { font-size: 0.65em !important; }
             .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
             .card .card-img-wrapper { height: 70px !important; }
             .no-img-placeholder { font-size: 0.6em; }
@@ -103,9 +107,9 @@
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>身份验证</h2>
-            <p id="modal-tip">请输入手机号和姓名，未注册的手机号将自动注册，已注册则直接登录。</p>
+            <p id="modal-tip">请输入手机号和姓名，未注册的手机号将自动引导注册。</p>
             <input type="tel" id="reg-phone" placeholder="请输入手机号" onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
-            <input type="text" id="reg-name" placeholder="请输入姓名（必须是厨师列表中的成员）" onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
+            <input type="text" id="reg-name" placeholder="请输入姓名（首次注册需填写）" onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
             <div id="reg-error" class="error-msg"></div>
             <button onclick="submitRegister()">登录 / 注册</button>
         </div>
@@ -127,6 +131,15 @@
             if (dish.chef1) return dish.chef1;
             if (dish.chef2) return dish.chef2;
             return '未知厨师';
+        }
+
+        function getDishDate(dish) {
+            let dishDate = dish.date || '未知日期';
+            if (dish.date && dish.date.includes('-')) {
+                const parts = dish.date.split('-');
+                if (parts.length >= 3) dishDate = `${parts[1]}月${parts[2]}日`;
+            }
+            return dishDate;
         }
 
         function resolveImgUrl(imgField) {
@@ -166,7 +179,7 @@
         };
 
         window.hideLightbox = function(e) {
-            if (e) { e.stopPropagation(); } // 阻止事件冒泡
+            if (e) { e.stopPropagation(); }
             lightbox.style.display = 'none';
             lightboxImg.src = ''; resetTransform();
         };
@@ -195,7 +208,6 @@
         window.addEventListener('mouseup', function() { isDragging = false; });
 
         lightbox.addEventListener('touchstart', function(e) {
-            // ⚠️ 放行 X 按钮
             if (e.target.classList.contains('lightbox-close')) return;
             
             if (e.touches.length === 2) {
@@ -263,7 +275,6 @@
             const phone = document.getElementById('reg-phone').value.trim(), name = document.getElementById('reg-name').value.trim();
             const errorEl = document.getElementById('reg-error'); errorEl.style.display = 'none';
             if (!phone) { errorEl.textContent = "手机号不能为空"; errorEl.style.display = 'block'; return; }
-            if (!name) { errorEl.textContent = "姓名不能为空"; errorEl.style.display = 'block'; return; }
             try {
                 const res = await fetch(`${API_BASE_URL}/api/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, phone }) });
                 const data = await res.json();
@@ -290,6 +301,7 @@
             } catch (e) { console.error('自动刷新失败:', e); }
         }
 
+        // ⚠️ 修改点：领奖台现在显示菜名 + 厨师 + 日期 + 票数
         function updatePodium() {
             const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes).slice(0, 3);
             const podiumSection = document.getElementById('podium-section'), podiumGrid = document.getElementById('podium-grid');
@@ -299,9 +311,20 @@
             if (podiumGrid.dataset.signature !== newSignature) {
                 podiumGrid.dataset.signature = newSignature; podiumGrid.innerHTML = '';
                 sortedByVotes.forEach((dish, index) => {
-                    const rank = index + 1, badgeText = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
-                    const card = document.createElement('div'); card.className = `podium-card rank-${rank}`;
-                    card.innerHTML = `<div class="podium-badge rank-${rank}">${badgeText}</div>${getImgHtml(dish, true)}<div class="podium-content"><div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div><div class="podium-votes">${dish.votes} 票</div></div>`;
+                    const rank = index + 1;
+                    const badgeText = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
+                    const dishDate = getDishDate(dish);
+                    const card = document.createElement('div');
+                    card.className = `podium-card rank-${rank}`;
+                    card.innerHTML = `
+                        <div class="podium-badge rank-${rank}">${badgeText}</div>
+                        ${getImgHtml(dish, true)}
+                        <div class="podium-content">
+                            <div class="podium-dish-name">🍽️ ${dish.name || '未命名'}</div>
+                            <div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div>
+                            <div class="podium-date">📅 ${dishDate}</div>
+                            <div class="podium-votes">${dish.votes} 票</div>
+                        </div>`;
                     podiumGrid.appendChild(card);
                 });
             } else {
@@ -314,7 +337,7 @@
             const grid = document.getElementById('dish-grid'); grid.innerHTML = ''; const isMaxed = totalVoted >= 3;
             dishesData.forEach(dish => {
                 const dishId = String(dish.id), voteCount = allVotes[dishId] || 0, myVoteCount = userVotes[dishId] || 0;
-                let dishDate = dish.date || '未知日期'; if (dish.date && dish.date.includes('-')) { const parts = dish.date.split('-'); if (parts.length >= 3) dishDate = `${parts[1]}月${parts[2]}日`; }
+                const dishDate = getDishDate(dish);
                 const card = document.createElement('div'); card.className = 'card';
                 card.innerHTML = `${getImgHtml(dish, false)}<div class="card-content"><div class="card-title">${dish.name || '未命名'}</div><div class="card-chef">👨‍🍳 ${getChefName(dish)}</div><div class="card-date">📅 ${dishDate}</div><div class="my-vote" id="my-vote-${dishId}">我的投票：${myVoteCount} 票</div><div class="vote-count" id="count-${dishId}">总票数：<strong>${voteCount}</strong></div><div class="btn-group"><button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button><button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button></div></div>`;
                 grid.appendChild(card);
@@ -337,17 +360,28 @@
         async function handleVote(dishId, action) {
             if (!currentUser) { showRegisterModal(); return; }
             if (isVoting) return; isVoting = true;
+            
             if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); isVoting = false; return; }
             if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); isVoting = false; return; }
+            
             if (action === 'add') { userVotes[dishId] = (userVotes[dishId] || 0) + 1; allVotes[dishId] = (allVotes[dishId] || 0) + 1; totalVoted++; }
             else { userVotes[dishId] = (userVotes[dishId] || 0) - 1; if (userVotes[dishId] <= 0) delete userVotes[dishId]; allVotes[dishId] = Math.max(0, (allVotes[dishId] || 0) - 1); totalVoted--; }
             updateUIAfterVote();
+
             try {
-                const response = await fetch(`${API_BASE_URL}/api/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dish_id: dishId, action: action, phone: currentUser.phone }) });
-                const result = await response.json(); if (!result.success) throw new Error(result.error);
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('网络超时，请刷新页面重试')), 8000));
+                const fetchPromise = fetch(`${API_BASE_URL}/api/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dish_id: dishId, action: action, phone: currentUser.phone }) });
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+                const result = await response.json(); 
+                if (!result.success) throw new Error(result.error);
                 allVotes[dishId] = result.count; userVotes = result.myVotes; totalVoted = result.totalVoted; updateUIAfterVote();
-            } catch (error) { console.error('投票失败，回滚:', error); alert('投票失败：' + error.message); fetchUserVotes().then(() => updateUIAfterVote()); }
-            finally { isVoting = false; }
+            } catch (error) { 
+                console.error('投票失败，回滚:', error); 
+                alert('投票失败：' + error.message); 
+                fetchUserVotes().then(() => updateUIAfterVote()); 
+            } finally { 
+                isVoting = false;
+            }
         }
 
         window.onload = init;
