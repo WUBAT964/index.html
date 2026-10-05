@@ -35,6 +35,27 @@
         .card-img-wrapper img.full.loaded { opacity: 1; }
         .no-img-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; color: #999; font-size: 1em; z-index: 3; }
 
+        /* 下载原图按钮 */
+        .download-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            z-index: 5;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .download-btn:active { background: rgba(0,0,0,0.9); }
+
         .vote-section-title { text-align: center; color: #333; font-size: 1.2em; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #ddd; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: transform 0.2s; }
@@ -62,10 +83,15 @@
         .modal-box button:hover { background: #0056b3; }
         .modal-box .error-msg { color: red; font-size: 0.9em; margin-bottom: 10px; display: none; }
 
-        .lightbox { display: none; position: fixed; z-index: 20000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); justify-content: center; align-items: center; overflow: hidden; touch-action: none; user-select: none; }
-        .lightbox img { max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: transform 0.1s ease-out; cursor: grab; transform-origin: center center; will-change: transform; }
-        .lightbox img:active { cursor: grabbing; }
-        .lightbox-close { position: absolute; top: 15px; right: 20px; color: white; font-size: 42px; font-weight: bold; cursor: pointer; z-index: 20001; line-height: 1; padding: 10px; }
+        /* 独立大图查看界面 */
+        .image-viewer { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+        .image-viewer.open { display: block; }
+        .viewer-topbar { position: absolute; top: 0; left: 0; right: 0; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: linear-gradient(180deg, rgba(0,0,0,0.7), transparent); z-index: 10; color: #fff; font-size: 1em; }
+        .viewer-close-btn { font-size: 1.6em; font-weight: bold; cursor: pointer; padding: 8px 14px; line-height: 1; border-radius: 50%; -webkit-user-select: none; user-select: none; }
+        .viewer-close-btn:active { background: rgba(255,255,255,0.15); }
+        .viewer-title { flex: 1; text-align: center; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+        .viewer-stage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .viewer-stage img { max-width: 95vw; max-height: 90vh; object-fit: contain; transition: transform 0.08s ease-out; transform-origin: center center; will-change: transform; pointer-events: none; -webkit-user-drag: none; }
 
         @media (max-width: 768px) {
             body { padding: 8px; }
@@ -79,6 +105,7 @@
             .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
             .card .card-img-wrapper { height: 70px !important; }
             .no-img-placeholder { font-size: 0.6em; }
+            .download-btn { font-size: 0.45em !important; padding: 3px 6px; bottom: 3px; right: 3px; }
             .card-content { padding: 4px 2px !important; }
             .card-title { font-size: 0.7em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .card-chef { font-size: 0.55em !important; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -115,16 +142,25 @@
         </div>
     </div>
 
-    <div id="lightbox" class="lightbox">
-        <span class="lightbox-close" onclick="hideLightbox(event)" ontouchstart="hideLightbox(event)">&times;</span>
-        <img id="lightbox-img" src="" alt="大图">
+    <div id="image-viewer" class="image-viewer">
+        <div class="viewer-topbar">
+            <div class="viewer-close-btn" id="viewer-close" onclick="closeViewer()">✕</div>
+            <div class="viewer-title" id="viewer-title"></div>
+            <div style="width: 42px;"></div>
+        </div>
+        <div class="viewer-stage" id="viewer-stage">
+            <img id="viewer-img" src="" alt="大图" draggable="false">
+        </div>
     </div>
 
     <script>
         const API_BASE_URL = 'https://hurricane-lightbox-funky-kitchen.trycloudflare.com'; 
         let allVotes = {}, dishesData = [], userVotes = {}, totalVoted = 0;
         let currentUser = JSON.parse(localStorage.getItem('chef_user')) || null;
-        let isVoting = false;
+
+        function escapeJsString(s) {
+            return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, ' ');
+        }
 
         function getChefName(dish) {
             if (dish.chef1 && dish.chef2) return `${dish.chef1} & ${dish.chef2}`;
@@ -150,57 +186,104 @@
             return url;
         }
 
+        // ============ 图片 HTML 生成 ============
+        // 领奖台：自动加载高清（只有3个）
+        // 列表：默认显示模糊缩略图 + "下载原图"按钮
         function getImgHtml(dish, isPodium = false) {
             const heightStyle = isPodium ? 'height:160px;' : 'height:200px;';
             const fullUrl = resolveImgUrl(dish.img);
             if (!fullUrl) return `<div class="card-img-wrapper" style="${heightStyle}"><div class="no-img-placeholder" style="display:flex;">暂无图片</div></div>`;
+            
             const thumbUrl = fullUrl.replace('/images/', '/images/thumbs/');
-            return `<div class="card-img-wrapper" style="${heightStyle}">
-                        <img class="thumb" src="${encodeURI(thumbUrl)}" alt="${dish.name}" onerror="this.style.display='none';">
-                        <img class="full" src="${encodeURI(fullUrl)}" alt="${dish.name}" loading="lazy" decoding="async"
-                             onclick="showLightbox('${encodeURI(fullUrl)}')"
-                             onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none';"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="no-img-placeholder" style="display:none;">暂无图片</div>
-                    </div>`;
+            const safeUrl = encodeURI(fullUrl);
+            const safeName = escapeJsString(dish.name || '');
+            const clickHandler = `onclick="openViewer('${safeUrl}', '${safeName}')"`;
+            
+            if (isPodium) {
+                // 领奖台：自动加载高清
+                return `<div class="card-img-wrapper" style="${heightStyle}">
+                            <img class="thumb" src="${encodeURI(thumbUrl)}" onerror="this.style.display='none';">
+                            <img class="full" src="${safeUrl}" loading="lazy" decoding="async" ${clickHandler}
+                                 onload="this.classList.add('loaded');"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="no-img-placeholder" style="display:none;">暂无图片</div>
+                        </div>`;
+            } else {
+                // 列表：默认显示模糊缩略图 + 下载原图按钮
+                return `<div class="card-img-wrapper" style="${heightStyle}">
+                            <img class="thumb" src="${encodeURI(thumbUrl)}" ${clickHandler} onerror="this.style.display='none';">
+                            <img class="full" src="" data-src="${safeUrl}" ${clickHandler}
+                                 onload="this.classList.add('loaded'); if(this.previousElementSibling) this.previousElementSibling.style.display='none';"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <button class="download-btn" onclick="downloadHD(event)">📥 下载原图</button>
+                            <div class="no-img-placeholder" style="display:none;">暂无图片</div>
+                        </div>`;
+            }
         }
 
-        let currentScale = 1, translateX = 0, translateY = 0, startX = 0, startY = 0;
-        let isDragging = false, isPinching = false, initialDistance = 0, lastTap = 0, isLightboxOpening = false;
-        let justClosedLightbox = false; // ⚠️ 防止幽灵点击：灯箱刚关闭后短时间内忽略图片点击
-        const lightbox = document.getElementById('lightbox');
-        const lightboxImg = document.getElementById('lightbox-img');
-
-        window.showLightbox = function(src) {
-            // ⚠️ 如果刚刚关闭过灯箱，忽略这次点击，防止误触
-            if (justClosedLightbox) return;
-            if (isLightboxOpening) return;
-            isLightboxOpening = true;
-            setTimeout(() => { isLightboxOpening = false; }, 300);
-            if (!src || src.includes('data:image/svg')) return;
-            lightboxImg.src = src; resetTransform(); lightbox.style.display = 'flex';
-        };
-
-        window.hideLightbox = function(e) {
-            if (e) {
-                e.stopPropagation();
-                // ⚠️ 核心修复：触摸事件直接 preventDefault，阻止后续 click 生成
-                if (e.type === 'touchstart') {
-                    e.preventDefault();
-                }
+        // 下载原图：把模糊缩略图替换成高清原图，按钮消失
+        window.downloadHD = function(event) {
+            if (event) event.stopPropagation();
+            const btn = event.target;
+            const wrapper = btn.parentElement;
+            const fullImg = wrapper.querySelector('img.full');
+            const thumbImg = wrapper.querySelector('img.thumb');
+            if (fullImg && fullImg.dataset.src) {
+                fullImg.src = fullImg.dataset.src;
             }
-            lightbox.style.display = 'none';
-            lightboxImg.src = '';
-            resetTransform();
-            // ⚠️ 设置标志，500ms 内忽略图片上的 click
-            justClosedLightbox = true;
-            setTimeout(() => { justClosedLightbox = false; }, 500);
+            if (thumbImg) thumbImg.style.display = 'none';
+            btn.style.display = 'none';
         };
+
+        // ============ 大图查看界面 ============
+        let viewerOpened = false;
+        let currentScale = 1, translateX = 0, translateY = 0;
+        let startX = 0, startY = 0;
+        let isDragging = false, isPinching = false, initialDistance = 0;
+        let lastTap = 0;
+
+        const viewer = document.getElementById('image-viewer');
+        const viewerImg = document.getElementById('viewer-img');
+        const viewerStage = document.getElementById('viewer-stage');
+        const viewerTitle = document.getElementById('viewer-title');
+
+        window.openViewer = function(src, title) {
+            if (viewerOpened) return;
+            viewerOpened = true;
+            viewerImg.src = src;
+            viewerTitle.textContent = title || '';
+            resetTransform();
+            viewer.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            history.pushState({ viewer: true }, '');
+        };
+
+        window.closeViewer = function() {
+            if (!viewerOpened) return;
+            viewerOpened = false;
+            viewer.classList.remove('open');
+            viewerImg.src = '';
+            document.body.style.overflow = '';
+            resetTransform();
+            if (history.state && history.state.viewer) {
+                history.back();
+            }
+        };
+
+        window.addEventListener('popstate', function(e) {
+            if (viewerOpened) {
+                viewerOpened = false;
+                viewer.classList.remove('open');
+                viewerImg.src = '';
+                document.body.style.overflow = '';
+                resetTransform();
+            }
+        });
 
         function resetTransform() { currentScale = 1; translateX = 0; translateY = 0; applyTransform(); }
-        function applyTransform() { lightboxImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`; }
+        function applyTransform() { viewerImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`; }
 
-        lightbox.addEventListener('wheel', function(e) {
+        viewerStage.addEventListener('wheel', function(e) {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
             currentScale *= delta;
@@ -210,7 +293,7 @@
             applyTransform();
         }, { passive: false });
 
-        lightboxImg.addEventListener('mousedown', function(e) {
+        viewerStage.addEventListener('mousedown', function(e) {
             if (currentScale <= 1) return;
             isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; e.preventDefault();
         });
@@ -220,9 +303,7 @@
         });
         window.addEventListener('mouseup', function() { isDragging = false; });
 
-        lightbox.addEventListener('touchstart', function(e) {
-            if (e.target.classList.contains('lightbox-close')) return;
-            
+        viewerStage.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
                 isPinching = true; isDragging = false; lastTap = 0;
                 initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -232,7 +313,7 @@
             e.preventDefault();
         }, { passive: false });
 
-        lightbox.addEventListener('touchmove', function(e) {
+        viewerStage.addEventListener('touchmove', function(e) {
             if (isPinching && e.touches.length === 2) {
                 const currentDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
                 const scaleDelta = currentDistance / initialDistance;
@@ -247,18 +328,21 @@
             e.preventDefault();
         }, { passive: false });
 
-        lightbox.addEventListener('touchend', function(e) {
+        viewerStage.addEventListener('touchend', function(e) {
             if (e.touches.length < 2) isPinching = false;
             if (e.touches.length === 0) isDragging = false;
         });
 
-        lightboxImg.addEventListener('click', function(e) {
+        viewerStage.addEventListener('click', function(e) {
             const now = Date.now();
-            if (now - lastTap < 300) { e.preventDefault(); if (currentScale > 1) resetTransform(); }
+            if (now - lastTap < 300) {
+                e.preventDefault();
+                if (currentScale > 1) resetTransform();
+            }
             lastTap = now;
         });
-        lightbox.addEventListener('click', function(e) { if (e.target === lightbox) hideLightbox(e); });
 
+        // ============ 页面逻辑 ============
         async function init() {
             try {
                 const [dishesRes, votesRes] = await Promise.all([fetch(`${API_BASE_URL}/api/dishes`), fetch(`${API_BASE_URL}/api/votes`)]);
@@ -302,7 +386,7 @@
         }
 
         async function autoRefreshVotes() {
-            if (document.hidden || isVoting) return;
+            if (document.hidden || viewerOpened) return;
             try {
                 const votesRes = await fetch(`${API_BASE_URL}/api/votes`); const newVotes = await votesRes.json();
                 let changed = false;
@@ -369,17 +453,19 @@
             updatePodium();
         }
 
+        // ⚠️ 已取消防连点锁，按钮点击立即响应
         async function handleVote(dishId, action) {
             if (!currentUser) { showRegisterModal(); return; }
-            if (isVoting) return; isVoting = true;
             
-            if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); isVoting = false; return; }
-            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); isVoting = false; return; }
+            if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); return; }
+            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); return; }
             
+            // 乐观更新（立即显示）
             if (action === 'add') { userVotes[dishId] = (userVotes[dishId] || 0) + 1; allVotes[dishId] = (allVotes[dishId] || 0) + 1; totalVoted++; }
             else { userVotes[dishId] = (userVotes[dishId] || 0) - 1; if (userVotes[dishId] <= 0) delete userVotes[dishId]; allVotes[dishId] = Math.max(0, (allVotes[dishId] || 0) - 1); totalVoted--; }
             updateUIAfterVote();
 
+            // 后台请求（不阻塞界面）
             try {
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('网络超时，请刷新页面重试')), 8000));
                 const fetchPromise = fetch(`${API_BASE_URL}/api/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dish_id: dishId, action: action, phone: currentUser.phone }) });
@@ -391,8 +477,6 @@
                 console.error('投票失败，回滚:', error); 
                 alert('投票失败：' + error.message); 
                 fetchUserVotes().then(() => updateUIAfterVote()); 
-            } finally { 
-                isVoting = false;
             }
         }
 
