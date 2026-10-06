@@ -174,6 +174,7 @@
             return url;
         }
 
+        // ============ 图片 HTML 生成（缩略图失败自动降级到高清图） ============
         function getImgHtml(dish, isPodium = false) {
             const heightStyle = isPodium ? 'height:160px;' : 'height:200px;';
             const fullUrl = resolveImgUrl(dish.img);
@@ -193,8 +194,10 @@
                             <div class="no-img-placeholder" style="display:none;">暂无图片</div>
                         </div>`;
             } else {
+                // ⚠️ 列表：缩略图加载失败时，自动把 src 换成高清图，并移除模糊效果
                 return `<div class="card-img-wrapper" style="${heightStyle}">
-                            <img class="thumb" src="${encodeURI(thumbUrl)}" ${clickHandler} onerror="this.style.display='none';">
+                            <img class="thumb" src="${encodeURI(thumbUrl)}" ${clickHandler} 
+                                 onerror="this.onerror=null; this.src='${safeUrl}'; this.classList.remove('thumb'); this.classList.add('full','loaded'); if(this.nextElementSibling) this.nextElementSibling.style.display='none';">
                             <img class="full" src="" data-src="${safeUrl}" ${clickHandler}
                                  onload="this.classList.add('loaded'); if(this.previousElementSibling) this.previousElementSibling.style.display='none';"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -401,7 +404,6 @@
             } catch (e) { console.error('自动刷新失败:', e); }
         }
 
-        // ⚠️ 领奖台：显示 菜名 + 厨师 + 日期 + 票数
         function updatePodium() {
             const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes).slice(0, 3);
             const podiumSection = document.getElementById('podium-section'), podiumGrid = document.getElementById('podium-grid');
