@@ -2,46 +2,59 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>月度好菜投票系统</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; color: #333; margin-bottom: 10px; }
-        .podium-section { background: white; border-radius: 16px; padding: 15px; margin-bottom: 30px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; margin-bottom: 10px; font-size: 1.8em; }
+
+        .podium-section { background: white; border-radius: 16px; padding: 15px; margin-bottom: 30px; box-shadow: 0 8px 16px rgba(0,0,0,0.08); }
         .podium-title { text-align: center; color: #ff9800; font-size: 1.3em; font-weight: bold; margin-bottom: 15px; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .podium-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.15); position: relative; border: 3px solid transparent; animation: fadeInUp 0.6s ease-out; }
-        .podium-card.rank-1 { border-color: #FFD700; }
+        .podium-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.12); position: relative; border: 3px solid transparent; animation: fadeInUp 0.6s ease-out; }
+        .podium-card.rank-1 { border-color: #FFD700; transform: scale(1.03); z-index: 2; }
         .podium-card.rank-2 { border-color: #C0C0C0; }
         .podium-card.rank-3 { border-color: #CD7F32; }
         .podium-badge { position: absolute; top: 8px; left: 8px; padding: 4px 10px; border-radius: 15px; font-weight: bold; color: #333; z-index: 10; font-size: 0.8em; }
         .podium-badge.rank-1 { background: #FFD700; }
         .podium-badge.rank-2 { background: #C0C0C0; }
-        .podium-badge.rank-3 { background: #CD7F32; color: white; }
-        
+        .podium-badge.rank-3 { background: #CD7F32; color: #fff; }
+        .podium-content { padding: 10px; text-align: center; }
+        .podium-dish-name { font-size: 1em; font-weight: bold; color: #333; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .podium-chef-name { font-size: 0.9em; font-weight: bold; color: #d9534f; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .podium-date { font-size: 0.75em; color: #888; margin-bottom: 3px; }
+        .podium-votes { font-size: 1.1em; color: #ff9800; font-weight: bold; }
+
         .card-img-wrapper { position: relative; width: 100%; height: 200px; background: #eee; overflow: hidden; }
         .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; position: absolute; top: 0; left: 0; }
         .card-img-wrapper img.thumb { filter: blur(8px); transform: scale(1.05); transition: filter 0.3s; z-index: 1; }
-        .card-img-wrapper img.full { opacity: 0; transition: opacity 0.5s; z-index: 2; }
+        .card-img-wrapper img.full { opacity: 0; transition: opacity 0.4s; z-index: 2; }
         .card-img-wrapper img.full.loaded { opacity: 1; }
         .no-img-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; color: #999; font-size: 1em; z-index: 3; }
 
-        .podium-content { padding: 15px; text-align: center; }
-        .podium-chef-name { font-size: 1.3em; font-weight: bold; color: #d9534f; margin-bottom: 5px; }
-        .podium-votes { font-size: 1.2em; color: #ff9800; font-weight: bold; }
+        .load-all-btn {
+            display: block; margin: 0 auto 15px; padding: 10px 24px;
+            background: #28a745; color: #fff; border: none; border-radius: 24px;
+            font-size: 0.95em; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 8px rgba(40,167,69,0.3); transition: all 0.2s;
+        }
+        .load-all-btn:active { transform: scale(0.97); }
+        .load-all-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
 
-        .vote-section-title { text-align: center; color: #333; font-size: 1.2em; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .vote-section-title { text-align: center; color: #333; font-size: 1.2em; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #ddd; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        .card-content { padding: 15px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-3px); }
+        .card-content { padding: 12px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
         .card-title { font-size: 1.1em; font-weight: bold; color: #333; margin-bottom: 5px; }
         .card-chef { font-size: 0.85em; color: #007bff; margin-bottom: 5px; font-weight: bold; }
         .card-date { font-size: 0.75em; color: #888; margin-bottom: 5px; }
         .my-vote { font-size: 0.85em; color: #28a745; margin-bottom: 5px; font-weight: bold; }
         .vote-count { color: #666; margin-bottom: 10px; font-size: 1em; }
-        .btn-group { display: flex; gap: 10px; margin-top: auto; }
+        .btn-group { display: flex; gap: 8px; margin-top: auto; }
         .vote-btn { flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: background 0.2s; }
         .vote-btn:hover { background-color: #0056b3; }
         .vote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -50,41 +63,33 @@
         .unvote-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
         .modal-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
+        .modal-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .modal-box h2 { margin-top: 0; color: #333; }
-        .modal-box p { color: #666; font-size: 0.9em; }
-        .modal-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .modal-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 10px; }
+        .modal-box p { color: #666; font-size: 0.9em; line-height: 1.5; }
+        .modal-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        .modal-box button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 10px; transition: background 0.2s; }
+        .modal-box button:hover { background: #0056b3; }
         .modal-box .error-msg { color: red; font-size: 0.9em; margin-bottom: 10px; display: none; }
 
-        .lightbox {
-            display: none; position: fixed; z-index: 20000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
-            justify-content: center; align-items: center;
-            overflow: hidden; touch-action: none; user-select: none;
-        }
-        .lightbox img {
-            max-width: 95%; max-height: 95%;
-            object-fit: contain; border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: transform 0.1s ease-out;
-            cursor: grab; transform-origin: center center;
-            will-change: transform;
-        }
-        .lightbox img:active { cursor: grabbing; }
-        .lightbox-close {
-            position: absolute; top: 15px; right: 20px;
-            color: white; font-size: 42px; font-weight: bold;
-            cursor: pointer; z-index: 20001; line-height: 1;
-        }
+        .image-viewer { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+        .image-viewer.open { display: block; }
+        .viewer-topbar { position: absolute; top: 0; left: 0; right: 0; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: linear-gradient(180deg, rgba(0,0,0,0.7), transparent); z-index: 10; color: #fff; font-size: 1em; }
+        .viewer-close-btn { font-size: 1.6em; font-weight: bold; cursor: pointer; padding: 8px 14px; line-height: 1; border-radius: 50%; -webkit-user-select: none; user-select: none; }
+        .viewer-close-btn:active { background: rgba(255,255,255,0.15); }
+        .viewer-title { flex: 1; text-align: center; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+        .viewer-stage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .viewer-stage img { max-width: 95vw; max-height: 90vh; object-fit: contain; transition: transform 0.08s ease-out; transform-origin: center center; will-change: transform; pointer-events: none; -webkit-user-drag: none; }
 
         @media (max-width: 768px) {
             body { padding: 8px; }
             h1 { font-size: 1.3em; }
             .podium-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
             .podium-card .card-img-wrapper { height: 70px !important; }
-            .podium-chef-name { font-size: 0.8em !important; }
-            .podium-votes { font-size: 0.7em !important; }
+            .podium-dish-name { font-size: 0.7em !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .podium-chef-name { font-size: 0.6em !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .podium-date { font-size: 0.5em !important; }
+            .podium-votes { font-size: 0.65em !important; }
+            .load-all-btn { font-size: 0.8em; padding: 8px 18px; margin-bottom: 10px; }
             .grid { grid-template-columns: repeat(3, 1fr) !important; gap: 5px !important; }
             .card .card-img-wrapper { height: 70px !important; }
             .no-img-placeholder { font-size: 0.6em; }
@@ -110,41 +115,55 @@
             <div class="podium-grid" id="podium-grid"></div>
         </div>
         <div class="vote-section-title">🗳️ 全部菜品投票（每人限3票）</div>
+        <button class="load-all-btn" id="load-all-btn" onclick="loadAllHD()">📥 一键加载全部高清图</button>
         <div class="grid" id="dish-grid"></div>
     </div>
 
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <h2>身份验证</h2>
-            <p id="modal-tip">请输入手机号和姓名，未注册的手机号将自动注册，已注册则直接登录。</p>
-            <input type="tel" id="reg-phone" placeholder="请输入手机号"
-                   onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
-            <input type="text" id="reg-name" placeholder="请输入姓名（必须是厨师列表中的成员）"
-                   onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
+            <p id="modal-tip">请输入手机号和姓名，未注册的手机号将自动引导注册。</p>
+            <input type="tel" id="reg-phone" placeholder="请输入手机号" onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
+            <input type="text" id="reg-name" placeholder="请输入姓名（首次注册需填写）" onkeydown="if(event.key==='Enter'){event.preventDefault(); submitRegister();}">
             <div id="reg-error" class="error-msg"></div>
             <button onclick="submitRegister()">登录 / 注册</button>
         </div>
     </div>
 
-    <div id="lightbox" class="lightbox">
-        <span class="lightbox-close" onclick="hideLightbox()">&times;</span>
-        <img id="lightbox-img" src="" alt="大图">
+    <div id="image-viewer" class="image-viewer">
+        <div class="viewer-topbar">
+            <div style="width: 42px; order: 1;"></div>
+            <div class="viewer-title" id="viewer-title" style="order: 2;"></div>
+            <div class="viewer-close-btn" id="viewer-close" onclick="closeViewer()" style="order: 3;">✕</div>
+        </div>
+        <div class="viewer-stage" id="viewer-stage">
+            <img id="viewer-img" src="" alt="大图" draggable="false">
+        </div>
     </div>
 
     <script>
         const API_BASE_URL = 'https://exemption-eliminate-watts-merchant.trycloudflare.com'; 
-        let allVotes = {};
-        let dishesData = [];
-        let userVotes = {};
-        let totalVoted = 0;
+        let allVotes = {}, dishesData = [], userVotes = {}, totalVoted = 0;
         let currentUser = JSON.parse(localStorage.getItem('chef_user')) || null;
-        let isVoting = false; // ⚠️ 防止连点的锁
+
+        function escapeJsString(s) {
+            return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, ' ');
+        }
 
         function getChefName(dish) {
             if (dish.chef1 && dish.chef2) return `${dish.chef1} & ${dish.chef2}`;
             if (dish.chef1) return dish.chef1;
             if (dish.chef2) return dish.chef2;
             return '未知厨师';
+        }
+
+        function getDishDate(dish) {
+            let dishDate = dish.date || '未知日期';
+            if (dish.date && dish.date.includes('-')) {
+                const parts = dish.date.split('-');
+                if (parts.length >= 3) dishDate = `${parts[1]}月${parts[2]}日`;
+            }
+            return dishDate;
         }
 
         function resolveImgUrl(imgField) {
@@ -155,56 +174,119 @@
             return url;
         }
 
-        // 渐进式加载：先显示模糊缩略图，高清图加载完成后淡入替换
         function getImgHtml(dish, isPodium = false) {
             const heightStyle = isPodium ? 'height:160px;' : 'height:200px;';
             const fullUrl = resolveImgUrl(dish.img);
-            if (!fullUrl) {
+            if (!fullUrl) return `<div class="card-img-wrapper" style="${heightStyle}"><div class="no-img-placeholder" style="display:flex;">暂无图片</div></div>`;
+            
+            const thumbUrl = fullUrl.replace('/images/', '/images/thumbs/');
+            const safeUrl = encodeURI(fullUrl);
+            const safeName = escapeJsString(dish.name || '');
+            const clickHandler = `onclick="openViewer('${safeUrl}', '${safeName}')"`;
+            
+            if (isPodium) {
                 return `<div class="card-img-wrapper" style="${heightStyle}">
-                            <div class="no-img-placeholder" style="display:flex;">暂无图片</div>
+                            <img class="thumb" src="${encodeURI(thumbUrl)}" onerror="this.style.display='none';">
+                            <img class="full" src="${safeUrl}" loading="lazy" decoding="async" ${clickHandler}
+                                 onload="this.classList.add('loaded');"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="no-img-placeholder" style="display:none;">暂无图片</div>
+                        </div>`;
+            } else {
+                return `<div class="card-img-wrapper" style="${heightStyle}">
+                            <img class="thumb" src="${encodeURI(thumbUrl)}" ${clickHandler} onerror="this.style.display='none';">
+                            <img class="full" src="" data-src="${safeUrl}" ${clickHandler}
+                                 onload="this.classList.add('loaded'); if(this.previousElementSibling) this.previousElementSibling.style.display='none';"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="no-img-placeholder" style="display:none;">暂无图片</div>
                         </div>`;
             }
-            const thumbUrl = fullUrl.replace('/images/', '/images/thumbs/');
-            return `<div class="card-img-wrapper" style="${heightStyle}">
-                        <img class="thumb" src="${encodeURI(thumbUrl)}" alt="${dish.name}" 
-                             onerror="this.style.display='none';">
-                        <img class="full" src="${encodeURI(fullUrl)}" alt="${dish.name}" 
-                             loading="lazy" decoding="async"
-                             onclick="showLightbox('${encodeURI(fullUrl)}')"
-                             onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none';"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="no-img-placeholder" style="display:none;">暂无图片</div>
-                    </div>`;
         }
 
-        // ==================== 灯箱与缩放逻辑 ====================
+        window.loadAllHD = function() {
+            const btn = document.getElementById('load-all-btn');
+            btn.textContent = '⏳ 正在加载高清图...';
+            btn.disabled = true;
+            
+            const allFullImgs = document.querySelectorAll('#dish-grid img.full');
+            let loadedCount = 0;
+            const total = allFullImgs.length;
+            
+            if (total === 0) {
+                btn.textContent = '✅ 没有需要加载的图片';
+                btn.disabled = false;
+                return;
+            }
+            
+            allFullImgs.forEach(img => {
+                if (img.dataset.src && !img.src) {
+                    img.src = img.dataset.src;
+                    img.addEventListener('load', onOneLoaded);
+                    img.addEventListener('error', onOneLoaded);
+                } else {
+                    onOneLoaded();
+                }
+            });
+            
+            function onOneLoaded() {
+                loadedCount++;
+                if (loadedCount >= total) {
+                    btn.textContent = '✅ 全部高清图已加载';
+                    btn.style.background = '#6c757d';
+                    btn.style.boxShadow = 'none';
+                }
+            }
+        };
+
+        // ============ 大图查看界面 ============
+        let viewerOpened = false;
         let currentScale = 1, translateX = 0, translateY = 0;
         let startX = 0, startY = 0;
         let isDragging = false, isPinching = false, initialDistance = 0;
         let lastTap = 0;
-        let isLightboxOpening = false;
-        
-        const lightbox = document.getElementById('lightbox');
-        const lightboxImg = document.getElementById('lightbox-img');
 
-        window.showLightbox = function(src) {
-            if (isLightboxOpening) return;
-            isLightboxOpening = true;
-            setTimeout(() => { isLightboxOpening = false; }, 300);
-            if (!src || src.includes('data:image/svg')) return;
-            lightboxImg.src = src;
+        const viewer = document.getElementById('image-viewer');
+        const viewerImg = document.getElementById('viewer-img');
+        const viewerStage = document.getElementById('viewer-stage');
+        const viewerTitle = document.getElementById('viewer-title');
+
+        window.openViewer = function(src, title) {
+            if (viewerOpened) return;
+            viewerOpened = true;
+            viewerImg.src = src;
+            viewerTitle.textContent = title || '';
             resetTransform();
-            lightbox.style.display = 'flex';
-        }
-        window.hideLightbox = function() {
-            lightbox.style.display = 'none';
-            lightboxImg.src = '';
+            viewer.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            history.pushState({ viewer: true }, '');
+        };
+
+        window.closeViewer = function() {
+            if (!viewerOpened) return;
+            viewerOpened = false;
+            viewer.classList.remove('open');
+            viewerImg.src = '';
+            document.body.style.overflow = '';
             resetTransform();
-        }
+            if (history.state && history.state.viewer) {
+                history.back();
+            }
+        };
+
+        window.addEventListener('popstate', function(e) {
+            if (viewerOpened) {
+                viewerOpened = false;
+                viewer.classList.remove('open');
+                viewerImg.src = '';
+                document.body.style.overflow = '';
+                resetTransform();
+            }
+        });
+
         function resetTransform() { currentScale = 1; translateX = 0; translateY = 0; applyTransform(); }
-        function applyTransform() { lightboxImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`; }
+        function applyTransform() { viewerImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`; }
 
-        lightbox.addEventListener('wheel', function(e) {
+        viewerStage.addEventListener('wheel', function(e) {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
             currentScale *= delta;
@@ -214,7 +296,7 @@
             applyTransform();
         }, { passive: false });
 
-        lightboxImg.addEventListener('mousedown', function(e) {
+        viewerStage.addEventListener('mousedown', function(e) {
             if (currentScale <= 1) return;
             isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; e.preventDefault();
         });
@@ -224,18 +306,17 @@
         });
         window.addEventListener('mouseup', function() { isDragging = false; });
 
-        lightbox.addEventListener('touchstart', function(e) {
+        viewerStage.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
                 isPinching = true; isDragging = false; lastTap = 0;
                 initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
             } else if (e.touches.length === 1 && currentScale > 1) {
-                isDragging = true;
-                startX = e.touches[0].clientX - translateX; startY = e.touches[0].clientY - translateY;
+                isDragging = true; startX = e.touches[0].clientX - translateX; startY = e.touches[0].clientY - translateY;
             }
             e.preventDefault();
         }, { passive: false });
 
-        lightbox.addEventListener('touchmove', function(e) {
+        viewerStage.addEventListener('touchmove', function(e) {
             if (isPinching && e.touches.length === 2) {
                 const currentDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
                 const scaleDelta = currentDistance / initialDistance;
@@ -250,45 +331,29 @@
             e.preventDefault();
         }, { passive: false });
 
-        lightbox.addEventListener('touchend', function(e) {
+        viewerStage.addEventListener('touchend', function(e) {
             if (e.touches.length < 2) isPinching = false;
             if (e.touches.length === 0) isDragging = false;
         });
 
-        lightboxImg.addEventListener('click', function(e) {
+        viewerStage.addEventListener('click', function(e) {
             const now = Date.now();
             if (now - lastTap < 300) {
                 e.preventDefault();
-                if (currentScale > 1) { resetTransform(); }
+                if (currentScale > 1) resetTransform();
             }
             lastTap = now;
         });
 
-        lightbox.addEventListener('click', function(e) { if (e.target === lightbox) hideLightbox(); });
-        // ========================================================
-
+        // ============ 页面逻辑 ============
         async function init() {
             try {
-                const [dishesRes, votesRes] = await Promise.all([
-                    fetch(`${API_BASE_URL}/api/dishes`), 
-                    fetch(`${API_BASE_URL}/api/votes`)
-                ]);
-                dishesData = await dishesRes.json();
-                allVotes = await votesRes.json();
+                const [dishesRes, votesRes] = await Promise.all([fetch(`${API_BASE_URL}/api/dishes`), fetch(`${API_BASE_URL}/api/votes`)]);
+                dishesData = await dishesRes.json(); allVotes = await votesRes.json();
                 dishesData.sort((a, b) => (new Date(a.date || 0) - new Date(b.date || 0)));
-                
-                if (currentUser) {
-                    await fetchUserVotes();
-                } else {
-                    setTimeout(showRegisterModal, 300);
-                }
-                
-                updatePodium(); renderDishes();
-                setInterval(autoRefreshVotes, 15000);
-            } catch (error) {
-                console.error('初始化失败:', error);
-                document.getElementById('dish-grid').innerHTML = '<p style="text-align:center;color:red;">数据加载失败，请刷新重试</p>';
-            }
+                if (currentUser) await fetchUserVotes(); else setTimeout(showRegisterModal, 300);
+                updatePodium(); renderDishes(); setInterval(autoRefreshVotes, 15000);
+            } catch (error) { console.error('初始化失败:', error); }
         }
 
         async function fetchUserVotes() {
@@ -300,195 +365,124 @@
                     userVotes = data.votedDishes || {};
                     totalVoted = Object.values(userVotes).reduce((a, b) => a + b, 0);
                     document.getElementById('user-info').textContent = `当前用户：${data.name} (已投 ${totalVoted}/3 票)`;
-                } else {
-                    localStorage.removeItem('chef_user');
-                    currentUser = null;
-                    showRegisterModal();
-                }
+                } else { localStorage.removeItem('chef_user'); currentUser = null; showRegisterModal(); }
             } catch (e) { console.error('获取用户票数失败', e); }
         }
 
         function showRegisterModal() { document.getElementById('register-modal').style.display = 'flex'; }
 
         async function submitRegister() {
-            const phone = document.getElementById('reg-phone').value.trim();
-            const name = document.getElementById('reg-name').value.trim();
-            const errorEl = document.getElementById('reg-error');
-            errorEl.style.display = 'none';
-
+            const phone = document.getElementById('reg-phone').value.trim(), name = document.getElementById('reg-name').value.trim();
+            const errorEl = document.getElementById('reg-error'); errorEl.style.display = 'none';
             if (!phone) { errorEl.textContent = "手机号不能为空"; errorEl.style.display = 'block'; return; }
-            if (!name) { errorEl.textContent = "姓名不能为空"; errorEl.style.display = 'block'; return; }
-
             try {
-                const res = await fetch(`${API_BASE_URL}/api/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, phone })
-                });
+                const res = await fetch(`${API_BASE_URL}/api/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, phone }) });
                 const data = await res.json();
                 if (data.success) {
-                    currentUser = { name: data.name, phone };
-                    localStorage.setItem('chef_user', JSON.stringify(currentUser));
-                    userVotes = data.votedDishes || {};
-                    totalVoted = Object.values(userVotes).reduce((a, b) => a + b, 0);
+                    currentUser = { name: data.name, phone }; localStorage.setItem('chef_user', JSON.stringify(currentUser));
+                    userVotes = data.votedDishes || {}; totalVoted = Object.values(userVotes).reduce((a, b) => a + b, 0);
                     document.getElementById('register-modal').style.display = 'none';
                     document.getElementById('user-info').textContent = `当前用户：${data.name} (已投 ${totalVoted}/3 票)`;
                     updateUIAfterVote();
-                } else {
-                    errorEl.textContent = data.error;
-                    errorEl.style.display = 'block';
-                }
-            } catch (e) {
-                errorEl.textContent = "网络错误，请重试";
-                errorEl.style.display = 'block';
-            }
+                } else { errorEl.textContent = data.error; errorEl.style.display = 'block'; }
+            } catch (e) { errorEl.textContent = "网络错误，请重试"; errorEl.style.display = 'block'; }
         }
 
         async function autoRefreshVotes() {
-            if (document.hidden) return;
+            if (document.hidden || viewerOpened) return;
             try {
-                const votesRes = await fetch(`${API_BASE_URL}/api/votes`);
-                const newVotes = await votesRes.json();
+                const votesRes = await fetch(`${API_BASE_URL}/api/votes`); const newVotes = await votesRes.json();
                 let changed = false;
-                for (const [id, count] of Object.entries(newVotes)) {
-                    if (allVotes[id] !== count) { allVotes[id] = count; changed = true; }
-                }
+                for (const [id, count] of Object.entries(newVotes)) { if (allVotes[id] !== count) { allVotes[id] = count; changed = true; } }
                 if (changed) {
-                    dishesData.forEach(dish => {
-                        const dishId = String(dish.id);
-                        const countEl = document.getElementById(`count-${dishId}`);
-                        if (countEl) countEl.innerHTML = `总票数：<strong>${allVotes[dishId] || 0}</strong>`;
-                    });
+                    dishesData.forEach(dish => { const dishId = String(dish.id); const countEl = document.getElementById(`count-${dishId}`); if (countEl) countEl.innerHTML = `总票数：<strong>${allVotes[dishId] || 0}</strong>`; });
                     updatePodium();
                 }
             } catch (e) { console.error('自动刷新失败:', e); }
         }
 
+        // ⚠️ 领奖台：显示 菜名 + 厨师 + 日期 + 票数
         function updatePodium() {
-            const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes);
-            const topThree = sortedByVotes.slice(0, 3);
-            const podiumSection = document.getElementById('podium-section');
-            const podiumGrid = document.getElementById('podium-grid');
-            if (topThree.length === 0) { podiumSection.style.display = 'none'; return; }
+            const sortedByVotes = [...dishesData].map(d => ({ ...d, votes: allVotes[String(d.id)] || 0 })).filter(d => d.votes > 0).sort((a, b) => b.votes - a.votes).slice(0, 3);
+            const podiumSection = document.getElementById('podium-section'), podiumGrid = document.getElementById('podium-grid');
+            if (sortedByVotes.length === 0) { podiumSection.style.display = 'none'; return; }
             podiumSection.style.display = 'block';
-            const newSignature = topThree.map(d => `${d.id}-${d.votes}`).join(',');
+            const newSignature = sortedByVotes.map(d => `${d.id}-${d.votes}`).join(',');
             if (podiumGrid.dataset.signature !== newSignature) {
-                podiumGrid.dataset.signature = newSignature;
-                podiumGrid.innerHTML = '';
-                topThree.forEach((dish, index) => {
+                podiumGrid.dataset.signature = newSignature; podiumGrid.innerHTML = '';
+                sortedByVotes.forEach((dish, index) => {
                     const rank = index + 1;
                     const badgeText = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
+                    const dishDate = getDishDate(dish);
                     const card = document.createElement('div');
                     card.className = `podium-card rank-${rank}`;
                     card.innerHTML = `
                         <div class="podium-badge rank-${rank}">${badgeText}</div>
                         ${getImgHtml(dish, true)}
                         <div class="podium-content">
+                            <div class="podium-dish-name">🍽️ ${dish.name || '未命名'}</div>
                             <div class="podium-chef-name">👨‍🍳 ${getChefName(dish)}</div>
+                            <div class="podium-date">📅 ${dishDate}</div>
                             <div class="podium-votes">${dish.votes} 票</div>
                         </div>`;
                     podiumGrid.appendChild(card);
                 });
             } else {
                 const cards = podiumGrid.querySelectorAll('.podium-card');
-                topThree.forEach((dish, index) => {
-                    if (cards[index]) {
-                        const voteEl = cards[index].querySelector('.podium-votes');
-                        if (voteEl) voteEl.textContent = `${dish.votes} 票`;
-                    }
-                });
+                sortedByVotes.forEach((dish, index) => { if (cards[index]) { const voteEl = cards[index].querySelector('.podium-votes'); if (voteEl) voteEl.textContent = `${dish.votes} 票`; } });
             }
         }
 
         function renderDishes() {
-            const grid = document.getElementById('dish-grid');
-            grid.innerHTML = '';
-            const isMaxed = totalVoted >= 3;
+            const grid = document.getElementById('dish-grid'); grid.innerHTML = ''; const isMaxed = totalVoted >= 3;
             dishesData.forEach(dish => {
-                const dishId = String(dish.id);
-                const voteCount = allVotes[dishId] || 0;
-                const myVoteCount = userVotes[dishId] || 0;
-                let dishDate = dish.date || '未知日期';
-                if (dish.date && dish.date.includes('-')) {
-                    const parts = dish.date.split('-');
-                    if (parts.length >= 3) dishDate = `${parts[1]}月${parts[2]}日`;
-                }
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    ${getImgHtml(dish, false)}
-                    <div class="card-content">
-                        <div class="card-title">${dish.name || '未命名'}</div>
-                        <div class="card-chef">👨‍🍳 ${getChefName(dish)}</div>
-                        <div class="card-date">📅 ${dishDate}</div>
-                        <div class="my-vote" id="my-vote-${dishId}">我的投票：${myVoteCount} 票</div>
-                        <div class="vote-count" id="count-${dishId}">总票数：<strong>${voteCount}</strong></div>
-                        <div class="btn-group">
-                            <button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button>
-                            <button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button>
-                        </div>
-                    </div>`;
+                const dishId = String(dish.id), voteCount = allVotes[dishId] || 0, myVoteCount = userVotes[dishId] || 0;
+                const dishDate = getDishDate(dish);
+                const card = document.createElement('div'); card.className = 'card';
+                card.innerHTML = `${getImgHtml(dish, false)}<div class="card-content"><div class="card-title">${dish.name || '未命名'}</div><div class="card-chef">👨‍🍳 ${getChefName(dish)}</div><div class="card-date">📅 ${dishDate}</div><div class="my-vote" id="my-vote-${dishId}">我的投票：${myVoteCount} 票</div><div class="vote-count" id="count-${dishId}">总票数：<strong>${voteCount}</strong></div><div class="btn-group"><button class="vote-btn" id="add-btn-${dishId}" ${isMaxed ? 'disabled' : ''} onclick="handleVote('${dishId}', 'add')">投一票</button><button class="unvote-btn" id="remove-btn-${dishId}" ${myVoteCount <= 0 ? 'disabled' : ''} onclick="handleVote('${dishId}', 'remove')">取消一票</button></div></div>`;
                 grid.appendChild(card);
             });
+            const btn = document.getElementById('load-all-btn');
+            btn.textContent = '📥 一键加载全部高清图';
+            btn.disabled = false;
+            btn.style.background = '#28a745';
+            btn.style.boxShadow = '0 4px 8px rgba(40,167,69,0.3)';
         }
 
         function updateUIAfterVote() {
             const isMaxed = totalVoted >= 3;
             dishesData.forEach(dish => {
-                const dishId = String(dish.id);
-                const myVoteCount = userVotes[dishId] || 0;
-                const countEl = document.getElementById(`count-${dishId}`);
-                const myVoteEl = document.getElementById(`my-vote-${dishId}`);
-                const addBtn = document.getElementById(`add-btn-${dishId}`);
-                const removeBtn = document.getElementById(`remove-btn-${dishId}`);
-                
-                if (countEl) countEl.innerHTML = `总票数：<strong>${allVotes[dishId] || 0}</strong>`;
-                if (myVoteEl) myVoteEl.innerHTML = `我的投票：${myVoteCount} 票`;
-                if (addBtn) addBtn.disabled = isMaxed;
-                if (removeBtn) removeBtn.disabled = myVoteCount <= 0;
+                const dishId = String(dish.id), myVoteCount = userVotes[dishId] || 0;
+                const countEl = document.getElementById(`count-${dishId}`), myVoteEl = document.getElementById(`my-vote-${dishId}`);
+                const addBtn = document.getElementById(`add-btn-${dishId}`), removeBtn = document.getElementById(`remove-btn-${dishId}`);
+                if (countEl) countEl.innerHTML = `总票数：<strong>${allVotes[dishId] || 0}</strong>`; if (myVoteEl) myVoteEl.innerHTML = `我的投票：${myVoteCount} 票`;
+                if (addBtn) addBtn.disabled = isMaxed; if (removeBtn) removeBtn.disabled = myVoteCount <= 0;
             });
             document.getElementById('user-info').textContent = currentUser ? `当前用户：${currentUser.name} (已投 ${totalVoted}/3 票)` : '';
-            updatePodium(); 
+            updatePodium();
         }
 
         async function handleVote(dishId, action) {
             if (!currentUser) { showRegisterModal(); return; }
-            if (isVoting) return; // ⚠️ 防止连点，保证一次只发一个请求
-            isVoting = true;
-
-            if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); isVoting = false; return; }
-            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); isVoting = false; return; }
-
-            if (action === 'add') {
-                userVotes[dishId] = (userVotes[dishId] || 0) + 1;
-                allVotes[dishId] = (allVotes[dishId] || 0) + 1;
-                totalVoted++;
-            } else {
-                userVotes[dishId] = (userVotes[dishId] || 0) - 1;
-                if (userVotes[dishId] <= 0) delete userVotes[dishId];
-                allVotes[dishId] = Math.max(0, (allVotes[dishId] || 0) - 1);
-                totalVoted--;
-            }
+            
+            if (action === 'add' && totalVoted >= 3) { alert("您最多只能投 3 票，请先取消其他菜的投票！"); return; }
+            if (action === 'remove' && (userVotes[dishId] || 0) <= 0) { alert("您还没有给这道菜投过票哦！"); return; }
+            
+            if (action === 'add') { userVotes[dishId] = (userVotes[dishId] || 0) + 1; allVotes[dishId] = (allVotes[dishId] || 0) + 1; totalVoted++; }
+            else { userVotes[dishId] = (userVotes[dishId] || 0) - 1; if (userVotes[dishId] <= 0) delete userVotes[dishId]; allVotes[dishId] = Math.max(0, (allVotes[dishId] || 0) - 1); totalVoted--; }
             updateUIAfterVote();
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/vote`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dish_id: dishId, action: action, phone: currentUser.phone })
-                });
-                const result = await response.json();
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('网络超时，请刷新页面重试')), 8000));
+                const fetchPromise = fetch(`${API_BASE_URL}/api/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dish_id: dishId, action: action, phone: currentUser.phone }) });
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+                const result = await response.json(); 
                 if (!result.success) throw new Error(result.error);
-                allVotes[dishId] = result.count;
-                userVotes = result.myVotes;
-                totalVoted = result.totalVoted;
-                updateUIAfterVote();
-            } catch (error) {
-                console.error('投票失败，正在回滚:', error);
-                alert('投票失败：' + error.message);
-                fetchUserVotes().then(() => updateUIAfterVote());
-            } finally {
-                isVoting = false; // ⚠️ 无论如何，最后释放锁
+                allVotes[dishId] = result.count; userVotes = result.myVotes; totalVoted = result.totalVoted; updateUIAfterVote();
+            } catch (error) { 
+                console.error('投票失败，回滚:', error); 
+                alert('投票失败：' + error.message); 
+                fetchUserVotes().then(() => updateUIAfterVote()); 
             }
         }
 
