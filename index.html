@@ -11,12 +11,11 @@ h1 { text-align: center; color: #333; font-size: 1.5em; margin: 10px 0; }
 .month-tip { text-align: center; font-weight: bold; color: #fff; background: #ff9800; padding: 10px; border-radius: 8px; margin: 0 auto 15px; max-width: 400px; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 10px; font-size: .9em; }
 
+/* 投票区图片：桌面端固定 180px 高度 */
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 1200px; margin: 0 auto; }
 .card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.1); display: flex; flex-direction: column; }
-
-/* 桌面端：4:3 图片比例，不再压扁 */
-.card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #eee; cursor: pointer; }
-.no-img { width: 100%; aspect-ratio: 4 / 3; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: .8em; }
+.card img { width: 100%; height: 180px; object-fit: cover; display: block; background: #eee; cursor: pointer; }
+.no-img { width: 100%; height: 180px; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: .8em; }
 
 .info { padding: 8px; text-align: center; font-size: .8em; display: flex; flex-direction: column; flex-grow: 1; }
 .name { font-weight: bold; color: #333; font-size: 1.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -29,9 +28,10 @@ button { flex: 1; padding: 8px 2px; border: none; border-radius: 5px; color: #ff
 .remove { background: #6c757d; }
 button:disabled { background: #ccc; cursor: not-allowed; }
 
+/* 领奖台：图片缩小到 140px */
 .podium { background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-.podium-title { text-align: center; color: #ff9800; font-weight: bold; margin-bottom: 12px; font-size: 1.1em; }
-.podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.podium-title { text-align: center; color: #ff9800; font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
+.podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .podium-card { border-radius: 8px; overflow: hidden; position: relative; border: 2px solid #eee; background: #fff; }
 .podium-card.r1 { border-color: #FFD700; }
 .podium-card.r2 { border-color: #C0C0C0; }
@@ -40,7 +40,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 .podium-card.r2 .podium-badge { background: #C0C0C0; }
 .podium-card.r3 .podium-badge { background: #CD7F32; color: #fff; }
 
-.podium-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #eee; }
+/* ⚠️ 领奖台图片固定 140px，不要太大 */
+.podium-card img { width: 100%; height: 140px; object-fit: cover; display: block; background: #eee; }
+.podium-card .no-img { width: 100%; height: 140px; }
 .podium-info { padding: 8px; text-align: center; font-size: .75em; }
 .podium-name { font-weight: bold; color: #333; font-size: 1.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .podium-chef { color: #d9534f; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
@@ -61,13 +63,13 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 .viewer img { max-width: 95%; max-height: 90%; object-fit: contain; }
 .viewer-close { position: absolute; top: 10px; right: 15px; color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; padding: 5px 12px; line-height: 1; background: rgba(255,255,255,.1); border-radius: 50%; }
 
-/* 手机端：更紧凑，图片正方形 */
+/* 手机端紧凑版 */
 @media (max-width: 768px) {
   body { padding: 6px; }
   h1 { font-size: 1.3em; }
   .month-tip { font-size: .9em; padding: 8px; margin-bottom: 10px; }
   .grid { gap: 5px; }
-  .card img, .no-img { aspect-ratio: 1 / 1; }
+  .card img, .no-img { height: 100px; }
   .info { padding: 5px; font-size: .7em; }
   .name { font-size: 1em; }
   .chef { font-size: .85em; }
@@ -77,7 +79,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   .podium { padding: 8px; margin-bottom: 10px; }
   .podium-title { font-size: .95em; margin-bottom: 8px; }
   .podium-grid { gap: 5px; }
-  .podium-card img { aspect-ratio: 1 / 1; }
+  .podium-card img, .podium-card .no-img { height: 80px; }
   .podium-info { padding: 5px; font-size: .65em; }
 }
 </style>
