@@ -11,7 +11,6 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .month-tip { text-align: center; font-weight: bold; color: #fff; background: #ff9800; padding: 12px; border-radius: 8px; margin: 0 auto 18px; max-width: 480px; font-size: 1.05em; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em; }
 
-/* 投票区 */
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 1300px; margin: 0 auto; }
 .card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); display: flex; flex-direction: column; }
 .card img { width: 100%; height: 220px; object-fit: cover; display: block; background: #eee; cursor: pointer; }
@@ -28,7 +27,6 @@ button { flex: 1; padding: 11px 2px; border: none; border-radius: 6px; color: #f
 .remove { background: #6c757d; }
 button:disabled { background: #ccc; cursor: not-allowed; }
 
-/* 领奖台：图片用 4:3 比例，不扁 */
 .podium { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
 .podium-title { text-align: center; color: #ff9800; font-weight: bold; margin-bottom: 14px; font-size: 1.3em; }
 .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
@@ -40,9 +38,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 .podium-card.r2 .podium-badge { background: #C0C0C0; }
 .podium-card.r3 .podium-badge { background: #CD7F32; color: #fff; }
 
-/* ⚠️ 领奖台图片：4:3 比例，不再扁 */
-.podium-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #eee; }
-.podium-card .no-img { width: 100%; aspect-ratio: 4 / 3; }
+/* ⚠️ 领奖台图片和投票区一样大：220px */
+.podium-card img { width: 100%; height: 220px; object-fit: cover; display: block; background: #eee; }
+.podium-card .no-img { width: 100%; height: 220px; }
 
 .podium-info { padding: 12px; text-align: center; }
 .podium-name { font-weight: bold; color: #333; font-size: 1.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -64,7 +62,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 .viewer img { max-width: 95%; max-height: 90%; object-fit: contain; }
 .viewer-close { position: absolute; top: 10px; right: 15px; color: #fff; font-size: 36px; font-weight: bold; cursor: pointer; padding: 5px 14px; line-height: 1; background: rgba(255,255,255,.1); border-radius: 50%; }
 
-/* 手机端：字体保持较大，图片比例改 1:1 */
+/* 手机端：投票区 110px，领奖台也是 110px */
 @media (max-width: 768px) {
   body { padding: 8px; font-size: 15px; }
   h1 { font-size: 1.5em; }
@@ -83,7 +81,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   .podium { padding: 10px; margin-bottom: 12px; }
   .podium-title { font-size: 1.1em; margin-bottom: 10px; }
   .podium-grid { gap: 6px; }
-  .podium-card img, .podium-card .no-img { aspect-ratio: 1 / 1; }
+  .podium-card img, .podium-card .no-img { height: 110px; }
   .podium-info { padding: 6px; }
   .podium-name { font-size: 1em; }
   .podium-chef { font-size: .85em; margin-top: 3px; }
