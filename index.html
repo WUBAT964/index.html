@@ -11,37 +11,41 @@ h1 { text-align: center; color: #333; font-size: 1.5em; margin: 10px 0; }
 .month-tip { text-align: center; font-weight: bold; color: #fff; background: #ff9800; padding: 10px; border-radius: 8px; margin: 0 auto 15px; max-width: 400px; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 10px; font-size: .9em; }
 
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 1200px; margin: 0 auto; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 1200px; margin: 0 auto; }
 .card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.1); display: flex; flex-direction: column; }
-.card img { width: 100%; height: 100px; object-fit: cover; display: block; background: #eee; }
-.no-img { height: 100px; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: .75em; }
-.info { padding: 6px; text-align: center; font-size: .75em; display: flex; flex-direction: column; flex-grow: 1; }
-.name { font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chef { color: #007bff; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 桌面端：4:3 图片比例，不再压扁 */
+.card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #eee; cursor: pointer; }
+.no-img { width: 100%; aspect-ratio: 4 / 3; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: .8em; }
+
+.info { padding: 8px; text-align: center; font-size: .8em; display: flex; flex-direction: column; flex-grow: 1; }
+.name { font-weight: bold; color: #333; font-size: 1.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chef { color: #007bff; margin: 3px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .date { color: #888; font-size: .9em; }
-.votes { color: #ff9800; font-weight: bold; margin: 3px 0; }
-.btns { display: flex; gap: 3px; margin-top: auto; }
-button { flex: 1; padding: 7px 2px; border: none; border-radius: 4px; color: #fff; font-size: .78em; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
+.votes { color: #ff9800; font-weight: bold; margin: 4px 0; }
+.btns { display: flex; gap: 4px; margin-top: auto; }
+button { flex: 1; padding: 8px 2px; border: none; border-radius: 5px; color: #fff; font-size: .85em; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
 .add { background: #007bff; }
 .remove { background: #6c757d; }
 button:disabled { background: #ccc; cursor: not-allowed; }
 
-.podium { background: #fff; border-radius: 10px; padding: 10px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-.podium-title { text-align: center; color: #ff9800; font-weight: bold; margin-bottom: 10px; font-size: .95em; }
-.podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.podium { background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+.podium-title { text-align: center; color: #ff9800; font-weight: bold; margin-bottom: 12px; font-size: 1.1em; }
+.podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .podium-card { border-radius: 8px; overflow: hidden; position: relative; border: 2px solid #eee; background: #fff; }
 .podium-card.r1 { border-color: #FFD700; }
 .podium-card.r2 { border-color: #C0C0C0; }
 .podium-card.r3 { border-color: #CD7F32; }
-.podium-badge { position: absolute; top: 4px; left: 4px; padding: 2px 6px; border-radius: 10px; font-size: .65em; font-weight: bold; background: #FFD700; color: #333; z-index: 2; }
+.podium-badge { position: absolute; top: 6px; left: 6px; padding: 3px 8px; border-radius: 10px; font-size: .7em; font-weight: bold; background: #FFD700; color: #333; z-index: 2; }
 .podium-card.r2 .podium-badge { background: #C0C0C0; }
 .podium-card.r3 .podium-badge { background: #CD7F32; color: #fff; }
-.podium-card img { width: 100%; height: 60px; object-fit: cover; display: block; }
-.podium-info { padding: 5px; text-align: center; font-size: .7em; }
-.podium-name { font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.podium-chef { color: #d9534f; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.podium-date { color: #888; font-size: .85em; margin-top: 2px; }
-.podium-votes { color: #ff9800; font-weight: bold; margin-top: 2px; }
+
+.podium-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #eee; }
+.podium-info { padding: 8px; text-align: center; font-size: .75em; }
+.podium-name { font-weight: bold; color: #333; font-size: 1.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.podium-chef { color: #d9534f; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.podium-date { color: #888; font-size: .9em; margin-top: 2px; }
+.podium-votes { color: #ff9800; font-weight: bold; margin-top: 3px; }
 
 .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); justify-content: center; align-items: center; }
 .modal.show { display: flex; }
@@ -56,6 +60,26 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 .viewer.show { display: flex; }
 .viewer img { max-width: 95%; max-height: 90%; object-fit: contain; }
 .viewer-close { position: absolute; top: 10px; right: 15px; color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; padding: 5px 12px; line-height: 1; background: rgba(255,255,255,.1); border-radius: 50%; }
+
+/* 手机端：更紧凑，图片正方形 */
+@media (max-width: 768px) {
+  body { padding: 6px; }
+  h1 { font-size: 1.3em; }
+  .month-tip { font-size: .9em; padding: 8px; margin-bottom: 10px; }
+  .grid { gap: 5px; }
+  .card img, .no-img { aspect-ratio: 1 / 1; }
+  .info { padding: 5px; font-size: .7em; }
+  .name { font-size: 1em; }
+  .chef { font-size: .85em; }
+  .date { font-size: .85em; }
+  .votes { font-size: .9em; }
+  button { padding: 7px 2px; font-size: .75em; }
+  .podium { padding: 8px; margin-bottom: 10px; }
+  .podium-title { font-size: .95em; margin-bottom: 8px; }
+  .podium-grid { gap: 5px; }
+  .podium-card img { aspect-ratio: 1 / 1; }
+  .podium-info { padding: 5px; font-size: .65em; }
+}
 </style>
 </head>
 <body>
@@ -237,8 +261,8 @@ button:disabled { background: #ccc; cursor: not-allowed; }
         card.appendChild(img);
       } else {
         var ph = document.createElement('div');
-        ph.style.height = '60px';
-        ph.style.background = '#eee';
+        ph.className = 'no-img';
+        ph.textContent = '暂无图片';
         card.appendChild(ph);
       }
 
