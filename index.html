@@ -120,11 +120,30 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 (function(){
   "use strict";
 
-  // ⚠️ 隧道地址变了就改这一行（只用于 /api/* 接口）
+  // ⚠️ 后端接口地址（隧道变了就改这一行）
   var API = 'https://exemption-eliminate-watts-merchant.trycloudflare.com';
 
-  // ✅ 图片走 jsDelivr CDN（不再走隧道）
+  // ✅ 图片走 jsDelivr CDN
   var CDN = 'https://cdn.jsdelivr.net/gh/WUBAT964/images@main';
+
+  // ✅ 旧中文名 → 新拼音名 映射（后端数据库里还是旧名）
+  var NAME_MAP = {
+    "1_炆行鸡.jpg":             "1_wenxingji.jpg",
+    "2_酸汤猪脚.jpg":           "2_suantangzhujiao.jpg",
+    "3_酸菜鱼.jpg":             "3_suancaiyu.jpg",
+    "6_白切五花肉、膈山肉.jpg":  "6_baqiewuhuarou.jpg",
+    "8_紫苏炆鸭.jpg":           "8_zisuwenya.jpg",
+    "9_水煮肉片.jpg":           "9_shuizhuroupian.jpg",
+    "10_蒸排骨.jpg":            "10_zhengpaigu.jpg",
+    "11_肉沫豆腐.jpg":          "11_roumodoufu.jpg",
+    "12_五花肉.jpg":            "12_wuhuarou.jpg",
+    "13_排骨炆五彩椒.jpg":      "13_paiguwencaijiao.jpg",
+    "15_五花肉.jpg":            "15_wuhuarou.jpg",
+    "17_啤酒鸭.jpg":            "17_pijiua.jpg",
+    "18_排骨炆芋头.jpg":        "18_paiguweiyutou.jpg",
+    "20_豆腐炆鱼.jpg":          "20_doufuweiyu.jpg",
+    "21_清蒸鲈鱼.jpg":          "21_qingzhengluyu.jpg"
+  };
 
   var votes = {};
   var dishes = [];
@@ -151,17 +170,23 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     return s;
   }
 
-  // ✅ 关键改动：图片统一走 jsDelivr CDN
+  // ✅ 关键：去前缀 → 映射旧名 → 拼 CDN
   function imgUrl(f){
     if (!f) return '';
     f = String(f).trim();
     if (!f) return '';
-    // 后端如果已经返回完整 http(s) 地址，直接用
-    if (f.indexOf('http') === 0) return f;
-    // 去掉可能存在的路径前缀，只取文件名
-    f = f.split('/').pop();
-    // 拼音文件名无需编码，但保险起见还是 encode
-    return CDN + '/' + encodeURIComponent(f);
+
+    // 1) 去掉 ?xxx 和 #xxx，取最后一段文件名
+    //    "images/1_炆行鸡.jpg"        → "1_炆行鸡.jpg"
+    //    "https://xx/a/b.jpg?x=1"    → "b.jpg"
+    var name = f.split('?')[0].split('#')[0].split('/').pop();
+    if (!name) return '';
+
+    // 2) 旧中文名 → 新拼音名
+    if (NAME_MAP[name]) name = NAME_MAP[name];
+
+    // 3) 拼 CDN
+    return CDN + '/' + name;
   }
 
   function render(){
@@ -185,7 +210,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
         imgEl.src = url;
         imgEl.loading = 'lazy';
         imgEl.onerror = function(){
-          // 加载失败时替换为占位
           var ph = document.createElement('div');
           ph.className = 'no-img';
           ph.textContent = '暂无图片';
