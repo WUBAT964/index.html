@@ -287,9 +287,8 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 }
 .fab-admin .icon { font-size: 1.1em; }
 
-/* ============ 👑 管理面板（修复关闭动画） ============ */
+/* ============ 👑 管理面板（苹果风折叠展开） ============ */
 .admin-modal {
-  /* ✅ 关键修复：默认 display:flex，用 visibility 控制显隐 */
   display: flex;
   position: fixed;
   z-index: 10001;
@@ -301,26 +300,42 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .3s ease, visibility 0s .3s;
+  transition: opacity .35s ease, visibility 0s .4s;
 }
 .admin-modal.show {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
-  transition: opacity .3s ease, visibility 0s 0s;
+  transition: opacity .35s ease, visibility 0s 0s;
 }
 .admin-box {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 22px;
   width: 100%;
   max-width: 400px;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,.3);
-  will-change: transform, opacity;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.3),
+    0 0 0 1px rgba(255,255,255,.5) inset;
+  will-change: transform, opacity, border-radius;
   transform-origin: center center;
 }
+
+/* 内容错峰出场 */
+.admin-box h2,
+.admin-box .admin-section,
+.admin-box .admin-close {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .35s ease, transform .4s cubic-bezier(.22,.61,.36,1);
+}
+.admin-modal.show .admin-box h2 { transition-delay: .12s; opacity: 1; transform: none; }
+.admin-modal.show .admin-box .admin-section:nth-of-type(1) { transition-delay: .18s; opacity: 1; transform: none; }
+.admin-modal.show .admin-box .admin-section:nth-of-type(2) { transition-delay: .24s; opacity: 1; transform: none; }
+.admin-modal.show .admin-box .admin-close { transition-delay: .3s; opacity: 1; transform: none; }
+
 .admin-box h2 {
   margin: 0 0 16px;
   font-size: 1.25em;
@@ -924,7 +939,7 @@ body.is-touch .podium { background: #fff !important; }
   }
 
   function applyFeature(f, on){
-    if (f === 'glass')    body.classList.toggle('glass-on', on); body.classList.toggle('no-glass', !on);
+    if (f === 'glass')    { body.classList.toggle('glass-on', on); body.classList.toggle('no-glass', !on); }
     if (f === 'gradient') body.classList.toggle('no-gradient', !on);
     if (f === 'anim')     body.classList.toggle('no-anim', !on);
     if (f === 'hover')    body.classList.toggle('no-hover', !on);
@@ -1004,13 +1019,13 @@ body.is-touch .podium { background: #fff !important; }
       })(rows[i]);
     }
 
-    // ============ FLIP 打开 ============
+    // ============ 🍎 苹果风折叠展开 ============
     function openAdminModal(){
       syncSwitches();
 
       var from = btnAdmin.getBoundingClientRect();
 
-      // 先让 modal 显示（visibility: visible + opacity 从 0 开始过渡）
+      // 让 modal 显示（visibility → visible）
       adminModal.classList.add('show');
 
       requestAnimationFrame(function(){
@@ -1023,25 +1038,31 @@ body.is-touch .podium { background: #fff !important; }
         var cy2 = to.top + to.height / 2;
         var dx = cx1 - cx2;
         var dy = cy1 - cy2;
-        var scale = Math.max(0.1, from.width / to.width);
+        var scale = Math.max(0.08, from.width / to.width);
 
+        // 起始状态：小球（小 scale + 50% 圆角 + 透明）
         adminBox.style.transition = 'none';
         adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
-        adminBox.style.opacity = '0.6';
+        adminBox.style.borderRadius = '50%';
+        adminBox.style.opacity = '0';
 
         void adminBox.offsetWidth;
 
+        // 下一帧开始"展开"：小球 → 完整面板
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
-            adminBox.style.transition = 'transform .45s cubic-bezier(.34,1.15,.64,1), opacity .3s ease';
+            adminBox.style.transition =
+              'transform .55s cubic-bezier(.32, .72, 0, 1), ' +
+              'border-radius .55s cubic-bezier(.32, .72, 0, 1), ' +
+              'opacity .3s ease';
             adminBox.style.transform = 'translate(0, 0) scale(1)';
+            adminBox.style.borderRadius = '20px';
             adminBox.style.opacity = '1';
           });
         });
       });
     }
 
-    // ============ FLIP 关闭（修复） ============
     function closeAdminModal(){
       var from = btnAdmin.getBoundingClientRect();
       var to = adminBox.getBoundingClientRect();
@@ -1052,28 +1073,29 @@ body.is-touch .podium { background: #fff !important; }
       var cy2 = to.top + to.height / 2;
       var dx = cx1 - cx2;
       var dy = cy1 - cy2;
-      var scale = Math.max(0.1, from.width / to.width);
+      var scale = Math.max(0.08, from.width / to.width);
 
-      // 缩小飞回 👑 按钮
-      adminBox.style.transition = 'transform .35s cubic-bezier(.4,0,.6,1), opacity .3s ease';
+      // 折叠缩小：矩形 → 小球
+      adminBox.style.transition =
+        'transform .45s cubic-bezier(.4, 0, .2, 1), ' +
+        'border-radius .45s cubic-bezier(.4, 0, .2, 1), ' +
+        'opacity .3s ease';
       adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+      adminBox.style.borderRadius = '50%';
       adminBox.style.opacity = '0';
 
-      // ✅ 关键：同时移除 .show，但 CSS 里 visibility 延迟 300ms 才 hidden
-      // 动画能完整播完
       adminModal.classList.remove('show');
 
-      // 动画结束后清理内联样式
       setTimeout(function(){
         adminBox.style.transition = '';
         adminBox.style.transform = '';
+        adminBox.style.borderRadius = '';
         adminBox.style.opacity = '';
-      }, 400);
+      }, 500);
     }
 
     btnAdmin.addEventListener('click', function(e){
       e.stopPropagation();
-      // 防止连点
       if (adminModal.classList.contains('show')) return;
       openAdminModal();
     });
