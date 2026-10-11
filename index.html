@@ -9,32 +9,19 @@
 body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 14px; font-size: 16px; }
 h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
-/* ⏰ 倒计时条 */
 .countdown {
-  text-align: center;
-  font-weight: bold;
-  color: #fff;
+  text-align: center; font-weight: bold; color: #fff;
   background: linear-gradient(90deg, #ff5252, #ff9800);
-  padding: 12px;
-  border-radius: 8px;
-  margin: 0 auto 14px;
-  max-width: 480px;
-  font-size: 1.05em;
+  padding: 12px; border-radius: 8px; margin: 0 auto 14px;
+  max-width: 480px; font-size: 1.05em;
   box-shadow: 0 2px 10px rgba(255,82,82,.35);
   letter-spacing: .5px;
 }
-.countdown.ended {
-  background: #999;
-  box-shadow: none;
-  font-size: 1em;
-}
+.countdown.ended { background: #999; box-shadow: none; font-size: 1em; }
+.countdown.free  { background: linear-gradient(90deg, #4caf50, #8bc34a); box-shadow: 0 2px 10px rgba(76,175,80,.35); }
 .countdown .num {
-  display: inline-block;
-  min-width: 2.2em;
-  padding: 2px 6px;
-  margin: 0 2px;
-  background: rgba(0,0,0,.18);
-  border-radius: 4px;
+  display: inline-block; min-width: 2.2em; padding: 2px 6px; margin: 0 2px;
+  background: rgba(0,0,0,.18); border-radius: 4px;
   font-variant-numeric: tabular-nums;
   font-family: "SF Mono", Menlo, Consolas, monospace;
 }
@@ -108,7 +95,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   .votes { font-size: 1em; margin: 4px 0; }
   button { padding: 8px 2px; font-size: .85em; }
   .btns { gap: 4px; margin-top: 5px; }
-
   .podium { padding: 10px; margin-bottom: 12px; }
   .podium-title { font-size: 1.1em; margin-bottom: 10px; }
   .podium-grid { gap: 6px; }
@@ -124,7 +110,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 <body>
 <h1>🍽️ 月度好菜投票</h1>
 
-<!-- ⏰ 倒计时条 -->
 <div class="countdown" id="countdown">⏰ 计算中...</div>
 
 <div class="month-tip" id="month-tip">📅 加载中...</div>
@@ -163,10 +148,10 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   // ✅ 图片走 jsDelivr CDN
   var CDN = 'https://cdn.jsdelivr.net/gh/WUBAT964/images@main';
 
-  // ⏰ 投票截止时间（北京时间 2026-10-12 00:00:00）
-  var DEADLINE = new Date('2026-10-12T00:00:00+08:00').getTime();
+  // ⏰ 当前显示月份 & 该月截止时间（由后端 /api/vote_status 返回）
+  var currentMonth = '';        // 例如 "2026-09"
+  var DEADLINE = null;          // null = 不限制；数字 = 时间戳
 
-  // ✅ 旧中文名 → 新拼音名 映射（后端数据库里还是旧名）
   var NAME_MAP = {
     "1_炆行鸡.jpg":             "1_wenxingji.jpg",
     "2_酸汤猪脚.jpg":           "2_suantangzhujiao.jpg",
@@ -209,13 +194,11 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     if (p.length >= 3) return p[1] + '月' + p[2] + '日';
     return s;
   }
-
-  // 投票是否还开放
   function isVoteOpen(){
+    if (DEADLINE === null) return true;   // 该月未设置截止 = 一直开放
     return Date.now() < DEADLINE;
   }
 
-  // ✅ 图片地址：去前缀 → 映射旧名 → 拼 CDN
   function imgUrl(f){
     if (!f) return '';
     f = String(f).trim();
@@ -227,23 +210,31 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   }
 
   // ============ ⏰ 倒计时 ============
-  var lastOpenState = null;  // 上一次的开放状态，用于检测状态翻转
+  var lastOpenState = null;
 
-  function pad2(n){
-    return n < 10 ? '0' + n : String(n);
-  }
+  function pad2(n){ return n < 10 ? '0' + n : String(n); }
 
   function updateCountdown(){
     var el = $('countdown');
     if (!el) return;
-    var now = Date.now();
-    var diff = DEADLINE - now;
 
+    // 情况1：当前月没有设置截止时间
+    if (DEADLINE === null){
+      el.className = 'countdown free';
+      el.innerHTML = '⏰ ' + (currentMonth || '当前') + ' 投票进行中（未设截止）';
+      if (lastOpenState !== true){
+        lastOpenState = true;
+        render();
+      }
+      return;
+    }
+
+    var diff = DEADLINE - Date.now();
+
+    // 情况2：已结束
     if (diff <= 0){
-      // 到点，投票结束
       el.className = 'countdown ended';
-      el.innerHTML = '⏰ 投票已结束 · 感谢参与';
-      // 状态翻转 → 重新 render 一次，禁用所有按钮
+      el.innerHTML = '⏰ ' + currentMonth + ' 投票已结束 · 感谢参与';
       if (lastOpenState !== false){
         lastOpenState = false;
         render();
@@ -251,13 +242,10 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       return;
     }
 
-    // 还没到点
+    // 情况3：还有倒计时
     if (lastOpenState !== true){
       lastOpenState = true;
-      // 如果之前是结束状态，现在又变成开放（理论上不会），重新 render
-      if (lastOpenState === true && $('grid').children.length > 0){
-        render();
-      }
+      if ($('grid').children.length > 0) render();
     }
 
     var days = Math.floor(diff / 86400000);
@@ -267,7 +255,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 
     el.className = 'countdown';
     el.innerHTML =
-      '⏰ 距投票结束还有 ' +
+      '⏰ ' + currentMonth + ' 投票还剩 ' +
       '<span class="num">' + days + '</span>天 ' +
       '<span class="num">' + pad2(hours) + '</span>:' +
       '<span class="num">' + pad2(mins) + '</span>:' +
@@ -342,7 +330,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       addBtn.className = 'add';
       addBtn.type = 'button';
       addBtn.textContent = voteOpen ? '投一票' : '已结束';
-      // ⏰ 投票结束后禁用 + 投满 3 票也禁用
       if (maxed || !voteOpen) addBtn.disabled = true;
       addBtn.setAttribute('data-id', id);
       addBtn.setAttribute('data-act', 'add');
@@ -460,9 +447,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   }
 
   function doVote(id, act, btn){
-    // ⏰ 投票时间检查（即使按钮被绕过也拦得住）
+    // ⏰ 时间检查（前端拦一层）
     if (!isVoteOpen()){
-      alert('本次投票已于 2026-10-12 00:00 结束，感谢参与！');
+      alert('本次投票已结束！');
       render();
       return;
     }
@@ -478,17 +465,27 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ dish_id: id, action: act, phone: user.phone })
     })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
+    .then(function(r){
+      return r.json().then(function(j){ return { status: r.status, data: j }; });
+    })
+    .then(function(res){
       btn.disabled = false;
       btn.textContent = oldText;
+      var data = res.data;
       if (data.success){
         votes[id] = data.count;
         user.votes = data.myVotes || {};
         localStorage.setItem('chef_user', JSON.stringify(user));
         render();
       } else {
+        // 后端返回的错误（含"投票已结束"）
         alert(data.error || '失败');
+        if (res.status === 403){
+          // 后端说结束了，同步前端
+          DEADLINE = 0;
+          updateCountdown();
+          render();
+        }
       }
     })
     .catch(function(){
@@ -520,9 +517,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 
   $('btn-reg').onclick = submitRegister;
 
+  // ============ 初始化 ============
+
   function init(){
-    // 先启动倒计时，页面一打开就能看到
-    updateCountdown();
     setInterval(updateCountdown, 1000);
 
     fetch(API + '/api/current_month')
@@ -536,8 +533,11 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       .then(function(r){ return r.json(); })
       .then(function(all){
         var tip = $('month-tip');
+        var month;
+
         if (targetMonth){
           dishes = all.filter(function(d){ return (d.date || '').indexOf(targetMonth) === 0; });
+          month = targetMonth;
           tip.textContent = '📅 当前月份：' + targetMonth + '（共 ' + dishes.length + ' 道菜）';
         } else {
           var months = {};
@@ -549,16 +549,40 @@ button:disabled { background: #ccc; cursor: not-allowed; }
           var latest = arr[arr.length - 1] || '';
           if (latest){
             dishes = all.filter(function(d){ return (d.date || '').indexOf(latest) === 0; });
+            month = latest;
             tip.textContent = '📅 当前月份：' + latest + '（自动）';
           } else {
             dishes = all;
+            month = '';
             tip.textContent = '📅 显示全部菜品';
           }
         }
+        currentMonth = month;
+
+        // 关键：问后端这个月的截止时间
+        return fetch(API + '/api/vote_status?month=' + encodeURIComponent(currentMonth))
+          .then(function(r){ return r.json(); })
+          .then(function(s){
+            if (s.deadline){
+              DEADLINE = new Date(s.deadline).getTime();
+            } else {
+              DEADLINE = null;
+            }
+            console.log('[vote_status]', currentMonth, 'deadline=', s.deadline, 'open=', s.open);
+          })
+          .catch(function(){
+            DEADLINE = null;   // 拉不到就默认不限制
+          });
+      })
+      .then(function(){
         dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
+        updateCountdown();
         loadVotes();
       })
-      .catch(function(){ $('month-tip').textContent = '📅 加载失败，请刷新'; });
+      .catch(function(){
+        $('month-tip').textContent = '📅 加载失败，请刷新';
+        updateCountdown();
+      });
   }
 
   function loadVotes(){
