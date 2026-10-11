@@ -9,6 +9,7 @@
 body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 14px; font-size: 16px; }
 h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
+/* ⏰ 倒计时条：颜色变化加过渡 */
 .countdown {
   text-align: center; font-weight: bold; color: #fff;
   background: linear-gradient(90deg, #ff5252, #ff9800);
@@ -16,90 +17,160 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   max-width: 480px; font-size: 1.05em;
   box-shadow: 0 2px 10px rgba(255,82,82,.35);
   letter-spacing: .5px;
+  transition: background .5s ease, box-shadow .5s ease, transform .3s ease;
 }
-.countdown.ended { background: #999; box-shadow: none; font-size: 1em; }
+.countdown.ended { background: linear-gradient(90deg, #999, #777); box-shadow: none; font-size: 1em; }
 .countdown.free  { background: linear-gradient(90deg, #4caf50, #8bc34a); box-shadow: 0 2px 10px rgba(76,175,80,.35); }
 .countdown .num {
   display: inline-block; min-width: 2.2em; padding: 2px 6px; margin: 0 2px;
   background: rgba(0,0,0,.18); border-radius: 4px;
   font-variant-numeric: tabular-nums;
   font-family: "SF Mono", Menlo, Consolas, monospace;
+  transition: background .3s ease;
 }
 
-/* 📅 月份切换按钮 */
-.month-switcher {
+/* 📅 月份下拉菜单 */
+.month-picker {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   justify-content: center;
-  max-width: 600px;
+  align-items: center;
+  gap: 8px;
+  max-width: 480px;
   margin: 0 auto 12px;
-  padding: 0 4px;
+  animation: fadeSlideIn .5s ease both;
 }
-.month-switcher button {
-  flex: 0 0 auto;
-  padding: 8px 16px;
-  background: #fff;
+.month-picker label {
   color: #555;
-  border: 2px solid #ddd;
-  border-radius: 20px;
-  font-size: .95em;
   font-weight: 600;
-  cursor: pointer;
+  font-size: .95em;
+}
+.month-picker select {
+  flex: 1;
+  max-width: 220px;
+  padding: 10px 14px;
+  font-size: 1em;
+  font-weight: 600;
   font-family: inherit;
-  transition: all .2s;
+  color: #333;
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
   -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%3E%3Cpath%20fill%3D%22%23555%22%20d%3D%22M6%208L0%200h12z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  transition: border-color .25s ease, box-shadow .25s ease, transform .15s ease;
 }
-.month-switcher button:hover {
+.month-picker select:hover {
   border-color: #007bff;
-  color: #007bff;
 }
-.month-switcher button.active {
-  background: #007bff;
-  color: #fff;
+.month-picker select:focus {
+  outline: none;
   border-color: #007bff;
-  box-shadow: 0 3px 10px rgba(0,123,255,.35);
+  box-shadow: 0 0 0 3px rgba(0,123,255,.15);
 }
-.month-switcher button.ended {
-  background: #f0f0f0;
-  color: #aaa;
-  border-color: #e5e5e5;
-  text-decoration: line-through;
-}
-.month-switcher button.active.ended {
-  background: #999;
-  color: #fff;
-  border-color: #999;
-  text-decoration: none;
+.month-picker select:active {
+  transform: scale(0.98);
 }
 
-.month-tip { text-align: center; font-weight: bold; color: #fff; background: #ff9800; padding: 10px; border-radius: 8px; margin: 0 auto 18px; max-width: 480px; font-size: 1em; }
-.user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em; }
+.month-tip {
+  text-align: center; font-weight: bold; color: #fff; background: #ff9800;
+  padding: 10px; border-radius: 8px; margin: 0 auto 18px; max-width: 480px; font-size: 1em;
+  transition: background .4s ease, opacity .3s ease;
+  animation: fadeSlideIn .5s ease .05s both;
+}
+.user-info {
+  text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em;
+  animation: fadeSlideIn .5s ease .1s both;
+}
 
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 1300px; margin: 0 auto; }
-.card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); display: flex; flex-direction: column; }
-.card img { width: 100%; height: 220px; object-fit: cover; display: block; background: #eee; cursor: pointer; }
+/* 📦 菜品网格：切换时的淡出/淡入 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 1300px;
+  margin: 0 auto;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.grid.fading-out {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.card {
+  background: #fff; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  display: flex; flex-direction: column;
+  transition: transform .25s ease, box-shadow .25s ease;
+  /* 卡片入场动画 */
+  opacity: 0;
+  transform: translateY(12px);
+  animation: cardIn .45s cubic-bezier(.22,.61,.36,1) both;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.15);
+}
+.card img { width: 100%; height: 220px; object-fit: cover; display: block; background: #eee; cursor: pointer; transition: transform .4s ease; }
+.card img:hover { transform: scale(1.03); }
 .no-img { width: 100%; height: 220px; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: 1em; }
 
 .info { padding: 12px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
 .name { font-weight: bold; color: #333; font-size: 1.15em; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chef { color: #007bff; margin: 4px 0; font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .date { color: #888; font-size: .95em; }
-.votes { color: #ff9800; font-weight: bold; font-size: 1.15em; margin: 6px 0; }
+.votes {
+  color: #ff9800; font-weight: bold; font-size: 1.15em; margin: 6px 0;
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), color .3s ease;
+}
+.votes.bump {
+  transform: scale(1.25);
+  color: #ff5722;
+}
 .btns { display: flex; gap: 6px; margin-top: 8px; }
-button { flex: 1; padding: 11px 2px; border: none; border-radius: 6px; color: #fff; font-size: 1em; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
+button {
+  flex: 1; padding: 11px 2px; border: none; border-radius: 6px; color: #fff;
+  font-size: 1em; cursor: pointer; font-family: inherit; -webkit-appearance: none;
+  transition: background .2s ease, transform .1s ease, opacity .2s ease;
+}
+button:not(:disabled):hover { filter: brightness(1.1); }
+button:not(:disabled):active { transform: scale(0.96); }
 .add { background: #007bff; }
 .remove { background: #6c757d; }
-button:disabled { background: #ccc; cursor: not-allowed; }
+button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
-.podium { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+/* 🏆 领奖台 */
+.podium {
+  background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  animation: fadeSlideIn .6s ease .15s both;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.podium.fading-out { opacity: 0; transform: translateY(10px); }
 .podium-title { text-align: center; color: #ff9800; font-weight: bold; margin-bottom: 14px; font-size: 1.3em; }
 .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.podium-card { border-radius: 10px; overflow: hidden; position: relative; border: 3px solid #eee; background: #fff; }
+.podium-card {
+  border-radius: 10px; overflow: hidden; position: relative; border: 3px solid #eee; background: #fff;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: podiumIn .55s cubic-bezier(.22,.61,.36,1) both;
+  transition: box-shadow .3s ease;
+}
+.podium-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,.15); }
 .podium-card.r1 { border-color: #FFD700; }
 .podium-card.r2 { border-color: #C0C0C0; }
 .podium-card.r3 { border-color: #CD7F32; }
-.podium-badge { position: absolute; top: 8px; left: 8px; padding: 4px 10px; border-radius: 12px; font-size: .85em; font-weight: bold; background: #FFD700; color: #333; z-index: 2; }
+.podium-badge {
+  position: absolute; top: 8px; left: 8px; padding: 4px 10px; border-radius: 12px;
+  font-size: .85em; font-weight: bold; background: #FFD700; color: #333; z-index: 2;
+  animation: badgePop .5s cubic-bezier(.34,1.56,.64,1) .2s both;
+}
 .podium-card.r2 .podium-badge { background: #C0C0C0; }
 .podium-card.r3 .podium-badge { background: #CD7F32; color: #fff; }
 
@@ -112,27 +183,58 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 .podium-date { color: #888; font-size: .95em; margin-top: 4px; }
 .podium-votes { color: #ff9800; font-weight: bold; margin-top: 6px; font-size: 1.2em; }
 
-.modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); justify-content: center; align-items: center; }
-.modal.show { display: flex; }
-.modal-box { background: #fff; padding: 28px; border-radius: 12px; width: 88%; max-width: 400px; text-align: center; }
+.modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); justify-content: center; align-items: center; opacity: 0; transition: opacity .3s ease; }
+.modal.show { display: flex; opacity: 1; }
+.modal-box {
+  background: #fff; padding: 28px; border-radius: 12px; width: 88%; max-width: 400px; text-align: center;
+  transform: scale(0.9); transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.modal.show .modal-box { transform: scale(1); }
 .modal-box h2 { margin: 0 0 12px; color: #333; font-size: 1.4em; }
 .modal-box p { color: #666; font-size: 1em; margin: 0 0 14px; }
-.modal-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 1.05em; font-family: inherit; box-sizing: border-box; -webkit-appearance: none; }
+.modal-box input {
+  width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px;
+  font-size: 1.05em; font-family: inherit; box-sizing: border-box; -webkit-appearance: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.modal-box input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,.15); }
 .modal-box button { width: 100%; padding: 13px; background: #007bff; color: #fff; border: none; border-radius: 6px; font-size: 1.1em; margin-top: 10px; }
 .err { color: #d9534f; font-size: .95em; margin-bottom: 8px; display: none; }
 
-.viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; justify-content: center; align-items: center; }
-.viewer.show { display: flex; }
-.viewer img { max-width: 95%; max-height: 90%; object-fit: contain; }
-.viewer-close { position: absolute; top: 10px; right: 15px; color: #fff; font-size: 36px; font-weight: bold; cursor: pointer; padding: 5px 14px; line-height: 1; background: rgba(255,255,255,.1); border-radius: 50%; }
+.viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.92); z-index: 99999; justify-content: center; align-items: center; opacity: 0; transition: opacity .3s ease; }
+.viewer.show { display: flex; opacity: 1; }
+.viewer img { max-width: 95%; max-height: 90%; object-fit: contain; transform: scale(0.95); transition: transform .35s cubic-bezier(.22,.61,.36,1); }
+.viewer.show img { transform: scale(1); }
+.viewer-close { position: absolute; top: 10px; right: 15px; color: #fff; font-size: 36px; font-weight: bold; cursor: pointer; padding: 5px 14px; line-height: 1; background: rgba(255,255,255,.1); border-radius: 50%; transition: background .2s ease, transform .2s ease; }
+.viewer-close:hover { background: rgba(255,255,255,.25); transform: rotate(90deg); }
+
+/* ============ 动画关键帧 ============ */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes podiumIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes badgePop {
+  0%   { opacity: 0; transform: scale(0.5) rotate(-15deg); }
+  60%  { opacity: 1; transform: scale(1.15) rotate(5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
 
 @media (max-width: 768px) {
   body { padding: 8px; font-size: 15px; }
   h1 { font-size: 1.5em; }
   .countdown { font-size: .9em; padding: 9px; margin-bottom: 10px; }
   .countdown .num { min-width: 1.8em; padding: 1px 4px; }
-  .month-switcher { gap: 6px; margin-bottom: 10px; }
-  .month-switcher button { padding: 6px 12px; font-size: .85em; }
+  .month-picker { margin-bottom: 10px; }
+  .month-picker select { padding: 8px 12px; font-size: .95em; padding-right: 32px; background-position: right 10px center; }
+  .month-picker label { font-size: .9em; }
   .month-tip { font-size: .9em; padding: 8px; margin-bottom: 12px; }
   .user-info { font-size: .95em; }
   .grid { gap: 6px; }
@@ -154,6 +256,14 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   .podium-date { font-size: .8em; margin-top: 3px; }
   .podium-votes { font-size: 1em; margin-top: 4px; }
 }
+
+/* 尊重用户系统设置：关闭动画 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -161,8 +271,12 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 
 <div class="countdown" id="countdown">⏰ 计算中...</div>
 
-<!-- 📅 月份切换按钮 -->
-<div class="month-switcher" id="month-switcher"></div>
+<div class="month-picker">
+  <label for="month-select">📅 月份：</label>
+  <select id="month-select">
+    <option value="">加载中...</option>
+  </select>
+</div>
 
 <div class="month-tip" id="month-tip">📅 加载中...</div>
 <div class="user-info" id="user-info"></div>
@@ -220,8 +334,8 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 
   var votes = {};
   var dishes = [];
-  var allDishesCache = [];      // 全量菜品缓存（切换月份时从中过滤）
-  var monthDeadlines = {};      // { "2026-09": {open, deadline}, ... }
+  var allDishesCache = [];
+  var monthDeadlines = {};
   var user = null;
   try { user = JSON.parse(localStorage.getItem('chef_user') || 'null'); } catch(e) { user = null; }
 
@@ -267,9 +381,19 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     var el = $('countdown');
     if (!el) return;
 
+    if (!currentMonth){
+      el.className = 'countdown free';
+      el.innerHTML = '📅 全部月份汇总 · 选择上方月份查看倒计时';
+      if (lastOpenState !== 'all'){
+        lastOpenState = 'all';
+        render();
+      }
+      return;
+    }
+
     if (DEADLINE === null){
       el.className = 'countdown free';
-      el.innerHTML = '⏰ ' + (currentMonth || '当前') + ' 投票进行中（未设截止）';
+      el.innerHTML = '⏰ ' + currentMonth + ' 投票进行中（未设截止）';
       if (lastOpenState !== true){
         lastOpenState = true;
         render();
@@ -308,105 +432,118 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       '<span class="num">' + pad2(secs) + '</span>';
   }
 
-  // ============ 📅 月份切换 ============
+  // ============ 📅 月份下拉菜单 ============
 
-  function renderMonthSwitcher(months){
-    var el = $('month-switcher');
-    if (!el) return;
-    el.innerHTML = '';
+  function renderMonthSelect(months){
+    var sel = $('month-select');
+    if (!sel) return;
+    sel.innerHTML = '';
 
-    if (months.length === 0){
-      el.style.display = 'none';
-      return;
-    }
-    el.style.display = 'flex';
-
-    // 加"全部"按钮
-    var allBtn = document.createElement('button');
-    allBtn.type = 'button';
-    allBtn.className = 'month-btn';
-    allBtn.textContent = '全部';
-    allBtn.setAttribute('data-month', '');
-    allBtn.onclick = function(){
-      if (currentMonth === '') return;
-      loadMonth('');
-    };
-    el.appendChild(allBtn);
+    var optAll = document.createElement('option');
+    optAll.value = '';
+    optAll.textContent = '全部月份（汇总）';
+    sel.appendChild(optAll);
 
     months.forEach(function(m){
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'month-btn';
-      btn.textContent = m;
-      btn.setAttribute('data-month', m);
-      btn.onclick = function(){
-        if (currentMonth === m) return;
-        loadMonth(m);
-      };
-      el.appendChild(btn);
-    });
-  }
-
-  function updateMonthSwitcherUI(){
-    var el = $('month-switcher');
-    if (!el) return;
-    var btns = el.querySelectorAll('.month-btn');
-    for (var i = 0; i < btns.length; i++){
-      var m = btns[i].getAttribute('data-month');
-      var cls = 'month-btn';
-      if (m === currentMonth) cls += ' active';
-      // 该月已结束 → 灰化 + 删除线
+      var opt = document.createElement('option');
+      opt.value = m;
       var info = monthDeadlines[m];
-      if (info && info.open === false) cls += ' ended';
-      btns[i].className = cls;
+      var suffix = '';
+      if (info){
+        suffix = info.open === false ? '  🔴已结束' : '  🟢进行中';
+      }
+      opt.textContent = m + suffix;
+      sel.appendChild(opt);
+    });
+
+    sel.onchange = function(){
+      var v = sel.value;
+      if (v === currentMonth) return;
+      loadMonth(v);
+    };
+  }
+
+  function updateMonthSelectUI(){
+    var sel = $('month-select');
+    if (!sel) return;
+    sel.value = currentMonth;
+
+    for (var i = 0; i < sel.options.length; i++){
+      var opt = sel.options[i];
+      var m = opt.value;
+      if (!m){
+        opt.textContent = '全部月份（汇总）';
+        continue;
+      }
+      var info = monthDeadlines[m];
+      var suffix = '';
+      if (info){
+        suffix = info.open === false ? '  🔴已结束' : '  🟢进行中';
+      }
+      opt.textContent = m + suffix;
     }
   }
 
-  // 切换月份
+  // ✅ 切换月份：先淡出，等过渡完成再更新内容
   function loadMonth(month){
-    currentMonth = month || '';
-    var tip = $('month-tip');
+    var grid = $('grid');
+    var podium = $('podium');
 
-    if (!currentMonth){
-      dishes = allDishesCache.slice();
-      tip.textContent = '📅 显示全部菜品（共 ' + dishes.length + ' 道）';
-    } else {
-      dishes = allDishesCache.filter(function(d){
-        return (d.date || '').indexOf(currentMonth) === 0;
-      });
-      tip.textContent = '📅 ' + currentMonth + ' 菜品（共 ' + dishes.length + ' 道）';
+    // 加 fading-out 类触发淡出
+    grid.classList.add('fading-out');
+    if (podium.style.display !== 'none') {
+      podium.classList.add('fading-out');
     }
 
-    updateMonthSwitcherUI();
+    var doUpdate = function(){
+      currentMonth = month || '';
+      var tip = $('month-tip');
 
-    // 获取该月截止时间
-    var url = API + '/api/vote_status';
-    if (currentMonth) url += '?month=' + encodeURIComponent(currentMonth);
+      if (!currentMonth){
+        dishes = allDishesCache.slice();
+        tip.textContent = '📅 显示全部菜品（共 ' + dishes.length + ' 道）';
+      } else {
+        dishes = allDishesCache.filter(function(d){
+          return (d.date || '').indexOf(currentMonth) === 0;
+        });
+        tip.textContent = '📅 ' + currentMonth + ' 菜品（共 ' + dishes.length + ' 道）';
+      }
 
-    fetch(url)
-      .then(function(r){ return r.json(); })
-      .then(function(s){
-        if (currentMonth && s.deadline){
-          var t = Date.parse(s.deadline);
-          if (isNaN(t)) t = Date.parse(s.deadline.replace(/\+08:00$/, ''));
-          DEADLINE = isNaN(t) ? null : t;
-        } else if (!currentMonth){
-          // 显示全部时，不限制投票
+      updateMonthSelectUI();
+
+      var url = API + '/api/vote_status';
+      if (currentMonth) url += '?month=' + encodeURIComponent(currentMonth);
+
+      fetch(url)
+        .then(function(r){ return r.json(); })
+        .then(function(s){
+          if (currentMonth && s.deadline){
+            var t = Date.parse(s.deadline);
+            if (isNaN(t)) t = Date.parse(s.deadline.replace(/\+08:00$/, ''));
+            DEADLINE = isNaN(t) ? null : t;
+          } else {
+            DEADLINE = null;
+          }
+          lastOpenState = null;
+        })
+        .catch(function(){
           DEADLINE = null;
-        } else {
-          DEADLINE = null;
-        }
-        lastOpenState = null;   // 重置，让倒计时重新判定
-      })
-      .catch(function(){
-        DEADLINE = null;
-        lastOpenState = null;
-      })
-      .then(function(){
-        dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
-        updateCountdown();
-        loadVotes();
-      });
+          lastOpenState = null;
+        })
+        .then(function(){
+          dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
+          updateCountdown();
+          loadVotes();
+          // 移除 fading-out，触发淡入
+          requestAnimationFrame(function(){
+            grid.classList.remove('fading-out');
+            podium.classList.remove('fading-out');
+          });
+        });
+    };
+
+    // 250ms 后（对应 CSS transition 时长）执行更新
+    setTimeout(doUpdate, 250);
   }
 
   // ============ 渲染 ============
@@ -417,6 +554,10 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     var voteOpen = isVoteOpen();
     var maxed = getTotalVoted() >= 3;
 
+    // 保存旧的票数，用于"票数跳动"动画
+    var oldVotes = {};
+    for (var k in votes) { oldVotes[k] = votes[k]; }
+
     for (var i = 0; i < dishes.length; i++){
       var d = dishes[i];
       var id = String(d.id);
@@ -426,6 +567,8 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 
       var card = document.createElement('div');
       card.className = 'card';
+      // 卡片错峰入场：每个延迟 30ms
+      card.style.animationDelay = (i * 0.03) + 's';
 
       var imgEl;
       if (url){
@@ -468,6 +611,11 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       votesEl.className = 'votes';
       votesEl.id = 'v-' + id;
       votesEl.textContent = total + ' 票';
+      // 票数变了 → 加 bump 动画
+      if (oldVotes[id] !== undefined && oldVotes[id] !== total){
+        votesEl.classList.add('bump');
+        setTimeout((function(el){ return function(){ el.classList.remove('bump'); }; })(votesEl), 400);
+      }
       info.appendChild(votesEl);
 
       var btns = document.createElement('div');
@@ -518,6 +666,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       var badge = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
       var card = document.createElement('div');
       card.className = 'podium-card r' + rank;
+      card.style.animationDelay = (i * 0.08) + 's';
 
       var badgeEl = document.createElement('div');
       badgeEl.className = 'podium-badge';
@@ -626,7 +775,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       } else {
         alert(data.error || '失败');
         if (res.status === 403){
-          // 后端说结束了，同步前端
           if (DEADLINE !== null) DEADLINE = Math.min(DEADLINE, Date.now() - 1);
           updateCountdown();
           render();
@@ -647,7 +795,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   }
   function closeViewer(){
     viewer.className = 'viewer';
-    $('viewer-img').src = '';
+    setTimeout(function(){ $('viewer-img').src = ''; }, 300);
   }
   $('viewer-close').onclick = closeViewer;
   viewer.onclick = function(e){ if (e.target === viewer) closeViewer(); };
@@ -655,8 +803,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   document.addEventListener('click', function(e){
     var t = e.target;
     if (!t || t.tagName.toLowerCase() !== 'button') return;
-    // 跳过月份按钮（有自己的 onclick）
-    if (t.classList && t.classList.contains('month-btn')) return;
     var id = t.getAttribute('data-id');
     var act = t.getAttribute('data-act');
     if (id && act) doVote(id, act, t);
@@ -669,13 +815,11 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   function init(){
     setInterval(updateCountdown, 1000);
 
-    // 1. 一次性拉全部菜品
     fetch(API + '/api/dishes')
       .then(function(r){ return r.json(); })
       .then(function(all){
         allDishesCache = all || [];
 
-        // 2. 提取月份
         var monthSet = {};
         allDishesCache.forEach(function(d){
           var m = (d.date || '').slice(0, 7);
@@ -683,22 +827,24 @@ button:disabled { background: #ccc; cursor: not-allowed; }
         });
         var months = Object.keys(monthSet).sort();
 
-        // 3. 拉所有月份的投票状态（用于按钮灰化）
         return fetch(API + '/api/vote_status')
           .then(function(r){ return r.json(); })
           .then(function(s){
             monthDeadlines = s.deadlines || {};
-            renderMonthSwitcher(months);
+            renderMonthSelect(months);
 
-            // 4. 决定初始月份
             return fetch(API + '/api/current_month')
               .then(function(r){ return r.json(); })
               .then(function(m){
-                var target = m.month || '';
-                if (!target && months.length > 0){
-                  target = months[months.length - 1];
-                }
-                return target;
+                var target = (m.month || '').trim();
+                if (target && months.indexOf(target) !== -1) return target;
+                var openMonths = months.filter(function(mm){
+                  var info = monthDeadlines[mm];
+                  return info && info.open !== false;
+                });
+                if (openMonths.length > 0) return openMonths[openMonths.length - 1];
+                if (months.length > 0) return months[months.length - 1];
+                return '';
               });
           });
       })
@@ -740,7 +886,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       .catch(function(){});
   }
 
-  // 每 15 秒刷新票数 + 月份状态
   setInterval(function(){
     if (document.hidden) return;
     fetch(API + '/api/votes')
@@ -754,12 +899,11 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       })
       .catch(function(){});
 
-    // 顺便刷新月份按钮的结束状态
     fetch(API + '/api/vote_status')
       .then(function(r){ return r.json(); })
       .then(function(s){
         monthDeadlines = s.deadlines || {};
-        updateMonthSwitcherUI();
+        updateMonthSelectUI();
       })
       .catch(function(){});
   }, 15000);
