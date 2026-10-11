@@ -12,7 +12,7 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .countdown {
   text-align: center; font-weight: bold; color: #fff;
   background: linear-gradient(90deg, #ff5252, #ff9800);
-  padding: 12px; border-radius: 8px; margin: 0 auto 14px;
+  padding: 12px; border-radius: 8px; margin: 0 auto 12px;
   max-width: 480px; font-size: 1.05em;
   box-shadow: 0 2px 10px rgba(255,82,82,.35);
   letter-spacing: .5px;
@@ -26,7 +26,54 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   font-family: "SF Mono", Menlo, Consolas, monospace;
 }
 
-.month-tip { text-align: center; font-weight: bold; color: #fff; background: #ff9800; padding: 12px; border-radius: 8px; margin: 0 auto 18px; max-width: 480px; font-size: 1.05em; }
+/* 📅 月份切换按钮 */
+.month-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto 12px;
+  padding: 0 4px;
+}
+.month-switcher button {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  background: #fff;
+  color: #555;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  font-size: .95em;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+  -webkit-appearance: none;
+}
+.month-switcher button:hover {
+  border-color: #007bff;
+  color: #007bff;
+}
+.month-switcher button.active {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+  box-shadow: 0 3px 10px rgba(0,123,255,.35);
+}
+.month-switcher button.ended {
+  background: #f0f0f0;
+  color: #aaa;
+  border-color: #e5e5e5;
+  text-decoration: line-through;
+}
+.month-switcher button.active.ended {
+  background: #999;
+  color: #fff;
+  border-color: #999;
+  text-decoration: none;
+}
+
+.month-tip { text-align: center; font-weight: bold; color: #fff; background: #ff9800; padding: 10px; border-radius: 8px; margin: 0 auto 18px; max-width: 480px; font-size: 1em; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em; }
 
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 1300px; margin: 0 auto; }
@@ -84,7 +131,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   h1 { font-size: 1.5em; }
   .countdown { font-size: .9em; padding: 9px; margin-bottom: 10px; }
   .countdown .num { min-width: 1.8em; padding: 1px 4px; }
-  .month-tip { font-size: .95em; padding: 10px; margin-bottom: 12px; }
+  .month-switcher { gap: 6px; margin-bottom: 10px; }
+  .month-switcher button { padding: 6px 12px; font-size: .85em; }
+  .month-tip { font-size: .9em; padding: 8px; margin-bottom: 12px; }
   .user-info { font-size: .95em; }
   .grid { gap: 6px; }
   .card img, .no-img { height: 110px; }
@@ -111,6 +160,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 <h1>🍽️ 月度好菜投票</h1>
 
 <div class="countdown" id="countdown">⏰ 计算中...</div>
+
+<!-- 📅 月份切换按钮 -->
+<div class="month-switcher" id="month-switcher"></div>
 
 <div class="month-tip" id="month-tip">📅 加载中...</div>
 <div class="user-info" id="user-info"></div>
@@ -142,15 +194,11 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 (function(){
   "use strict";
 
-  // ⚠️ 后端接口地址（隧道变了就改这一行）
   var API = 'https://exemption-eliminate-watts-merchant.trycloudflare.com';
-
-  // ✅ 图片走 jsDelivr CDN
   var CDN = 'https://cdn.jsdelivr.net/gh/WUBAT964/images@main';
 
-  // ⏰ 当前显示月份 & 该月截止时间（由后端 /api/vote_status 返回）
-  var currentMonth = '';        // 例如 "2026-09"
-  var DEADLINE = null;          // null = 不限制；数字 = 时间戳
+  var currentMonth = '';
+  var DEADLINE = null;
 
   var NAME_MAP = {
     "1_炆行鸡.jpg":             "1_wenxingji.jpg",
@@ -172,6 +220,8 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 
   var votes = {};
   var dishes = [];
+  var allDishesCache = [];      // 全量菜品缓存（切换月份时从中过滤）
+  var monthDeadlines = {};      // { "2026-09": {open, deadline}, ... }
   var user = null;
   try { user = JSON.parse(localStorage.getItem('chef_user') || 'null'); } catch(e) { user = null; }
 
@@ -195,10 +245,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     return s;
   }
   function isVoteOpen(){
-    if (DEADLINE === null) return true;   // 该月未设置截止 = 一直开放
+    if (DEADLINE === null) return true;
     return Date.now() < DEADLINE;
   }
-
   function imgUrl(f){
     if (!f) return '';
     f = String(f).trim();
@@ -218,7 +267,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     var el = $('countdown');
     if (!el) return;
 
-    // 情况1：当前月没有设置截止时间
     if (DEADLINE === null){
       el.className = 'countdown free';
       el.innerHTML = '⏰ ' + (currentMonth || '当前') + ' 投票进行中（未设截止）';
@@ -231,7 +279,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 
     var diff = DEADLINE - Date.now();
 
-    // 情况2：已结束
     if (diff <= 0){
       el.className = 'countdown ended';
       el.innerHTML = '⏰ ' + currentMonth + ' 投票已结束 · 感谢参与';
@@ -242,7 +289,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       return;
     }
 
-    // 情况3：还有倒计时
     if (lastOpenState !== true){
       lastOpenState = true;
       if ($('grid').children.length > 0) render();
@@ -260,6 +306,107 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       '<span class="num">' + pad2(hours) + '</span>:' +
       '<span class="num">' + pad2(mins) + '</span>:' +
       '<span class="num">' + pad2(secs) + '</span>';
+  }
+
+  // ============ 📅 月份切换 ============
+
+  function renderMonthSwitcher(months){
+    var el = $('month-switcher');
+    if (!el) return;
+    el.innerHTML = '';
+
+    if (months.length === 0){
+      el.style.display = 'none';
+      return;
+    }
+    el.style.display = 'flex';
+
+    // 加"全部"按钮
+    var allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = 'month-btn';
+    allBtn.textContent = '全部';
+    allBtn.setAttribute('data-month', '');
+    allBtn.onclick = function(){
+      if (currentMonth === '') return;
+      loadMonth('');
+    };
+    el.appendChild(allBtn);
+
+    months.forEach(function(m){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'month-btn';
+      btn.textContent = m;
+      btn.setAttribute('data-month', m);
+      btn.onclick = function(){
+        if (currentMonth === m) return;
+        loadMonth(m);
+      };
+      el.appendChild(btn);
+    });
+  }
+
+  function updateMonthSwitcherUI(){
+    var el = $('month-switcher');
+    if (!el) return;
+    var btns = el.querySelectorAll('.month-btn');
+    for (var i = 0; i < btns.length; i++){
+      var m = btns[i].getAttribute('data-month');
+      var cls = 'month-btn';
+      if (m === currentMonth) cls += ' active';
+      // 该月已结束 → 灰化 + 删除线
+      var info = monthDeadlines[m];
+      if (info && info.open === false) cls += ' ended';
+      btns[i].className = cls;
+    }
+  }
+
+  // 切换月份
+  function loadMonth(month){
+    currentMonth = month || '';
+    var tip = $('month-tip');
+
+    if (!currentMonth){
+      dishes = allDishesCache.slice();
+      tip.textContent = '📅 显示全部菜品（共 ' + dishes.length + ' 道）';
+    } else {
+      dishes = allDishesCache.filter(function(d){
+        return (d.date || '').indexOf(currentMonth) === 0;
+      });
+      tip.textContent = '📅 ' + currentMonth + ' 菜品（共 ' + dishes.length + ' 道）';
+    }
+
+    updateMonthSwitcherUI();
+
+    // 获取该月截止时间
+    var url = API + '/api/vote_status';
+    if (currentMonth) url += '?month=' + encodeURIComponent(currentMonth);
+
+    fetch(url)
+      .then(function(r){ return r.json(); })
+      .then(function(s){
+        if (currentMonth && s.deadline){
+          var t = Date.parse(s.deadline);
+          if (isNaN(t)) t = Date.parse(s.deadline.replace(/\+08:00$/, ''));
+          DEADLINE = isNaN(t) ? null : t;
+        } else if (!currentMonth){
+          // 显示全部时，不限制投票
+          DEADLINE = null;
+        } else {
+          DEADLINE = null;
+        }
+        lastOpenState = null;   // 重置，让倒计时重新判定
+      })
+      .catch(function(){
+        DEADLINE = null;
+        lastOpenState = null;
+      })
+      .then(function(){
+        dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
+        updateCountdown();
+        loadVotes();
+      });
   }
 
   // ============ 渲染 ============
@@ -447,7 +594,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   }
 
   function doVote(id, act, btn){
-    // ⏰ 时间检查（前端拦一层）
     if (!isVoteOpen()){
       alert('本次投票已结束！');
       render();
@@ -478,11 +624,10 @@ button:disabled { background: #ccc; cursor: not-allowed; }
         localStorage.setItem('chef_user', JSON.stringify(user));
         render();
       } else {
-        // 后端返回的错误（含"投票已结束"）
         alert(data.error || '失败');
         if (res.status === 403){
           // 后端说结束了，同步前端
-          DEADLINE = 0;
+          if (DEADLINE !== null) DEADLINE = Math.min(DEADLINE, Date.now() - 1);
           updateCountdown();
           render();
         }
@@ -510,6 +655,8 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   document.addEventListener('click', function(e){
     var t = e.target;
     if (!t || t.tagName.toLowerCase() !== 'button') return;
+    // 跳过月份按钮（有自己的 onclick）
+    if (t.classList && t.classList.contains('month-btn')) return;
     var id = t.getAttribute('data-id');
     var act = t.getAttribute('data-act');
     if (id && act) doVote(id, act, t);
@@ -522,62 +669,41 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   function init(){
     setInterval(updateCountdown, 1000);
 
-    fetch(API + '/api/current_month')
-      .then(function(r){ return r.json(); })
-      .then(function(m){ loadDishes(m.month || ''); })
-      .catch(function(){ loadDishes(''); });
-  }
-
-  function loadDishes(targetMonth){
+    // 1. 一次性拉全部菜品
     fetch(API + '/api/dishes')
       .then(function(r){ return r.json(); })
       .then(function(all){
-        var tip = $('month-tip');
-        var month;
+        allDishesCache = all || [];
 
-        if (targetMonth){
-          dishes = all.filter(function(d){ return (d.date || '').indexOf(targetMonth) === 0; });
-          month = targetMonth;
-          tip.textContent = '📅 当前月份：' + targetMonth + '（共 ' + dishes.length + ' 道菜）';
-        } else {
-          var months = {};
-          all.forEach(function(d){
-            var m = (d.date || '').slice(0, 7);
-            if (m) months[m] = 1;
-          });
-          var arr = Object.keys(months).sort();
-          var latest = arr[arr.length - 1] || '';
-          if (latest){
-            dishes = all.filter(function(d){ return (d.date || '').indexOf(latest) === 0; });
-            month = latest;
-            tip.textContent = '📅 当前月份：' + latest + '（自动）';
-          } else {
-            dishes = all;
-            month = '';
-            tip.textContent = '📅 显示全部菜品';
-          }
-        }
-        currentMonth = month;
+        // 2. 提取月份
+        var monthSet = {};
+        allDishesCache.forEach(function(d){
+          var m = (d.date || '').slice(0, 7);
+          if (m) monthSet[m] = true;
+        });
+        var months = Object.keys(monthSet).sort();
 
-        // 关键：问后端这个月的截止时间
-        return fetch(API + '/api/vote_status?month=' + encodeURIComponent(currentMonth))
+        // 3. 拉所有月份的投票状态（用于按钮灰化）
+        return fetch(API + '/api/vote_status')
           .then(function(r){ return r.json(); })
           .then(function(s){
-            if (s.deadline){
-              DEADLINE = new Date(s.deadline).getTime();
-            } else {
-              DEADLINE = null;
-            }
-            console.log('[vote_status]', currentMonth, 'deadline=', s.deadline, 'open=', s.open);
-          })
-          .catch(function(){
-            DEADLINE = null;   // 拉不到就默认不限制
+            monthDeadlines = s.deadlines || {};
+            renderMonthSwitcher(months);
+
+            // 4. 决定初始月份
+            return fetch(API + '/api/current_month')
+              .then(function(r){ return r.json(); })
+              .then(function(m){
+                var target = m.month || '';
+                if (!target && months.length > 0){
+                  target = months[months.length - 1];
+                }
+                return target;
+              });
           });
       })
-      .then(function(){
-        dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
-        updateCountdown();
-        loadVotes();
+      .then(function(target){
+        loadMonth(target);
       })
       .catch(function(){
         $('month-tip').textContent = '📅 加载失败，请刷新';
@@ -614,6 +740,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       .catch(function(){});
   }
 
+  // 每 15 秒刷新票数 + 月份状态
   setInterval(function(){
     if (document.hidden) return;
     fetch(API + '/api/votes')
@@ -624,6 +751,15 @@ button:disabled { background: #ccc; cursor: not-allowed; }
           if (v[k] !== votes[k]){ changed = true; break; }
         }
         if (changed){ votes = v; render(); }
+      })
+      .catch(function(){});
+
+    // 顺便刷新月份按钮的结束状态
+    fetch(API + '/api/vote_status')
+      .then(function(r){ return r.json(); })
+      .then(function(s){
+        monthDeadlines = s.deadlines || {};
+        updateMonthSwitcherUI();
       })
       .catch(function(){});
   }, 15000);
