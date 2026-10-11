@@ -33,7 +33,6 @@ body > * {
   z-index: 1;
 }
 
-/* 🎨 关闭渐变背景 */
 body.no-gradient {
   background: #f4f7f6 !important;
   background-attachment: scroll !important;
@@ -288,9 +287,10 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 }
 .fab-admin .icon { font-size: 1.1em; }
 
-/* ============ 👑 管理面板（FLIP 动画） ============ */
+/* ============ 👑 管理面板（修复关闭动画） ============ */
 .admin-modal {
-  display: none;
+  /* ✅ 关键修复：默认 display:flex，用 visibility 控制显隐 */
+  display: flex;
   position: fixed;
   z-index: 10001;
   inset: 0;
@@ -298,12 +298,16 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   justify-content: center;
   align-items: center;
   padding: 16px;
+  visibility: hidden;
   opacity: 0;
-  transition: opacity .3s ease;
+  pointer-events: none;
+  transition: opacity .3s ease, visibility 0s .3s;
 }
 .admin-modal.show {
-  display: flex;
+  visibility: visible;
   opacity: 1;
+  pointer-events: auto;
+  transition: opacity .3s ease, visibility 0s 0s;
 }
 .admin-box {
   background: #fff;
@@ -351,7 +355,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   user-select: all;
 }
 
-/* ============ 开关列表 ============ */
 .switch-list {
   display: flex;
   flex-direction: column;
@@ -450,11 +453,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ========================================================
-   特性开关（由 JS 加在 body 上）
-   ======================================================== */
-
-/* 默认（高配电脑）：全开 */
+/* 特性开关 */
 body.has-hover .card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 body.has-hover .card img:hover { transform: scale(1.03); }
 body.has-hover .dropdown-item:hover { background: #eef2ff; color: #4f46e5; }
@@ -463,7 +462,6 @@ body.has-hover .viewer-close:hover { background: rgba(255,255,255,.28); transfor
 body.has-hover .podium-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,.15); }
 body.has-hover button:not(:disabled):active { transform: scale(0.96); }
 
-/* 🖱️ 关闭悬停效果 */
 body.no-hover .card:hover,
 body.no-hover .card img:hover,
 body.no-hover .dropdown-trigger:hover,
@@ -479,7 +477,6 @@ body.no-hover .fab:hover {
 }
 body.no-hover .card:hover { box-shadow: 0 2px 6px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04) !important; }
 
-/* 🌀 关闭过渡动画 */
 body.no-transition,
 body.no-transition *,
 body.no-transition *::before,
@@ -490,11 +487,9 @@ body.no-transition *::after {
 body.no-transition .grid.animate .card { animation: none !important; }
 body.no-transition .grid.fading-out { opacity: 1 !important; transform: none !important; }
 
-/* ✨ 关闭入场动画 */
 body.no-anim .grid.animate .card { animation: none !important; }
 body.no-anim .grid.fading-out { opacity: 1 !important; transform: none !important; }
 
-/* 🌫️ 毛玻璃（仅高配电脑且未关闭） */
 body.has-hover.glass-on .card {
   background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(14px) saturate(180%);
@@ -549,7 +544,6 @@ body.has-hover.glass-on .fab-power:not(.active) {
   border: 1px solid rgba(255, 255, 255, 0.9);
 }
 
-/* 关闭毛玻璃（no-glass 或 非 has-hover） */
 body.no-glass .card,
 body.no-glass .podium,
 body.no-glass .podium-card,
@@ -749,7 +743,6 @@ body.is-touch .podium { background: #fff !important; }
   <img id="viewer-img" src="" alt="">
 </div>
 
-<!-- ⚡ 悬浮按钮组 -->
 <div class="fab-group">
   <button type="button" class="fab fab-power" id="btn-power" title="省电模式">
     <span class="icon">⚡</span>
@@ -761,7 +754,6 @@ body.is-touch .podium { background: #fff !important; }
   </button>
 </div>
 
-<!-- 👑 管理面板 -->
 <div class="admin-modal" id="admin-modal">
   <div class="admin-box" id="admin-box">
     <h2>👑 管理面板</h2>
@@ -841,7 +833,6 @@ body.is-touch .podium { background: #fff !important; }
   var body = document.body;
   if (!body) return;
 
-  // ---------- 1. 设备指纹 ----------
   function getDeviceId(){
     var saved = localStorage.getItem('device_id');
     if (saved) return saved;
@@ -891,7 +882,6 @@ body.is-touch .podium { background: #fff !important; }
 
   var DEVICE_ID = getDeviceId();
 
-  // ---------- 2. 管理员白名单 ----------
   var ADMIN_IDS = [
     'dev-msw0i6up35xnt3nk4a',
     '154bde98eb07421f81d75657af6e7f12',
@@ -900,11 +890,9 @@ body.is-touch .podium { background: #fff !important; }
 
   var isAdmin = ADMIN_IDS.indexOf(DEVICE_ID) !== -1;
 
-  // ---------- 3. hover / touch ----------
   var hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   body.classList.add(hasHover ? 'has-hover' : 'is-touch');
 
-  // ---------- 4. 自动性能档 ----------
   var autoLevel = 'perf-lite';
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     var mem = navigator.deviceMemory;
@@ -924,22 +912,18 @@ body.is-touch .podium { background: #fff !important; }
 
   body.classList.add(autoLevel);
 
-  // ---------- 5. 特性开关 ----------
-  // 默认全开；用 localStorage 保存关闭状态
   var FEATURES = ['glass', 'gradient', 'anim', 'hover', 'transition'];
 
   function loadFeatureState(){
     var state = {};
     FEATURES.forEach(function(f){
       var saved = localStorage.getItem('feat_' + f);
-      // 默认开
       state[f] = (saved === null) ? true : (saved === '1');
     });
     return state;
   }
 
   function applyFeature(f, on){
-    // 应用 body class
     if (f === 'glass')    body.classList.toggle('glass-on', on); body.classList.toggle('no-glass', !on);
     if (f === 'gradient') body.classList.toggle('no-gradient', !on);
     if (f === 'anim')     body.classList.toggle('no-anim', !on);
@@ -952,7 +936,7 @@ body.is-touch .podium { background: #fff !important; }
     applyFeature(f, featState[f]);
   });
 
-  console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin + ' 档位=' + autoLevel + ' 特性=' + JSON.stringify(featState));
+  console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin + ' 档位=' + autoLevel);
 
   window.__DEVICE__ = {
     id: DEVICE_ID,
@@ -960,7 +944,6 @@ body.is-touch .podium { background: #fff !important; }
     autoLevel: autoLevel
   };
 
-  // ---------- 6. 省电模式按钮 ----------
   var btnPower = document.getElementById('btn-power');
   function refreshPowerBtn(){
     var lite = localStorage.getItem('perf_lite') === '1';
@@ -987,7 +970,6 @@ body.is-touch .podium { background: #fff !important; }
     refreshPowerBtn();
   });
 
-  // ---------- 7. 管理面板 ----------
   var btnAdmin = document.getElementById('btn-admin');
   var adminModal = document.getElementById('admin-modal');
   var adminBox = document.getElementById('admin-box');
@@ -996,11 +978,9 @@ body.is-touch .podium { background: #fff !important; }
   if (isAdmin && btnAdmin && adminModal && adminBox){
     btnAdmin.style.display = '';
 
-    // 设备 ID
     var elId = document.getElementById('admin-device-id');
     if (elId) elId.textContent = DEVICE_ID;
 
-    // ===== 开关 UI 同步 =====
     function syncSwitches(){
       FEATURES.forEach(function(f){
         var row = document.getElementById('sw-' + f);
@@ -1009,7 +989,6 @@ body.is-touch .podium { background: #fff !important; }
     }
     syncSwitches();
 
-    // 绑定开关点击
     var rows = adminBox.querySelectorAll('.switch-row');
     for (var i = 0; i < rows.length; i++){
       (function(row){
@@ -1021,15 +1000,17 @@ body.is-touch .podium { background: #fff !important; }
           localStorage.setItem('feat_' + f, featState[f] ? '1' : '0');
           applyFeature(f, featState[f]);
           syncSwitches();
-          console.log('[开关] ' + f + ' → ' + (featState[f] ? '开' : '关'));
         });
       })(rows[i]);
     }
 
-    // ===== FLIP 打开动画 =====
+    // ============ FLIP 打开 ============
     function openAdminModal(){
       syncSwitches();
+
       var from = btnAdmin.getBoundingClientRect();
+
+      // 先让 modal 显示（visibility: visible + opacity 从 0 开始过渡）
       adminModal.classList.add('show');
 
       requestAnimationFrame(function(){
@@ -1060,7 +1041,7 @@ body.is-touch .podium { background: #fff !important; }
       });
     }
 
-    // ===== FLIP 关闭动画 =====
+    // ============ FLIP 关闭（修复） ============
     function closeAdminModal(){
       var from = btnAdmin.getBoundingClientRect();
       var to = adminBox.getBoundingClientRect();
@@ -1073,12 +1054,16 @@ body.is-touch .podium { background: #fff !important; }
       var dy = cy1 - cy2;
       var scale = Math.max(0.1, from.width / to.width);
 
+      // 缩小飞回 👑 按钮
       adminBox.style.transition = 'transform .35s cubic-bezier(.4,0,.6,1), opacity .3s ease';
       adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
       adminBox.style.opacity = '0';
 
+      // ✅ 关键：同时移除 .show，但 CSS 里 visibility 延迟 300ms 才 hidden
+      // 动画能完整播完
       adminModal.classList.remove('show');
 
+      // 动画结束后清理内联样式
       setTimeout(function(){
         adminBox.style.transition = '';
         adminBox.style.transform = '';
@@ -1088,10 +1073,15 @@ body.is-touch .podium { background: #fff !important; }
 
     btnAdmin.addEventListener('click', function(e){
       e.stopPropagation();
+      // 防止连点
+      if (adminModal.classList.contains('show')) return;
       openAdminModal();
     });
 
-    adminClose.addEventListener('click', closeAdminModal);
+    adminClose.addEventListener('click', function(e){
+      e.stopPropagation();
+      closeAdminModal();
+    });
 
     adminModal.addEventListener('click', function(e){
       if (e.target === adminModal) closeAdminModal();
@@ -1103,7 +1093,6 @@ body.is-touch .podium { background: #fff !important; }
       }
     });
 
-    // 设备 ID 复制
     if (elId){
       elId.addEventListener('click', function(){
         var txt = elId.textContent;
