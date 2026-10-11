@@ -8,6 +8,37 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 14px; font-size: 16px; }
 h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
+
+/* ⏰ 倒计时条 */
+.countdown {
+  text-align: center;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(90deg, #ff5252, #ff9800);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 0 auto 14px;
+  max-width: 480px;
+  font-size: 1.05em;
+  box-shadow: 0 2px 10px rgba(255,82,82,.35);
+  letter-spacing: .5px;
+}
+.countdown.ended {
+  background: #999;
+  box-shadow: none;
+  font-size: 1em;
+}
+.countdown .num {
+  display: inline-block;
+  min-width: 2.2em;
+  padding: 2px 6px;
+  margin: 0 2px;
+  background: rgba(0,0,0,.18);
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+
 .month-tip { text-align: center; font-weight: bold; color: #fff; background: #ff9800; padding: 12px; border-radius: 8px; margin: 0 auto 18px; max-width: 480px; font-size: 1.05em; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em; }
 
@@ -64,6 +95,8 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 @media (max-width: 768px) {
   body { padding: 8px; font-size: 15px; }
   h1 { font-size: 1.5em; }
+  .countdown { font-size: .9em; padding: 9px; margin-bottom: 10px; }
+  .countdown .num { min-width: 1.8em; padding: 1px 4px; }
   .month-tip { font-size: .95em; padding: 10px; margin-bottom: 12px; }
   .user-info { font-size: .95em; }
   .grid { gap: 6px; }
@@ -90,6 +123,10 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 </head>
 <body>
 <h1>🍽️ 月度好菜投票</h1>
+
+<!-- ⏰ 倒计时条 -->
+<div class="countdown" id="countdown">⏰ 计算中...</div>
+
 <div class="month-tip" id="month-tip">📅 加载中...</div>
 <div class="user-info" id="user-info"></div>
 
@@ -125,6 +162,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 
   // ✅ 图片走 jsDelivr CDN
   var CDN = 'https://cdn.jsdelivr.net/gh/WUBAT964/images@main';
+
+  // ⏰ 投票截止时间（北京时间 2026-10-12 00:00:00）
+  var DEADLINE = new Date('2026-10-12T00:00:00+08:00').getTime();
 
   // ✅ 旧中文名 → 新拼音名 映射（后端数据库里还是旧名）
   var NAME_MAP = {
@@ -170,28 +210,76 @@ button:disabled { background: #ccc; cursor: not-allowed; }
     return s;
   }
 
-  // ✅ 关键：去前缀 → 映射旧名 → 拼 CDN
+  // 投票是否还开放
+  function isVoteOpen(){
+    return Date.now() < DEADLINE;
+  }
+
+  // ✅ 图片地址：去前缀 → 映射旧名 → 拼 CDN
   function imgUrl(f){
     if (!f) return '';
     f = String(f).trim();
     if (!f) return '';
-
-    // 1) 去掉 ?xxx 和 #xxx，取最后一段文件名
-    //    "images/1_炆行鸡.jpg"        → "1_炆行鸡.jpg"
-    //    "https://xx/a/b.jpg?x=1"    → "b.jpg"
     var name = f.split('?')[0].split('#')[0].split('/').pop();
     if (!name) return '';
-
-    // 2) 旧中文名 → 新拼音名
     if (NAME_MAP[name]) name = NAME_MAP[name];
-
-    // 3) 拼 CDN
     return CDN + '/' + name;
   }
+
+  // ============ ⏰ 倒计时 ============
+  var lastOpenState = null;  // 上一次的开放状态，用于检测状态翻转
+
+  function pad2(n){
+    return n < 10 ? '0' + n : String(n);
+  }
+
+  function updateCountdown(){
+    var el = $('countdown');
+    if (!el) return;
+    var now = Date.now();
+    var diff = DEADLINE - now;
+
+    if (diff <= 0){
+      // 到点，投票结束
+      el.className = 'countdown ended';
+      el.innerHTML = '⏰ 投票已结束 · 感谢参与';
+      // 状态翻转 → 重新 render 一次，禁用所有按钮
+      if (lastOpenState !== false){
+        lastOpenState = false;
+        render();
+      }
+      return;
+    }
+
+    // 还没到点
+    if (lastOpenState !== true){
+      lastOpenState = true;
+      // 如果之前是结束状态，现在又变成开放（理论上不会），重新 render
+      if (lastOpenState === true && $('grid').children.length > 0){
+        render();
+      }
+    }
+
+    var days = Math.floor(diff / 86400000);
+    var hours = Math.floor((diff % 86400000) / 3600000);
+    var mins  = Math.floor((diff % 3600000) / 60000);
+    var secs  = Math.floor((diff % 60000) / 1000);
+
+    el.className = 'countdown';
+    el.innerHTML =
+      '⏰ 距投票结束还有 ' +
+      '<span class="num">' + days + '</span>天 ' +
+      '<span class="num">' + pad2(hours) + '</span>:' +
+      '<span class="num">' + pad2(mins) + '</span>:' +
+      '<span class="num">' + pad2(secs) + '</span>';
+  }
+
+  // ============ 渲染 ============
 
   function render(){
     var g = $('grid');
     g.innerHTML = '';
+    var voteOpen = isVoteOpen();
     var maxed = getTotalVoted() >= 3;
 
     for (var i = 0; i < dishes.length; i++){
@@ -253,8 +341,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       var addBtn = document.createElement('button');
       addBtn.className = 'add';
       addBtn.type = 'button';
-      addBtn.textContent = '投一票';
-      if (maxed) addBtn.disabled = true;
+      addBtn.textContent = voteOpen ? '投一票' : '已结束';
+      // ⏰ 投票结束后禁用 + 投满 3 票也禁用
+      if (maxed || !voteOpen) addBtn.disabled = true;
       addBtn.setAttribute('data-id', id);
       addBtn.setAttribute('data-act', 'add');
       btns.appendChild(addBtn);
@@ -263,7 +352,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       rmBtn.className = 'remove';
       rmBtn.type = 'button';
       rmBtn.textContent = '取消';
-      if (my <= 0) rmBtn.disabled = true;
+      if (my <= 0 || !voteOpen) rmBtn.disabled = true;
       rmBtn.setAttribute('data-id', id);
       rmBtn.setAttribute('data-act', 'remove');
       btns.appendChild(rmBtn);
@@ -371,6 +460,12 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   }
 
   function doVote(id, act, btn){
+    // ⏰ 投票时间检查（即使按钮被绕过也拦得住）
+    if (!isVoteOpen()){
+      alert('本次投票已于 2026-10-12 00:00 结束，感谢参与！');
+      render();
+      return;
+    }
     if (!user){ showModal(); return; }
     if (act === 'add' && getTotalVoted() >= 3){ alert('您最多只能投3票，请先取消其他菜的投票'); return; }
 
@@ -426,6 +521,10 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   $('btn-reg').onclick = submitRegister;
 
   function init(){
+    // 先启动倒计时，页面一打开就能看到
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
     fetch(API + '/api/current_month')
       .then(function(r){ return r.json(); })
       .then(function(m){ loadDishes(m.month || ''); })
