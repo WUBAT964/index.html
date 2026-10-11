@@ -88,11 +88,11 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .month-tip.readonly { background: #6c757d; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em; }
 
-/* ============ 📦 菜品网格（卡片加宽） ============ */
+/* ============ 📦 菜品网格：电脑固定 4 列 ============ */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
   max-width: 1400px; margin: 0 auto;
   opacity: 1; transform: translateY(0);
   transition: opacity .25s ease, transform .25s ease;
@@ -107,39 +107,39 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 }
 .grid.animate .card { animation: cardIn .4s cubic-bezier(.22,.61,.36,1) both; }
 
-.card img { width: 100%; height: 150px; object-fit: cover; display: block; background: #eee; cursor: pointer; transition: transform .35s ease; }
-.no-img { width: 100%; height: 150px; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: .95em; }
+.card img { width: 100%; height: 200px; object-fit: cover; display: block; background: #eee; cursor: pointer; transition: transform .35s ease; }
+.no-img { width: 100%; height: 200px; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: 1em; }
 
-.info { padding: 10px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
-.name { font-weight: bold; color: #333; font-size: 1.05em; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chef { color: #007bff; margin: 3px 0; font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.date { color: #888; font-size: .85em; }
+.info { padding: 12px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
+.name { font-weight: bold; color: #333; font-size: 1.15em; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chef { color: #007bff; margin: 4px 0; font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.date { color: #888; font-size: .9em; }
 .votes {
-  color: #ff9800; font-weight: bold; font-size: 1.05em; margin: 5px 0;
+  color: #ff9800; font-weight: bold; font-size: 1.15em; margin: 6px 0;
   transition: transform .3s cubic-bezier(.34,1.56,.64,1), color .3s ease;
 }
 .votes.bump { transform: scale(1.25); color: #ff5722; }
-.btns { display: flex; gap: 5px; margin-top: 6px; }
+.btns { display: flex; gap: 6px; margin-top: 8px; }
 button {
-  flex: 1; padding: 9px 2px; border: none; border-radius: 6px; color: #fff;
-  font-size: .92em; cursor: pointer; font-family: inherit; -webkit-appearance: none;
+  flex: 1; padding: 10px 2px; border: none; border-radius: 6px; color: #fff;
+  font-size: .95em; cursor: pointer; font-family: inherit; -webkit-appearance: none;
   transition: background .2s ease, transform .1s ease, opacity .2s ease;
 }
 .add { background: #007bff; }
 .remove { background: #6c757d; }
 button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
-/* ============ 🏆 领奖台（缩小到与普通卡片一致） ============ */
+/* ============ 🏆 领奖台（3 列居中，与卡片同高） ============ */
 .podium {
   background: #fff; border-radius: 12px; padding: 16px;
   margin: 0 auto 20px;
-  max-width: 780px;                    /* ✅ 限制宽度 */
+  max-width: 1080px;
   box-shadow: 0 2px 8px rgba(0,0,0,.1);
   transition: opacity .25s ease, transform .25s ease;
 }
 .podium.fading-out { opacity: 0; transform: translateY(10px); }
 .podium-title { text-align: center; color: #ff9800; font-weight: bold; margin-bottom: 14px; font-size: 1.3em; }
-.podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .podium-card {
   border-radius: 10px; overflow: hidden; position: relative; border: 3px solid #eee; background: #fff;
   transition: box-shadow .3s ease;
@@ -154,15 +154,14 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .podium-card.r2 .podium-badge { background: #C0C0C0; }
 .podium-card.r3 .podium-badge { background: #CD7F32; color: #fff; }
 
-/* ✅ 领奖台图片高度 = 普通卡片 150px */
-.podium-card img { width: 100%; height: 150px; object-fit: cover; display: block; background: #eee; }
-.podium-card .no-img { width: 100%; height: 150px; }
+.podium-card img { width: 100%; height: 200px; object-fit: cover; display: block; background: #eee; }
+.podium-card .no-img { width: 100%; height: 200px; }
 
-.podium-info { padding: 10px; text-align: center; }
-.podium-name { font-weight: bold; color: #333; font-size: 1.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.podium-chef { color: #d9534f; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; font-size: .92em; }
-.podium-date { color: #888; font-size: .85em; margin-top: 3px; }
-.podium-votes { color: #ff9800; font-weight: bold; margin-top: 5px; font-size: 1.05em; }
+.podium-info { padding: 12px; text-align: center; }
+.podium-name { font-weight: bold; color: #333; font-size: 1.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.podium-chef { color: #d9534f; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; font-size: 1em; }
+.podium-date { color: #888; font-size: .9em; margin-top: 4px; }
+.podium-votes { color: #ff9800; font-weight: bold; margin-top: 6px; font-size: 1.15em; }
 
 /* ============ 弹窗 ============ */
 .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); justify-content: center; align-items: center; opacity: 0; transition: opacity .3s ease; }
@@ -238,7 +237,7 @@ body.perf-lite .card {
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
   transition: none;
   content-visibility: auto;
-  contain-intrinsic-size: 200px;
+  contain-intrinsic-size: 240px;
 }
 body.perf-lite .card img { transition: none; }
 body.perf-lite .votes { transition: none; }
@@ -259,13 +258,16 @@ body.perf-lite .viewer-close { transition: none; }
 body.perf-lite .countdown { transition: none; }
 body.perf-lite .month-tip { transition: none; }
 
+/* ====== 平板：3 列 ====== */
 @media (max-width: 1024px) {
-  .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-  .card img, .no-img { height: 130px; }
-  .podium-card img, .podium-card .no-img { height: 130px; }
-  .podium { max-width: 640px; }
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .card img, .no-img { height: 160px; }
+  .podium { max-width: 800px; }
+  .podium-grid { gap: 12px; }
+  .podium-card img, .podium-card .no-img { height: 160px; }
 }
 
+/* ====== 手机：2 列 ====== */
 @media (max-width: 768px) {
   body { padding: 8px; font-size: 15px; }
   h1 { font-size: 1.5em; }
@@ -277,26 +279,28 @@ body.perf-lite .month-tip { transition: none; }
   .dropdown-item { padding: 9px 12px; font-size: .88em; }
   .month-tip { font-size: .9em; padding: 8px; margin-bottom: 12px; }
   .user-info { font-size: .95em; }
-  .grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .card img, .no-img { height: 100px; }
-  .info { padding: 6px; }
-  .name { font-size: .95em; margin-bottom: 2px; }
-  .chef { font-size: .8em; margin: 2px 0; }
-  .date { font-size: .75em; }
-  .votes { font-size: .95em; margin: 4px 0; }
-  button { padding: 7px 2px; font-size: .82em; }
-  .btns { gap: 4px; margin-top: 4px; }
 
-  /* 领奖台手机端 */
+  /* ✅ 手机 2 列 */
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .card img, .no-img { height: 140px; }
+  .info { padding: 10px; }
+  .name { font-size: 1.05em; margin-bottom: 3px; }
+  .chef { font-size: .88em; margin: 3px 0; }
+  .date { font-size: .82em; }
+  .votes { font-size: 1.05em; margin: 5px 0; }
+  button { padding: 9px 2px; font-size: .88em; }
+  .btns { gap: 5px; margin-top: 6px; }
+
+  /* 领奖台手机端 3 列 */
   .podium { padding: 10px; margin-bottom: 12px; max-width: 100%; }
   .podium-title { font-size: 1.1em; margin-bottom: 10px; }
   .podium-grid { gap: 6px; }
   .podium-card img, .podium-card .no-img { height: 100px; }
   .podium-info { padding: 6px; }
-  .podium-name { font-size: .95em; }
-  .podium-chef { font-size: .8em; margin-top: 3px; }
-  .podium-date { font-size: .75em; margin-top: 3px; }
-  .podium-votes { font-size: .95em; margin-top: 4px; }
+  .podium-name { font-size: .92em; }
+  .podium-chef { font-size: .75em; margin-top: 2px; }
+  .podium-date { font-size: .72em; margin-top: 2px; }
+  .podium-votes { font-size: .9em; margin-top: 4px; }
   .viewer-close { font-size: 28px; top: 10px; right: 12px; }
 }
 
