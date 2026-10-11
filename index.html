@@ -33,6 +33,15 @@ body > * {
   z-index: 1;
 }
 
+/* 🎨 关闭渐变背景 */
+body.no-gradient {
+  background: #f4f7f6 !important;
+  background-attachment: scroll !important;
+}
+body.no-gradient::before {
+  display: none !important;
+}
+
 h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
 .countdown {
@@ -299,33 +308,32 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .admin-box {
   background: #fff;
   border-radius: 16px;
-  padding: 24px;
+  padding: 22px;
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,.3);
-  /* FLIP 动画由 JS 控制，这里不用 transition */
   will-change: transform, opacity;
   transform-origin: center center;
 }
 .admin-box h2 {
   margin: 0 0 16px;
-  font-size: 1.3em;
+  font-size: 1.25em;
   color: #333;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .admin-section {
-  margin-bottom: 18px;
-  padding: 14px;
+  margin-bottom: 16px;
+  padding: 12px;
   background: #f9fafb;
   border-radius: 10px;
 }
 .admin-section h3 {
-  margin: 0 0 10px;
-  font-size: .9em;
+  margin: 0 0 8px;
+  font-size: .85em;
   color: #666;
   font-weight: 600;
   text-transform: uppercase;
@@ -334,62 +342,101 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .admin-device-id {
   background: #eef2ff;
   color: #4f46e5;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
   font-family: "SF Mono", Menlo, Consolas, monospace;
-  font-size: .82em;
+  font-size: .78em;
   word-break: break-all;
   cursor: pointer;
   user-select: all;
-  margin-top: 6px;
-  transition: background .2s ease;
 }
-.admin-device-id:hover { background: #e0e7ff; }
 
-/* 画质选项按钮 */
-.quality-options {
+/* ============ 开关列表 ============ */
+.switch-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 6px;
+  gap: 4px;
+  margin-top: 4px;
 }
-.quality-btn {
+.switch-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px;
   gap: 10px;
-  width: 100%;
-  padding: 12px 14px;
-  background: #fff;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  font-family: inherit;
   cursor: pointer;
-  text-align: left;
-  -webkit-appearance: none;
-  transition: border-color .2s ease, background-color .2s ease, transform .1s ease;
+  user-select: none;
+  border-radius: 8px;
+  transition: background .15s ease;
 }
-.quality-btn:active { transform: scale(.98); }
-.quality-btn:hover { border-color: #c7d2fe; background: #fafaff; }
-.quality-btn.active {
-  border-color: #6366f1;
-  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
-  box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+.switch-row:hover { background: #eef2ff; }
+.switch-row + .switch-row {
+  border-top: 1px solid #eef0f3;
 }
-.quality-btn .q-icon { font-size: 1.4em; flex-shrink: 0; }
-.quality-btn .q-text { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-.quality-btn .q-name { font-weight: bold; color: #333; font-size: .95em; }
-.quality-btn .q-desc { font-size: .75em; color: #888; }
-.quality-btn.active .q-name { color: #4f46e5; }
-.quality-btn.active .q-desc { color: #6366f1; }
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.switch-label .s-icon {
+  font-size: 1.15em;
+  flex-shrink: 0;
+  width: 1.4em;
+  text-align: center;
+}
+.switch-label .s-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.switch-label .s-name {
+  font-size: .95em;
+  font-weight: 600;
+  color: #333;
+}
+.switch-label .s-desc {
+  font-size: .72em;
+  color: #888;
+}
+.switch-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: #d1d5db;
+  border-radius: 12px;
+  flex-shrink: 0;
+  transition: background-color .25s ease;
+}
+.switch-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.switch-row.on .switch-toggle {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+.switch-row.on .switch-toggle::after {
+  transform: translateX(20px);
+}
 
 .admin-close {
   width: 100%;
-  padding: 12px;
+  padding: 11px;
   background: #6366f1;
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-size: 1em;
+  font-size: .95em;
   font-weight: 600;
   cursor: pointer;
   margin-top: 6px;
@@ -403,6 +450,11 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ========================================================
+   特性开关（由 JS 加在 body 上）
+   ======================================================== */
+
+/* 默认（高配电脑）：全开 */
 body.has-hover .card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 body.has-hover .card img:hover { transform: scale(1.03); }
 body.has-hover .dropdown-item:hover { background: #eef2ff; color: #4f46e5; }
@@ -411,60 +463,110 @@ body.has-hover .viewer-close:hover { background: rgba(255,255,255,.28); transfor
 body.has-hover .podium-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,.15); }
 body.has-hover button:not(:disabled):active { transform: scale(0.96); }
 
-body.has-hover.perf-high .card {
+/* 🖱️ 关闭悬停效果 */
+body.no-hover .card:hover,
+body.no-hover .card img:hover,
+body.no-hover .dropdown-trigger:hover,
+body.no-hover .dropdown-item:hover,
+body.no-hover .podium-card:hover,
+body.no-hover button:not(:disabled):hover,
+body.no-hover .viewer-close:hover,
+body.no-hover .fab:hover {
+  transform: none !important;
+  filter: none !important;
+  box-shadow: inherit !important;
+  background-color: inherit !important;
+}
+body.no-hover .card:hover { box-shadow: 0 2px 6px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04) !important; }
+
+/* 🌀 关闭过渡动画 */
+body.no-transition,
+body.no-transition *,
+body.no-transition *::before,
+body.no-transition *::after {
+  transition: none !important;
+  animation-duration: .01ms !important;
+}
+body.no-transition .grid.animate .card { animation: none !important; }
+body.no-transition .grid.fading-out { opacity: 1 !important; transform: none !important; }
+
+/* ✨ 关闭入场动画 */
+body.no-anim .grid.animate .card { animation: none !important; }
+body.no-anim .grid.fading-out { opacity: 1 !important; transform: none !important; }
+
+/* 🌫️ 毛玻璃（仅高配电脑且未关闭） */
+body.has-hover.glass-on .card {
   background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
-body.has-hover.perf-high .card:hover {
+body.has-hover.glass-on .card:hover {
   background: rgba(255, 255, 255, 0.78);
   box-shadow: 0 12px 28px rgba(99,102,241,.16), inset 0 1px 0 rgba(255, 255, 255, 1);
 }
-body.has-hover.perf-high .podium {
+body.has-hover.glass-on .podium {
   background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow: 0 4px 16px rgba(99,102,241,.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
-body.has-hover.perf-high .podium-card { background: rgba(255, 255, 255, 0.7); }
-body.has-hover.perf-high .dropdown-trigger {
+body.has-hover.glass-on .podium-card { background: rgba(255, 255, 255, 0.7); }
+body.has-hover.glass-on .dropdown-trigger {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1.5px solid rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 10px rgba(99,102,241,.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
-body.has-hover.perf-high .dropdown-trigger:hover {
+body.has-hover.glass-on .dropdown-trigger:hover {
   background: rgba(255, 255, 255, 0.8);
   border-color: #c7d2fe;
-  box-shadow: 0 6px 16px rgba(99,102,241,.15), inset 0 1px 0 rgba(255, 255, 255, 1);
 }
-body.has-hover.perf-high .dropdown.open .dropdown-trigger {
+body.has-hover.glass-on .dropdown.open .dropdown-trigger {
   border-color: #6366f1;
   box-shadow: 0 0 0 4px rgba(99,102,241,.18);
 }
-body.has-hover.perf-high .dropdown-panel {
+body.has-hover.glass-on .dropdown-panel {
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(24px) saturate(200%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow: 0 12px 40px rgba(99,102,241,.18), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
-body.has-hover.perf-high .modal-box {
+body.has-hover.glass-on .modal-box {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.9);
 }
-body.has-hover.perf-high .fab-power:not(.active) {
+body.has-hover.glass-on .fab-power:not(.active) {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.9);
 }
+
+/* 关闭毛玻璃（no-glass 或 非 has-hover） */
+body.no-glass .card,
+body.no-glass .podium,
+body.no-glass .podium-card,
+body.no-glass .dropdown-trigger,
+body.no-glass .dropdown-panel,
+body.no-glass .modal-box,
+body.no-glass .fab-power:not(.active) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.no-glass .card { background: #fff !important; border: none; }
+body.no-glass .podium { background: #fff !important; border: none; }
+body.no-glass .podium-card { background: #fff !important; }
+body.no-glass .dropdown-trigger { background: #fff !important; }
+body.no-glass .dropdown-panel { background: #fff !important; }
+body.no-glass .modal-box { background: #fff !important; }
+body.no-glass .fab-power:not(.active) { background: rgba(255,255,255,.95) !important; }
 
 body.perf-mid .card { box-shadow: 0 1px 4px rgba(0,0,0,.06); transition: transform .2s ease; }
 body.perf-mid .card img { transition: transform .25s ease; }
@@ -659,7 +761,7 @@ body.is-touch .podium { background: #fff !important; }
   </button>
 </div>
 
-<!-- 👑 管理面板（FLIP 动画） -->
+<!-- 👑 管理面板 -->
 <div class="admin-modal" id="admin-modal">
   <div class="admin-box" id="admin-box">
     <h2>👑 管理面板</h2>
@@ -670,29 +772,62 @@ body.is-touch .podium { background: #fff !important; }
     </div>
 
     <div class="admin-section">
-      <h3>画质档位</h3>
-      <div class="quality-options" id="quality-options">
-        <button type="button" class="quality-btn" data-perf="perf-high">
-          <span class="q-icon">✨</span>
-          <span class="q-text">
-            <span class="q-name">高画质</span>
-            <span class="q-desc">全动画 · 毛玻璃</span>
-          </span>
-        </button>
-        <button type="button" class="quality-btn" data-perf="perf-mid">
-          <span class="q-icon">🌤️</span>
-          <span class="q-text">
-            <span class="q-name">中画质</span>
-            <span class="q-desc">基础动画 · 无毛玻璃</span>
-          </span>
-        </button>
-        <button type="button" class="quality-btn" data-perf="perf-lite">
-          <span class="q-icon">⚡</span>
-          <span class="q-text">
-            <span class="q-name">低画质</span>
-            <span class="q-desc">无动画 · 最省电</span>
-          </span>
-        </button>
+      <h3>特效开关</h3>
+      <div class="switch-list">
+        <div class="switch-row on" data-feature="glass" id="sw-glass">
+          <div class="switch-label">
+            <span class="s-icon">🌫️</span>
+            <span class="s-text">
+              <span class="s-name">毛玻璃</span>
+              <span class="s-desc">卡片半透明模糊</span>
+            </span>
+          </div>
+          <div class="switch-toggle"></div>
+        </div>
+
+        <div class="switch-row on" data-feature="gradient" id="sw-gradient">
+          <div class="switch-label">
+            <span class="s-icon">🎨</span>
+            <span class="s-text">
+              <span class="s-name">渐变背景</span>
+              <span class="s-desc">淡蓝紫到淡青绿</span>
+            </span>
+          </div>
+          <div class="switch-toggle"></div>
+        </div>
+
+        <div class="switch-row on" data-feature="anim" id="sw-anim">
+          <div class="switch-label">
+            <span class="s-icon">✨</span>
+            <span class="s-text">
+              <span class="s-name">入场动画</span>
+              <span class="s-desc">卡片错峰淡入</span>
+            </span>
+          </div>
+          <div class="switch-toggle"></div>
+        </div>
+
+        <div class="switch-row on" data-feature="hover" id="sw-hover">
+          <div class="switch-label">
+            <span class="s-icon">🖱️</span>
+            <span class="s-text">
+              <span class="s-name">悬停效果</span>
+              <span class="s-desc">鼠标悬停上浮/放大</span>
+            </span>
+          </div>
+          <div class="switch-toggle"></div>
+        </div>
+
+        <div class="switch-row on" data-feature="transition" id="sw-transition">
+          <div class="switch-label">
+            <span class="s-icon">🌀</span>
+            <span class="s-text">
+              <span class="s-name">过渡动画</span>
+              <span class="s-desc">弹窗/下拉菜单平滑</span>
+            </span>
+          </div>
+          <div class="switch-toggle"></div>
+        </div>
       </div>
     </div>
 
@@ -701,7 +836,7 @@ body.is-touch .podium { background: #fff !important; }
 </div>
 
 <script>
-// ============ 🎯 设备识别 + 性能分档 + 管理员 ============
+// ============ 🎯 设备识别 + 管理员 + 特效开关 ============
 (function detectPerformance(){
   var body = document.body;
   if (!body) return;
@@ -787,68 +922,50 @@ body.is-touch .podium { background: #fff !important; }
     }
   }
 
-  // ---------- 5. 最终档位（force_perf 优先） ----------
-  var forcePerf = localStorage.getItem('force_perf') || '';
-  var userLite = localStorage.getItem('perf_lite') === '1';
+  body.classList.add(autoLevel);
 
-  var finalLevel;
-  if (forcePerf === 'perf-high' || forcePerf === 'perf-mid' || forcePerf === 'perf-lite') {
-    finalLevel = forcePerf;
-  } else if (userLite) {
-    finalLevel = 'perf-lite';
-  } else {
-    finalLevel = autoLevel;
+  // ---------- 5. 特性开关 ----------
+  // 默认全开；用 localStorage 保存关闭状态
+  var FEATURES = ['glass', 'gradient', 'anim', 'hover', 'transition'];
+
+  function loadFeatureState(){
+    var state = {};
+    FEATURES.forEach(function(f){
+      var saved = localStorage.getItem('feat_' + f);
+      // 默认开
+      state[f] = (saved === null) ? true : (saved === '1');
+    });
+    return state;
   }
 
-  body.classList.add(finalLevel);
+  function applyFeature(f, on){
+    // 应用 body class
+    if (f === 'glass')    body.classList.toggle('glass-on', on); body.classList.toggle('no-glass', !on);
+    if (f === 'gradient') body.classList.toggle('no-gradient', !on);
+    if (f === 'anim')     body.classList.toggle('no-anim', !on);
+    if (f === 'hover')    body.classList.toggle('no-hover', !on);
+    if (f === 'transition') body.classList.toggle('no-transition', !on);
+  }
 
-  console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin +
-              ' 自动档=' + autoLevel + ' force=' + (forcePerf || '—') +
-              ' 省电=' + userLite + ' 最终=' + finalLevel);
+  var featState = loadFeatureState();
+  FEATURES.forEach(function(f){
+    applyFeature(f, featState[f]);
+  });
+
+  console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin + ' 档位=' + autoLevel + ' 特性=' + JSON.stringify(featState));
 
   window.__DEVICE__ = {
     id: DEVICE_ID,
     isAdmin: isAdmin,
-    autoLevel: autoLevel,
-    forcePerf: forcePerf,
-    userLite: userLite,
-    finalLevel: finalLevel
+    autoLevel: autoLevel
   };
 
-  // ---------- 6. 统一设置档位 ----------
-  function setLevel(level, saveAs){
-    // 清除旧档
-    body.classList.remove('perf-high', 'perf-mid', 'perf-lite');
-    body.classList.add(level);
-
-    // 保存设置
-    if (saveAs === 'force'){
-      localStorage.setItem('force_perf', level);
-      if (level === 'perf-lite') localStorage.setItem('perf_lite', '1');
-      else localStorage.removeItem('perf_lite');
-    } else if (saveAs === 'power'){
-      if (level === 'perf-lite') {
-        localStorage.setItem('perf_lite', '1');
-        localStorage.removeItem('force_perf');
-      } else {
-        localStorage.removeItem('perf_lite');
-        localStorage.removeItem('force_perf');
-      }
-    }
-
-    // 更新 UI
-    refreshPowerBtn();
-    updateQualityUI();
-
-    console.log('[档位切换] → ' + level + ' (saveAs=' + saveAs + ')');
-  }
-
-  // ---------- 7. 省电模式按钮 ----------
+  // ---------- 6. 省电模式按钮 ----------
   var btnPower = document.getElementById('btn-power');
   function refreshPowerBtn(){
-    var isLite = body.classList.contains('perf-lite');
+    var lite = localStorage.getItem('perf_lite') === '1';
     var textEl = btnPower.querySelector('.text');
-    if (isLite){
+    if (lite){
       btnPower.classList.add('active');
       if (textEl) textEl.textContent = '省电模式已开启';
     } else {
@@ -859,47 +976,62 @@ body.is-touch .podium { background: #fff !important; }
   refreshPowerBtn();
 
   btnPower.addEventListener('click', function(){
-    var isLite = body.classList.contains('perf-lite');
-    var next = isLite ? autoLevel : 'perf-lite';
-    setLevel(next, 'power');
+    var lite = localStorage.getItem('perf_lite') === '1';
+    var next = lite ? '0' : '1';
+    localStorage.setItem('perf_lite', next);
+
+    var level = next === '1' ? 'perf-lite' : autoLevel;
+    body.classList.remove('perf-high', 'perf-mid', 'perf-lite');
+    body.classList.add(level);
+
+    refreshPowerBtn();
   });
 
-  // ---------- 8. 管理面板 ----------
+  // ---------- 7. 管理面板 ----------
   var btnAdmin = document.getElementById('btn-admin');
   var adminModal = document.getElementById('admin-modal');
   var adminBox = document.getElementById('admin-box');
   var adminClose = document.getElementById('admin-close');
 
-  function updateQualityUI(){
-    var current = body.classList.contains('perf-high') ? 'perf-high' :
-                  body.classList.contains('perf-mid') ? 'perf-mid' : 'perf-lite';
-    var btns = document.querySelectorAll('.quality-btn');
-    for (var i = 0; i < btns.length; i++){
-      btns[i].classList.toggle('active', btns[i].getAttribute('data-perf') === current);
-    }
-  }
-
   if (isAdmin && btnAdmin && adminModal && adminBox){
     btnAdmin.style.display = '';
 
-    // 填充设备信息
-    function fillAdminPanel(){
-      var elId = document.getElementById('admin-device-id');
-      if (elId) elId.textContent = window.__DEVICE__.id;
-      updateQualityUI();
+    // 设备 ID
+    var elId = document.getElementById('admin-device-id');
+    if (elId) elId.textContent = DEVICE_ID;
+
+    // ===== 开关 UI 同步 =====
+    function syncSwitches(){
+      FEATURES.forEach(function(f){
+        var row = document.getElementById('sw-' + f);
+        if (row) row.classList.toggle('on', featState[f]);
+      });
+    }
+    syncSwitches();
+
+    // 绑定开关点击
+    var rows = adminBox.querySelectorAll('.switch-row');
+    for (var i = 0; i < rows.length; i++){
+      (function(row){
+        row.addEventListener('click', function(e){
+          e.stopPropagation();
+          var f = row.getAttribute('data-feature');
+          if (!f) return;
+          featState[f] = !featState[f];
+          localStorage.setItem('feat_' + f, featState[f] ? '1' : '0');
+          applyFeature(f, featState[f]);
+          syncSwitches();
+          console.log('[开关] ' + f + ' → ' + (featState[f] ? '开' : '关'));
+        });
+      })(rows[i]);
     }
 
-    // ============ 🖼️ FLIP 动画打开 ============
+    // ===== FLIP 打开动画 =====
     function openAdminModal(){
-      fillAdminPanel();
-
-      // 拿到 👑 按钮的位置
+      syncSwitches();
       var from = btnAdmin.getBoundingClientRect();
-
-      // 先显示 modal（此时 opacity 从 0 开始，背景淡入）
       adminModal.classList.add('show');
 
-      // 下一帧：拿 box 最终位置 + 设为起始状态
       requestAnimationFrame(function(){
         var to = adminBox.getBoundingClientRect();
         if (to.width === 0 || to.height === 0) return;
@@ -912,14 +1044,12 @@ body.is-touch .podium { background: #fff !important; }
         var dy = cy1 - cy2;
         var scale = Math.max(0.1, from.width / to.width);
 
-        // 立即设为起始状态（禁用过渡）
         adminBox.style.transition = 'none';
         adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
         adminBox.style.opacity = '0.6';
 
         void adminBox.offsetWidth;
 
-        // 下一帧开始飞行动画
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
             adminBox.style.transition = 'transform .45s cubic-bezier(.34,1.15,.64,1), opacity .3s ease';
@@ -930,7 +1060,7 @@ body.is-touch .podium { background: #fff !important; }
       });
     }
 
-    // ============ 🖼️ FLIP 动画关闭 ============
+    // ===== FLIP 关闭动画 =====
     function closeAdminModal(){
       var from = btnAdmin.getBoundingClientRect();
       var to = adminBox.getBoundingClientRect();
@@ -956,42 +1086,24 @@ body.is-touch .podium { background: #fff !important; }
       }, 400);
     }
 
-    // 打开
     btnAdmin.addEventListener('click', function(e){
       e.stopPropagation();
       openAdminModal();
     });
 
-    // 关闭按钮
     adminClose.addEventListener('click', closeAdminModal);
 
-    // 点击遮罩关闭
     adminModal.addEventListener('click', function(e){
       if (e.target === adminModal) closeAdminModal();
     });
 
-    // ESC 关闭
     document.addEventListener('keydown', function(e){
       if (e.key === 'Escape' && adminModal.classList.contains('show')){
         closeAdminModal();
       }
     });
 
-    // 画质切换
-    var qualityBtns = document.querySelectorAll('.quality-btn');
-    for (var i = 0; i < qualityBtns.length; i++){
-      (function(btn){
-        btn.addEventListener('click', function(e){
-          e.stopPropagation();
-          var level = btn.getAttribute('data-perf');
-          if (!level) return;
-          setLevel(level, 'force');
-        });
-      })(qualityBtns[i]);
-    }
-
-    // 设备 ID 点击复制
-    var elId = document.getElementById('admin-device-id');
+    // 设备 ID 复制
     if (elId){
       elId.addEventListener('click', function(){
         var txt = elId.textContent;
@@ -1025,10 +1137,7 @@ body.is-touch .podium { background: #fff !important; }
   var API = 'https://exemption-eliminate-watts-merchant.trycloudflare.com';
   var CDN = 'https://cdn.jsdelivr.net/gh/WUBAT964/images@main';
 
-  // ⚡ 动态判断是否低端（切换画质后立即生效）
-  function isLowEnd(){
-    return document.body.classList.contains('perf-lite');
-  }
+  function isLowEnd(){ return document.body.classList.contains('perf-lite'); }
 
   var currentMonth = '';
   var DEADLINE = null;
@@ -1698,7 +1807,7 @@ body.is-touch .podium { background: #fff !important; }
     if (!t || t.tagName.toLowerCase() !== 'button') return;
     if (t.classList && t.classList.contains('dropdown-trigger')) return;
     if (t.classList && t.classList.contains('fab')) return;
-    if (t.classList && t.classList.contains('quality-btn')) return;
+    if (t.classList && t.classList.contains('switch-row')) return;
     if (t.classList && t.classList.contains('admin-close')) return;
     var id = t.getAttribute('data-id');
     var act = t.getAttribute('data-act');
