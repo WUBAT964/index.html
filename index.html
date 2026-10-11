@@ -54,7 +54,6 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 }
 
 .dropdown-trigger {
-  /* 覆盖全局 button 的 flex:1 */
   flex: none !important;
   width: 100%;
   display: flex;
@@ -161,7 +160,9 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .month-tip {
   text-align: center; font-weight: bold; color: #fff; background: #ff9800;
   padding: 10px; border-radius: 8px; margin: 0 auto 18px; max-width: 480px; font-size: 1em;
+  transition: background .3s ease;
 }
+.month-tip.readonly { background: #6c757d; }
 .user-info {
   text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em;
 }
@@ -317,7 +318,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   transform: rotate(90deg);
 }
 
-/* 动画关键帧 */
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(16px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -457,15 +457,21 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
     if (a && b) return a + ' & ' + b;
     return a || b || '未知厨师';
   }
+  // ✅ 日期格式改为 YYYY-MM-DD
   function fmtDate(s){
     if (!s) return '未知';
-    var p = String(s).split('-');
-    if (p.length >= 3) return p[1] + '月' + p[2] + '日';
+    s = String(s).trim();
+    // 已经是 2026-09-11 格式，直接返回
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
     return s;
   }
   function isVoteOpen(){
     if (DEADLINE === null) return true;
     return Date.now() < DEADLINE;
+  }
+  // ✅ 当前是否为"全部月份"（只读模式）
+  function isAllMonthsView(){
+    return !currentMonth;
   }
   function imgUrl(f){
     if (!f) return '';
@@ -639,25 +645,48 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
       currentMonth = month || '';
       var tip = $('month-tip');
 
+      // ✅ "全部月份"提示条改成灰色只读样式
       if (!currentMonth){
         dishes = allDishesCache.slice();
-        tip.textContent = '📅 显示全部菜品（共 ' + dishes.length + ' 道）';
+        tip.textContent = '📅 全部菜品展示（共 ' + dishes.length + ' 道）· 仅供浏览';
+        tip.classList.add('readonly');
       } else {
         dishes = allDishesCache.filter(function(d){
           return (d.date || '').indexOf(currentMonth) === 0;
         });
         tip.textContent = '📅 ' + currentMonth + ' 菜品（共 ' + dishes.length + ' 道）';
+        tip.classList.remove('readonly');
       }
 
       updateMonthSelectUI();
 
-      var url = API + '/api/vote_status';
-      if (currentMonth) url += '?month=' + encodeURIComponent(currentMonth);
+      // ✅ "全部月份"不需要拉截止时间，也不需要投票
+      if (!currentMonth){
+        DEADLINE = null;
+        lastOpenState = null;
+        dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
+        updateCountdown();
+
+        _animNextRender = true;
+        grid.classList.add('animate');
+        setTimeout(function(){ grid.classList.remove('animate'); }, 900);
+
+        // 直接用缓存的 votes 渲染
+        render();
+
+        requestAnimationFrame(function(){
+          grid.classList.remove('fading-out');
+          podium.classList.remove('fading-out');
+        });
+        return;
+      }
+
+      var url = API + '/api/vote_status?month=' + encodeURIComponent(currentMonth);
 
       fetch(url)
         .then(function(r){ return r.json(); })
         .then(function(s){
-          if (currentMonth && s.deadline){
+          if (s.deadline){
             var t = Date.parse(s.deadline);
             if (isNaN(t)) t = Date.parse(s.deadline.replace(/\+08:00$/, ''));
             DEADLINE = isNaN(t) ? null : t;
@@ -699,6 +728,9 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
     var maxed = getTotalVoted() >= 3;
     var playAnim = _animNextRender;
     _animNextRender = false;
+
+    // ✅ 全部月份视图 = 只读模式，不显示投票按钮
+    var readonly = isAllMonthsView();
 
     var oldVotes = {};
     for (var k in votes) { oldVotes[k] = votes[k]; }
@@ -753,38 +785,42 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
       dateEl.textContent = '📅 ' + fmtDate(d.date);
       info.appendChild(dateEl);
 
-      var votesEl = document.createElement('div');
-      votesEl.className = 'votes';
-      votesEl.id = 'v-' + id;
-      votesEl.textContent = total + ' 票';
-      if (oldVotes[id] !== undefined && oldVotes[id] !== total){
-        votesEl.classList.add('bump');
-        setTimeout((function(el){ return function(){ el.classList.remove('bump'); }; })(votesEl), 400);
+      // ✅ 只读模式：不显示票数和投票按钮
+      if (!readonly){
+        var votesEl = document.createElement('div');
+        votesEl.className = 'votes';
+        votesEl.id = 'v-' + id;
+        votesEl.textContent = total + ' 票';
+        if (oldVotes[id] !== undefined && oldVotes[id] !== total){
+          votesEl.classList.add('bump');
+          setTimeout((function(el){ return function(){ el.classList.remove('bump'); }; })(votesEl), 400);
+        }
+        info.appendChild(votesEl);
+
+        var btns = document.createElement('div');
+        btns.className = 'btns';
+
+        var addBtn = document.createElement('button');
+        addBtn.className = 'add';
+        addBtn.type = 'button';
+        addBtn.textContent = voteOpen ? '投一票' : '已结束';
+        if (maxed || !voteOpen) addBtn.disabled = true;
+        addBtn.setAttribute('data-id', id);
+        addBtn.setAttribute('data-act', 'add');
+        btns.appendChild(addBtn);
+
+        var rmBtn = document.createElement('button');
+        rmBtn.className = 'remove';
+        rmBtn.type = 'button';
+        rmBtn.textContent = '取消';
+        if (my <= 0 || !voteOpen) rmBtn.disabled = true;
+        rmBtn.setAttribute('data-id', id);
+        rmBtn.setAttribute('data-act', 'remove');
+        btns.appendChild(rmBtn);
+
+        info.appendChild(btns);
       }
-      info.appendChild(votesEl);
 
-      var btns = document.createElement('div');
-      btns.className = 'btns';
-
-      var addBtn = document.createElement('button');
-      addBtn.className = 'add';
-      addBtn.type = 'button';
-      addBtn.textContent = voteOpen ? '投一票' : '已结束';
-      if (maxed || !voteOpen) addBtn.disabled = true;
-      addBtn.setAttribute('data-id', id);
-      addBtn.setAttribute('data-act', 'add');
-      btns.appendChild(addBtn);
-
-      var rmBtn = document.createElement('button');
-      rmBtn.className = 'remove';
-      rmBtn.type = 'button';
-      rmBtn.textContent = '取消';
-      if (my <= 0 || !voteOpen) rmBtn.disabled = true;
-      rmBtn.setAttribute('data-id', id);
-      rmBtn.setAttribute('data-act', 'remove');
-      btns.appendChild(rmBtn);
-
-      info.appendChild(btns);
       card.appendChild(info);
       g.appendChild(card);
     }
@@ -793,6 +829,13 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   }
 
   function renderPodium(){
+    // ✅ 全部月份视图不显示领奖台（因为混了多个月份，没意义）
+    var p = $('podium'), g = $('podium-grid');
+    if (isAllMonthsView()){
+      p.style.display = 'none';
+      return;
+    }
+
     var arr = [];
     for (var i = 0; i < dishes.length; i++){
       var d = dishes[i];
@@ -801,7 +844,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
     }
     arr.sort(function(a, b){ return b.votes - a.votes; });
     var top = arr.slice(0, 3);
-    var p = $('podium'), g = $('podium-grid');
     if (top.length === 0){ p.style.display = 'none'; return; }
     p.style.display = 'block';
     g.innerHTML = '';
@@ -887,6 +929,11 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   }
 
   function doVote(id, act, btn){
+    // ✅ 全部月份只读，直接阻止
+    if (isAllMonthsView()){
+      alert('全部月份视图仅供浏览，请先选择具体月份投票');
+      return;
+    }
     if (!isVoteOpen()){
       alert('本次投票已结束！');
       render();
@@ -1043,7 +1090,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   document.addEventListener('click', function(e){
     var t = e.target;
     if (!t || t.tagName.toLowerCase() !== 'button') return;
-    // 跳过下拉菜单按钮
     if (t.classList && t.classList.contains('dropdown-trigger')) return;
     var id = t.getAttribute('data-id');
     var act = t.getAttribute('data-act');
