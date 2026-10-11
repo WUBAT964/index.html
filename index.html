@@ -6,7 +6,42 @@
 <title>月度好菜投票</title>
 <style>
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 14px; font-size: 16px; }
+
+/* ============ 🎨 背景渐变 ============ */
+html {
+  min-height: 100%;
+}
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 14px;
+  font-size: 16px;
+  min-height: 100vh;
+
+  /* ✅ 淡蓝紫 → 淡青绿 斜向渐变 */
+  background: linear-gradient(135deg, #eef2ff 0%, #f4f7f6 45%, #ecfdf5 100%);
+  background-attachment: fixed;
+  background-size: cover;
+
+  /* 兼容不支持 fixed 的浏览器 */
+  background-color: #f4f7f6;
+}
+/* 顶部加一层柔和高光，让渐变有层次 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 40vh;
+  background: radial-gradient(ellipse at top, rgba(99,102,241,.06), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+/* 页面内容浮在背景层之上 */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
 h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
 .countdown {
@@ -41,8 +76,10 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 10px 20px;
   font-size: .95em; font-weight: 600; font-family: inherit; color: #333;
-  background: #fff;
-  border: 1.5px solid #e5e7eb; border-radius: 999px;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(229,231,235,.9); border-radius: 999px;
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
   cursor: pointer; text-align: left;
   transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease;
@@ -55,7 +92,10 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
 .dropdown-panel {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0;
-  background: #fff; border-radius: 16px;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.08);
   padding: 6px;
   max-height: 0; overflow: hidden;
@@ -88,7 +128,7 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .month-tip.readonly { background: #6c757d; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em; }
 
-/* ============ 📦 菜品网格：电脑固定 4 列 ============ */
+/* ============ 📦 菜品网格：电脑 4 列 ============ */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -129,7 +169,7 @@ button {
 .remove { background: #6c757d; }
 button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
-/* ============ 🏆 领奖台（3 列居中，与卡片同高） ============ */
+/* ============ 🏆 领奖台 ============ */
 .podium {
   background: #fff; border-radius: 12px; padding: 16px;
   margin: 0 auto 20px;
@@ -215,7 +255,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
 body.has-hover .card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 body.has-hover .card img:hover { transform: scale(1.03); }
-body.has-hover .dropdown-trigger:hover { border-color: #c7d2fe; background: #fafaff; box-shadow: 0 4px 12px rgba(99,102,241,.12); }
+body.has-hover .dropdown-trigger:hover { border-color: #c7d2fe; background: rgba(255,255,255,.95); box-shadow: 0 4px 12px rgba(99,102,241,.12); }
 body.has-hover .dropdown-item:hover { background: #eef2ff; color: #4f46e5; }
 body.has-hover button:not(:disabled):hover { filter: brightness(1.1); }
 body.has-hover .viewer-close:hover { background: rgba(255,255,255,.28); transform: rotate(90deg); }
@@ -228,6 +268,9 @@ body.perf-mid .grid.animate .card { animation-duration: .3s; }
 body.perf-mid .dropdown-panel { box-shadow: 0 6px 20px rgba(0,0,0,.12); transition: opacity .15s ease, transform .2s ease; }
 body.perf-mid .podium-card { transition: none; }
 body.perf-mid .viewer { transition: opacity .2s ease; }
+body.perf-mid .dropdown-trigger { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
+body.perf-mid .dropdown-panel { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
+body.perf-mid body::before { display: none; }
 
 body.perf-lite .grid { transition: none; }
 body.perf-lite .grid.fading-out { opacity: 1; transform: none; }
@@ -243,9 +286,9 @@ body.perf-lite .card img { transition: none; }
 body.perf-lite .votes { transition: none; }
 body.perf-lite .votes.bump { transform: none; }
 body.perf-lite button { transition: none; }
-body.perf-lite .dropdown-trigger { transition: none; }
+body.perf-lite .dropdown-trigger { transition: none; backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
 body.perf-lite .dropdown-arrow { transition: transform .15s linear; }
-body.perf-lite .dropdown-panel { transition: opacity .15s ease; transform: none; }
+body.perf-lite .dropdown-panel { transition: opacity .15s ease; transform: none; backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
 body.perf-lite .dropdown.open .dropdown-panel { transform: none; }
 body.perf-lite .podium { transition: none; }
 body.perf-lite .podium.fading-out { opacity: 1; transform: none; }
@@ -257,6 +300,14 @@ body.perf-lite .viewer { transition: none; }
 body.perf-lite .viewer-close { transition: none; }
 body.perf-lite .countdown { transition: none; }
 body.perf-lite .month-tip { transition: none; }
+body.perf-lite body::before { display: none; }
+
+/* 低端设备：渐变改成纯色（省 GPU） */
+body.perf-lite,
+html:has(body.perf-lite) body {
+  background: #f4f7f6 !important;
+  background-attachment: scroll !important;
+}
 
 /* ====== 平板：3 列 ====== */
 @media (max-width: 1024px) {
@@ -308,6 +359,12 @@ body.perf-lite .month-tip { transition: none; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
+  }
+  /* 系统偏好减少动画时也去掉渐变 backdrop-filter */
+  .dropdown-trigger, .dropdown-panel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #fff !important;
   }
 }
 </style>
