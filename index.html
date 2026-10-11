@@ -14,17 +14,22 @@ body {
   padding: 14px;
   font-size: 16px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #eef2ff 0%, #f4f7f6 45%, #ecfdf5 100%);
+  background:
+    radial-gradient(circle at 8% 4%,  rgba(99,102,241,.35), transparent 42%),
+    radial-gradient(circle at 95% 12%, rgba(168,85,247,.28), transparent 42%),
+    radial-gradient(circle at 85% 95%, rgba(16,185,129,.34), transparent 42%),
+    radial-gradient(circle at 12% 92%, rgba(59,130,246,.28), transparent 42%),
+    linear-gradient(135deg, #c7d2fe 0%, #dbeafe 30%, #d1fae5 65%, #a7f3d0 100%);
   background-attachment: fixed;
   background-size: cover;
-  background-color: #f4f7f6;
+  background-color: #dbeafe;
 }
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 40vh;
-  background: radial-gradient(ellipse at top, rgba(99,102,241,.06), transparent 70%);
+  height: 55vh;
+  background: radial-gradient(ellipse at top, rgba(255,255,255,.55), transparent 65%);
   pointer-events: none;
   z-index: 0;
 }
@@ -34,7 +39,7 @@ body > * {
 }
 
 body.no-gradient {
-  background: #f4f7f6 !important;
+  background: #eef2ff !important;
   background-attachment: scroll !important;
 }
 body.no-gradient::before {
@@ -237,7 +242,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   z-index: 100000;
 }
 
-/* ============ ⚡ 悬浮按钮组 ============ */
 .fab-group {
   position: fixed;
   right: 18px;
@@ -287,7 +291,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 }
 .fab-admin .icon { font-size: 1.1em; }
 
-/* ============ 👑 管理面板（苹果风折叠展开） ============ */
 .admin-modal {
   display: flex;
   position: fixed;
@@ -323,7 +326,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   transform-origin: center center;
 }
 
-/* 内容错峰出场 */
 .admin-box h2,
 .admin-box .admin-section,
 .admin-box .admin-close {
@@ -468,7 +470,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* 特性开关 */
 body.has-hover .card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 body.has-hover .card img:hover { transform: scale(1.03); }
 body.has-hover .dropdown-item:hover { background: #eef2ff; color: #4f46e5; }
@@ -797,7 +798,7 @@ body.is-touch .podium { background: #fff !important; }
             <span class="s-icon">🎨</span>
             <span class="s-text">
               <span class="s-name">渐变背景</span>
-              <span class="s-desc">淡蓝紫到淡青绿</span>
+              <span class="s-desc">彩色光斑渐变</span>
             </span>
           </div>
           <div class="switch-toggle"></div>
@@ -1019,13 +1020,10 @@ body.is-touch .podium { background: #fff !important; }
       })(rows[i]);
     }
 
-    // ============ 🍎 苹果风折叠展开 ============
     function openAdminModal(){
       syncSwitches();
 
       var from = btnAdmin.getBoundingClientRect();
-
-      // 让 modal 显示（visibility → visible）
       adminModal.classList.add('show');
 
       requestAnimationFrame(function(){
@@ -1040,7 +1038,6 @@ body.is-touch .podium { background: #fff !important; }
         var dy = cy1 - cy2;
         var scale = Math.max(0.08, from.width / to.width);
 
-        // 起始状态：小球（小 scale + 50% 圆角 + 透明）
         adminBox.style.transition = 'none';
         adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
         adminBox.style.borderRadius = '50%';
@@ -1048,7 +1045,6 @@ body.is-touch .podium { background: #fff !important; }
 
         void adminBox.offsetWidth;
 
-        // 下一帧开始"展开"：小球 → 完整面板
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
             adminBox.style.transition =
@@ -1075,7 +1071,6 @@ body.is-touch .podium { background: #fff !important; }
       var dy = cy1 - cy2;
       var scale = Math.max(0.08, from.width / to.width);
 
-      // 折叠缩小：矩形 → 小球
       adminBox.style.transition =
         'transform .45s cubic-bezier(.4, 0, .2, 1), ' +
         'border-radius .45s cubic-bezier(.4, 0, .2, 1), ' +
@@ -1146,7 +1141,14 @@ body.is-touch .podium { background: #fff !important; }
   "use strict";
 
   var API = 'https://exemption-eliminate-watts-merchant.trycloudflare.com';
-  var CDN = 'https://cdn.jsdelivr.net/gh/WUBAT964/images@main';
+
+  // ✅ 4 个 CDN 自动 fallback（手机网络下 jsDelivr 可能被墙）
+  var CDN_LIST = [
+    'https://cdn.jsdelivr.net/gh/WUBAT964/images@main',
+    'https://raw.githack.com/WUBAT964/images/main',
+    'https://cdn.statically.io/gh/WUBAT964/images/main',
+    'https://raw.githubusercontent.com/WUBAT964/images/main'
+  ];
 
   function isLowEnd(){ return document.body.classList.contains('perf-lite'); }
 
@@ -1205,14 +1207,68 @@ body.is-touch .podium { background: #fff !important; }
   function isAllMonthsView(){
     return !currentMonth;
   }
-  function imgUrl(f){
+
+  // 只返回文件名（不含 CDN 前缀）
+  function imgFilename(f){
     if (!f) return '';
     f = String(f).trim();
     if (!f) return '';
     var name = f.split('?')[0].split('#')[0].split('/').pop();
     if (!name) return '';
     if (NAME_MAP[name]) name = NAME_MAP[name];
-    return CDN + '/' + name;
+    return name;
+  }
+
+  // 第 0 个 CDN（默认）
+  function imgUrl(f){
+    var name = imgFilename(f);
+    if (!name) return '';
+    return CDN_LIST[0] + '/' + name;
+  }
+
+  // ============ 🖼️ 多 CDN 自动 fallback 的图片加载 ============
+  // 用法：createImg(name, onSuccess)
+  // 会依次尝试 CDN_LIST 里的每个 CDN，任何一个成功就用它
+  var _cdnWorking = {};   // 记忆每个文件成功的 CDN 索引，避免重复失败
+  function createImg(filename, onSuccess, onError){
+    var name = imgFilename(filename);
+    if (!name) return null;
+
+    var img = document.createElement('img');
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.alt = '';
+
+    var startIdx = _cdnWorking[name] || 0;
+    var idx = startIdx;
+
+    function tryNext(){
+      if (idx >= CDN_LIST.length){
+        // 全部失败
+        if (onError) onError();
+        return;
+      }
+      img.src = CDN_LIST[idx] + '/' + name;
+    }
+
+    img.onload = function(){
+      // 记住这个文件成功的 CDN
+      _cdnWorking[name] = idx;
+      if (onSuccess) onSuccess(img);
+    };
+
+    img.onerror = function(){
+      idx++;
+      // 加一点随机延迟，避免瞬间轰炸所有 CDN
+      if (idx < CDN_LIST.length){
+        setTimeout(tryNext, 100);
+      } else {
+        if (onError) onError();
+      }
+    };
+
+    tryNext();
+    return img;
   }
 
   var lastOpenState = null;
@@ -1467,7 +1523,7 @@ body.is-touch .podium { background: #fff !important; }
     for (var i = 0; i < dishes.length; i++){
       var d = dishes[i];
       var id = String(d.id);
-      var url = imgUrl(d.img);
+      var filename = d.img;
       var my = getVote(id);
       var total = votes[id] || 0;
 
@@ -1477,20 +1533,25 @@ body.is-touch .podium { background: #fff !important; }
         card.style.animationDelay = (i * 0.03) + 's';
       }
 
+      // ✅ 用多 CDN 加载图片
       var imgEl;
-      if (url){
-        imgEl = document.createElement('img');
-        imgEl.src = url;
-        imgEl.loading = 'lazy';
-        imgEl.decoding = 'async';
-        imgEl.onerror = function(){
-          var ph = document.createElement('div');
-          ph.className = 'no-img';
-          ph.textContent = '暂无图片';
-          if (this.parentNode) this.parentNode.replaceChild(ph, this);
-        };
-        (function(el, u){ el.onclick = function(){ openViewer(el, u); }; })(imgEl, url);
-      } else {
+      var nameOnly = imgFilename(filename);
+      if (nameOnly){
+        imgEl = createImg(filename,
+          function(img){ /* 成功 */ },
+          function(){
+            // 全部 CDN 都失败 → 换成占位
+            var ph = document.createElement('div');
+            ph.className = 'no-img';
+            ph.textContent = '暂无图片';
+            if (imgEl.parentNode) imgEl.parentNode.replaceChild(ph, imgEl);
+          }
+        );
+        if (imgEl){
+          (function(el, n){ el.onclick = function(){ openViewer(el, CDN_LIST[0] + '/' + n); }; })(imgEl, nameOnly);
+        }
+      }
+      if (!imgEl){
         imgEl = document.createElement('div');
         imgEl.className = 'no-img';
         imgEl.textContent = '暂无图片';
@@ -1576,7 +1637,7 @@ body.is-touch .podium { background: #fff !important; }
     p.style.display = 'block';
     g.innerHTML = '';
     for (var i = 0; i < top.length; i++){
-      var it = top[i], d = it.dish, url = imgUrl(d.img);
+      var it = top[i], d = it.dish, filename = d.img;
       var rank = i + 1;
       var badge = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
       var card = document.createElement('div');
@@ -1587,16 +1648,18 @@ body.is-touch .podium { background: #fff !important; }
       badgeEl.textContent = badge;
       card.appendChild(badgeEl);
 
-      if (url){
-        var img = document.createElement('img');
-        img.src = url;
-        img.onerror = function(){
-          var ph = document.createElement('div');
-          ph.className = 'no-img';
-          ph.textContent = '暂无图片';
-          if (this.parentNode) this.parentNode.replaceChild(ph, this);
-        };
-        card.appendChild(img);
+      var nameOnly = imgFilename(filename);
+      if (nameOnly){
+        var pImg = createImg(filename,
+          function(){},
+          function(){
+            var ph = document.createElement('div');
+            ph.className = 'no-img';
+            ph.textContent = '暂无图片';
+            if (pImg.parentNode) pImg.parentNode.replaceChild(ph, pImg);
+          }
+        );
+        if (pImg) card.appendChild(pImg);
       } else {
         var ph = document.createElement('div');
         ph.className = 'no-img';
