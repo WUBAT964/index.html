@@ -9,7 +9,7 @@
 body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 14px; font-size: 16px; }
 h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
-/* ⏰ 倒计时条：颜色变化加过渡 */
+/* ⏰ 倒计时条 */
 .countdown {
   text-align: center; font-weight: bold; color: #fff;
   background: linear-gradient(90deg, #ff5252, #ff9800);
@@ -17,7 +17,7 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   max-width: 480px; font-size: 1.05em;
   box-shadow: 0 2px 10px rgba(255,82,82,.35);
   letter-spacing: .5px;
-  transition: background .5s ease, box-shadow .5s ease, transform .3s ease;
+  transition: background .5s ease, box-shadow .5s ease;
 }
 .countdown.ended { background: linear-gradient(90deg, #999, #777); box-shadow: none; font-size: 1em; }
 .countdown.free  { background: linear-gradient(90deg, #4caf50, #8bc34a); box-shadow: 0 2px 10px rgba(76,175,80,.35); }
@@ -26,68 +26,147 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   background: rgba(0,0,0,.18); border-radius: 4px;
   font-variant-numeric: tabular-nums;
   font-family: "SF Mono", Menlo, Consolas, monospace;
-  transition: background .3s ease;
 }
 
-/* 📅 月份下拉菜单 */
+/* ============ 📅 圆角自定义下拉菜单 ============ */
 .month-picker {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   max-width: 480px;
   margin: 0 auto 12px;
-  animation: fadeSlideIn .5s ease both;
+  position: relative;
+  z-index: 200;
 }
 .month-picker label {
   color: #555;
   font-weight: 600;
   font-size: .95em;
+  flex-shrink: 0;
 }
-.month-picker select {
+
+.dropdown {
+  position: relative;
   flex: 1;
-  max-width: 220px;
-  padding: 10px 14px;
-  font-size: 1em;
+  max-width: 260px;
+  min-width: 170px;
+}
+
+.dropdown-trigger {
+  /* 覆盖全局 button 的 flex:1 */
+  flex: none !important;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 10px 20px;
+  font-size: .95em;
   font-weight: 600;
   font-family: inherit;
   color: #333;
+
   background: #fff;
-  border: 2px solid #ddd;
-  border-radius: 8px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
   cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%3E%3Cpath%20fill%3D%22%23555%22%20d%3D%22M6%208L0%200h12z%22%2F%3E%3C%2Fsvg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 38px;
-  transition: border-color .25s ease, box-shadow .25s ease, transform .15s ease;
+  text-align: left;
+
+  transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease;
 }
-.month-picker select:hover {
-  border-color: #007bff;
+.dropdown-trigger:hover {
+  border-color: #c7d2fe;
+  background: #fafaff;
+  box-shadow: 0 4px 12px rgba(99,102,241,.12);
 }
-.month-picker select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0,123,255,.15);
+.dropdown-trigger:active {
+  transform: none;
 }
-.month-picker select:active {
-  transform: scale(0.98);
+.dropdown.open .dropdown-trigger {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99,102,241,.15);
 }
 
+.dropdown-arrow {
+  transition: transform .3s cubic-bezier(.22,.61,.36,1);
+  flex-shrink: 0;
+}
+.dropdown.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* 弹出面板 */
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.08);
+  padding: 6px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+  transform-origin: top center;
+  pointer-events: none;
+  transition:
+    opacity .22s ease,
+    transform .28s cubic-bezier(.22,.61,.36,1),
+    max-height .3s cubic-bezier(.22,.61,.36,1);
+  z-index: 1000;
+}
+.dropdown.open .dropdown-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: .92em;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+  user-select: none;
+}
+.dropdown-item:hover {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+.dropdown-item.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-weight: 600;
+}
+.dropdown-item.ended {
+  opacity: .55;
+}
+.dropdown-item .status-dot {
+  font-size: .75em;
+}
+
+/* ============ 提示条 ============ */
 .month-tip {
   text-align: center; font-weight: bold; color: #fff; background: #ff9800;
   padding: 10px; border-radius: 8px; margin: 0 auto 18px; max-width: 480px; font-size: 1em;
-  transition: background .4s ease, opacity .3s ease;
-  animation: fadeSlideIn .5s ease .05s both;
 }
 .user-info {
   text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em;
-  animation: fadeSlideIn .5s ease .1s both;
 }
 
-/* 📦 菜品网格：切换时的淡出/淡入 */
+/* ============ 📦 菜品网格 ============ */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -108,15 +187,15 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   box-shadow: 0 2px 8px rgba(0,0,0,.1);
   display: flex; flex-direction: column;
   transition: transform .25s ease, box-shadow .25s ease;
-  /* 卡片入场动画 */
-  opacity: 0;
-  transform: translateY(12px);
-  animation: cardIn .45s cubic-bezier(.22,.61,.36,1) both;
 }
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0,0,0,.15);
 }
+.grid.animate .card {
+  animation: cardIn .45s cubic-bezier(.22,.61,.36,1) both;
+}
+
 .card img { width: 100%; height: 220px; object-fit: cover; display: block; background: #eee; cursor: pointer; transition: transform .4s ease; }
 .card img:hover { transform: scale(1.03); }
 .no-img { width: 100%; height: 220px; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: 1em; }
@@ -145,11 +224,10 @@ button:not(:disabled):active { transform: scale(0.96); }
 .remove { background: #6c757d; }
 button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
-/* 🏆 领奖台 */
+/* ============ 🏆 领奖台 ============ */
 .podium {
   background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,.1);
-  animation: fadeSlideIn .6s ease .15s both;
   transition: opacity .25s ease, transform .25s ease;
 }
 .podium.fading-out { opacity: 0; transform: translateY(10px); }
@@ -157,9 +235,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .podium-card {
   border-radius: 10px; overflow: hidden; position: relative; border: 3px solid #eee; background: #fff;
-  opacity: 0;
-  transform: translateY(16px);
-  animation: podiumIn .55s cubic-bezier(.22,.61,.36,1) both;
   transition: box-shadow .3s ease;
 }
 .podium-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,.15); }
@@ -169,7 +244,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .podium-badge {
   position: absolute; top: 8px; left: 8px; padding: 4px 10px; border-radius: 12px;
   font-size: .85em; font-weight: bold; background: #FFD700; color: #333; z-index: 2;
-  animation: badgePop .5s cubic-bezier(.34,1.56,.64,1) .2s both;
 }
 .podium-card.r2 .podium-badge { background: #C0C0C0; }
 .podium-card.r3 .podium-badge { background: #CD7F32; color: #fff; }
@@ -183,6 +257,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .podium-date { color: #888; font-size: .95em; margin-top: 4px; }
 .podium-votes { color: #ff9800; font-weight: bold; margin-top: 6px; font-size: 1.2em; }
 
+/* ============ 弹窗 ============ */
 .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); justify-content: center; align-items: center; opacity: 0; transition: opacity .3s ease; }
 .modal.show { display: flex; opacity: 1; }
 .modal-box {
@@ -201,30 +276,51 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .modal-box button { width: 100%; padding: 13px; background: #007bff; color: #fff; border: none; border-radius: 6px; font-size: 1.1em; margin-top: 10px; }
 .err { color: #d9534f; font-size: .95em; margin-bottom: 8px; display: none; }
 
-.viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.92); z-index: 99999; justify-content: center; align-items: center; opacity: 0; transition: opacity .3s ease; }
-.viewer.show { display: flex; opacity: 1; }
-.viewer img { max-width: 95%; max-height: 90%; object-fit: contain; transform: scale(0.95); transition: transform .35s cubic-bezier(.22,.61,.36,1); }
-.viewer.show img { transform: scale(1); }
-.viewer-close { position: absolute; top: 10px; right: 15px; color: #fff; font-size: 36px; font-weight: bold; cursor: pointer; padding: 5px 14px; line-height: 1; background: rgba(255,255,255,.1); border-radius: 50%; transition: background .2s ease, transform .2s ease; }
-.viewer-close:hover { background: rgba(255,255,255,.25); transform: rotate(90deg); }
-
-/* ============ 动画关键帧 ============ */
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ============ 🖼️ 图片查看器（FLIP 动画） ============ */
+.viewer {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,.92);
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
 }
+.viewer.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.viewer img {
+  width: auto;
+  height: auto;
+  max-width: 92vw;
+  max-height: 88vh;
+  display: block;
+  will-change: transform, opacity;
+  border-radius: 4px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.viewer-close {
+  position: absolute; top: 15px; right: 20px;
+  color: #fff; font-size: 32px; font-weight: bold;
+  cursor: pointer; padding: 4px 12px; line-height: 1;
+  background: rgba(255,255,255,.12); border-radius: 50%;
+  transition: background .2s ease, transform .25s ease;
+  z-index: 100000;
+}
+.viewer-close:hover {
+  background: rgba(255,255,255,.28);
+  transform: rotate(90deg);
+}
+
+/* 动画关键帧 */
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(16px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes podiumIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.94); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes badgePop {
-  0%   { opacity: 0; transform: scale(0.5) rotate(-15deg); }
-  60%  { opacity: 1; transform: scale(1.15) rotate(5deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0); }
 }
 
 @media (max-width: 768px) {
@@ -232,9 +328,10 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   h1 { font-size: 1.5em; }
   .countdown { font-size: .9em; padding: 9px; margin-bottom: 10px; }
   .countdown .num { min-width: 1.8em; padding: 1px 4px; }
-  .month-picker { margin-bottom: 10px; }
-  .month-picker select { padding: 8px 12px; font-size: .95em; padding-right: 32px; background-position: right 10px center; }
-  .month-picker label { font-size: .9em; }
+  .month-picker { margin-bottom: 10px; gap: 8px; }
+  .month-picker label { font-size: .85em; }
+  .dropdown-trigger { padding: 8px 14px; font-size: .9em; }
+  .dropdown-item { padding: 9px 12px; font-size: .88em; }
   .month-tip { font-size: .9em; padding: 8px; margin-bottom: 12px; }
   .user-info { font-size: .95em; }
   .grid { gap: 6px; }
@@ -255,9 +352,9 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   .podium-chef { font-size: .85em; margin-top: 3px; }
   .podium-date { font-size: .8em; margin-top: 3px; }
   .podium-votes { font-size: 1em; margin-top: 4px; }
+  .viewer-close { font-size: 28px; top: 10px; right: 12px; }
 }
 
-/* 尊重用户系统设置：关闭动画 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -271,11 +368,18 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
 <div class="countdown" id="countdown">⏰ 计算中...</div>
 
+<!-- 📅 圆角自定义月份下拉 -->
 <div class="month-picker">
-  <label for="month-select">📅 月份：</label>
-  <select id="month-select">
-    <option value="">加载中...</option>
-  </select>
+  <label>📅 月份：</label>
+  <div class="dropdown" id="month-dropdown">
+    <button type="button" class="dropdown-trigger" id="month-trigger">
+      <span id="month-label">加载中...</span>
+      <svg class="dropdown-arrow" width="12" height="8" viewBox="0 0 12 8">
+        <path fill="#9ca3af" d="M6 8L0 0h12z"/>
+      </svg>
+    </button>
+    <div class="dropdown-panel" id="month-panel"></div>
+  </div>
 </div>
 
 <div class="month-tip" id="month-tip">📅 加载中...</div>
@@ -313,6 +417,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
   var currentMonth = '';
   var DEADLINE = null;
+  var _animNextRender = false;
 
   var NAME_MAP = {
     "1_炆行鸡.jpg":             "1_wenxingji.jpg",
@@ -432,64 +537,99 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
       '<span class="num">' + pad2(secs) + '</span>';
   }
 
-  // ============ 📅 月份下拉菜单 ============
+  // ============ 📅 圆角自定义下拉 ============
+  var _monthList = [];
 
   function renderMonthSelect(months){
-    var sel = $('month-select');
-    if (!sel) return;
-    sel.innerHTML = '';
+    _monthList = months.slice();
+    var trigger = $('month-trigger');
+    var dropdown = $('month-dropdown');
 
-    var optAll = document.createElement('option');
-    optAll.value = '';
-    optAll.textContent = '全部月份（汇总）';
-    sel.appendChild(optAll);
+    if (!trigger._bound){
+      trigger._bound = true;
+      trigger.onclick = function(e){
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+      };
+      document.addEventListener('click', function(e){
+        if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+      });
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape') dropdown.classList.remove('open');
+      });
+    }
 
-    months.forEach(function(m){
-      var opt = document.createElement('option');
-      opt.value = m;
+    rebuildPanel();
+  }
+
+  function rebuildPanel(){
+    var panel = $('month-panel');
+    if (!panel) return;
+    panel.innerHTML = '';
+
+    appendItem(panel, '', '全部月份（汇总）', null);
+
+    _monthList.forEach(function(m){
       var info = monthDeadlines[m];
-      var suffix = '';
-      if (info){
-        suffix = info.open === false ? '  🔴已结束' : '  🟢进行中';
-      }
-      opt.textContent = m + suffix;
-      sel.appendChild(opt);
+      var open = info ? info.open !== false : true;
+      appendItem(panel, m, m, open);
     });
+  }
 
-    sel.onchange = function(){
-      var v = sel.value;
-      if (v === currentMonth) return;
-      loadMonth(v);
+  function appendItem(panel, value, label, open){
+    var item = document.createElement('div');
+    item.className = 'dropdown-item';
+    if (value === currentMonth) item.classList.add('active');
+    if (open === false) item.classList.add('ended');
+    item.setAttribute('data-value', value);
+
+    var text = document.createElement('span');
+    text.textContent = label;
+    item.appendChild(text);
+
+    if (open !== null){
+      var dot = document.createElement('span');
+      dot.className = 'status-dot';
+      dot.textContent = open === false ? '🔴' : '🟢';
+      item.appendChild(dot);
+    }
+
+    item.onclick = function(e){
+      e.stopPropagation();
+      $('month-dropdown').classList.remove('open');
+      if (value === currentMonth) return;
+      loadMonth(value);
     };
+
+    panel.appendChild(item);
   }
 
   function updateMonthSelectUI(){
-    var sel = $('month-select');
-    if (!sel) return;
-    sel.value = currentMonth;
+    var label = $('month-label');
+    if (label){
+      label.textContent = currentMonth || '全部月份（汇总）';
+    }
+    var panel = $('month-panel');
+    if (panel){
+      var items = panel.querySelectorAll('.dropdown-item');
+      for (var i = 0; i < items.length; i++){
+        var v = items[i].getAttribute('data-value');
+        items[i].classList.toggle('active', v === currentMonth);
 
-    for (var i = 0; i < sel.options.length; i++){
-      var opt = sel.options[i];
-      var m = opt.value;
-      if (!m){
-        opt.textContent = '全部月份（汇总）';
-        continue;
+        var info = monthDeadlines[v];
+        if (v && info){
+          items[i].classList.toggle('ended', info.open === false);
+          var dot = items[i].querySelector('.status-dot');
+          if (dot) dot.textContent = info.open === false ? '🔴' : '🟢';
+        }
       }
-      var info = monthDeadlines[m];
-      var suffix = '';
-      if (info){
-        suffix = info.open === false ? '  🔴已结束' : '  🟢进行中';
-      }
-      opt.textContent = m + suffix;
     }
   }
 
-  // ✅ 切换月份：先淡出，等过渡完成再更新内容
   function loadMonth(month){
     var grid = $('grid');
     var podium = $('podium');
 
-    // 加 fading-out 类触发淡出
     grid.classList.add('fading-out');
     if (podium.style.display !== 'none') {
       podium.classList.add('fading-out');
@@ -533,8 +673,13 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
         .then(function(){
           dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
           updateCountdown();
+
+          _animNextRender = true;
+          grid.classList.add('animate');
+          setTimeout(function(){ grid.classList.remove('animate'); }, 900);
+
           loadVotes();
-          // 移除 fading-out，触发淡入
+
           requestAnimationFrame(function(){
             grid.classList.remove('fading-out');
             podium.classList.remove('fading-out');
@@ -542,7 +687,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
         });
     };
 
-    // 250ms 后（对应 CSS transition 时长）执行更新
     setTimeout(doUpdate, 250);
   }
 
@@ -553,8 +697,9 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
     g.innerHTML = '';
     var voteOpen = isVoteOpen();
     var maxed = getTotalVoted() >= 3;
+    var playAnim = _animNextRender;
+    _animNextRender = false;
 
-    // 保存旧的票数，用于"票数跳动"动画
     var oldVotes = {};
     for (var k in votes) { oldVotes[k] = votes[k]; }
 
@@ -567,8 +712,9 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
       var card = document.createElement('div');
       card.className = 'card';
-      // 卡片错峰入场：每个延迟 30ms
-      card.style.animationDelay = (i * 0.03) + 's';
+      if (playAnim) {
+        card.style.animationDelay = (i * 0.03) + 's';
+      }
 
       var imgEl;
       if (url){
@@ -581,7 +727,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
           ph.textContent = '暂无图片';
           if (this.parentNode) this.parentNode.replaceChild(ph, this);
         };
-        (function(u){ imgEl.onclick = function(){ openViewer(u); }; })(url);
+        (function(el, u){ el.onclick = function(){ openViewer(el, u); }; })(imgEl, url);
       } else {
         imgEl = document.createElement('div');
         imgEl.className = 'no-img';
@@ -611,7 +757,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
       votesEl.className = 'votes';
       votesEl.id = 'v-' + id;
       votesEl.textContent = total + ' 票';
-      // 票数变了 → 加 bump 动画
       if (oldVotes[id] !== undefined && oldVotes[id] !== total){
         votesEl.classList.add('bump');
         setTimeout((function(el){ return function(){ el.classList.remove('bump'); }; })(votesEl), 400);
@@ -666,7 +811,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
       var badge = rank === 1 ? '🥇 第一' : rank === 2 ? '🥈 第二' : '🥉 第三';
       var card = document.createElement('div');
       card.className = 'podium-card r' + rank;
-      card.style.animationDelay = (i * 0.08) + 's';
 
       var badgeEl = document.createElement('div');
       badgeEl.className = 'podium-badge';
@@ -788,21 +932,119 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
     });
   }
 
+  // ============ 🖼️ 图片查看器（FLIP 动画） ============
   var viewer = $('viewer');
-  function openViewer(url){
-    $('viewer-img').src = url;
-    viewer.className = 'viewer show';
+  var viewerImg = $('viewer-img');
+  var _lastTriggerEl = null;
+
+  function openViewer(triggerEl, url){
+    _lastTriggerEl = triggerEl;
+
+    var from = triggerEl.getBoundingClientRect();
+
+    viewer.classList.add('show');
+    viewerImg.style.opacity = '0';
+    viewerImg.style.transform = '';
+    viewerImg.style.transition = 'none';
+    viewerImg.src = url;
+
+    var startFly = function(){
+      var to = viewerImg.getBoundingClientRect();
+      if (to.width === 0 || to.height === 0){
+        viewerImg.style.opacity = '1';
+        return;
+      }
+
+      var cx1 = from.left + from.width / 2;
+      var cy1 = from.top + from.height / 2;
+      var cx2 = to.left + to.width / 2;
+      var cy2 = to.top + to.height / 2;
+      var dx = cx1 - cx2;
+      var dy = cy1 - cy2;
+      var scale = from.width / to.width;
+
+      viewerImg.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+      viewerImg.style.opacity = '0.6';
+
+      void viewerImg.offsetWidth;
+
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          viewerImg.style.transition = 'transform .45s cubic-bezier(.34,1.15,.64,1), opacity .25s ease';
+          viewerImg.style.transform = 'translate(0, 0) scale(1)';
+          viewerImg.style.opacity = '1';
+        });
+      });
+    };
+
+    if (viewerImg.complete && viewerImg.naturalWidth > 0){
+      requestAnimationFrame(function(){
+        requestAnimationFrame(startFly);
+      });
+    } else {
+      viewerImg.onload = function(){
+        viewerImg.onload = null;
+        requestAnimationFrame(startFly);
+      };
+      viewerImg.onerror = function(){
+        viewerImg.onerror = null;
+        viewerImg.style.opacity = '1';
+      };
+    }
   }
+
   function closeViewer(){
-    viewer.className = 'viewer';
-    setTimeout(function(){ $('viewer-img').src = ''; }, 300);
+    var trigger = _lastTriggerEl;
+
+    if (!trigger || !viewerImg.src || !viewerImg.offsetParent){
+      viewer.classList.remove('show');
+      setTimeout(function(){
+        viewerImg.src = '';
+        viewerImg.style.transition = '';
+        viewerImg.style.transform = '';
+        viewerImg.style.opacity = '';
+      }, 300);
+      _lastTriggerEl = null;
+      return;
+    }
+
+    var from = trigger.getBoundingClientRect();
+    var to = viewerImg.getBoundingClientRect();
+
+    var cx1 = from.left + from.width / 2;
+    var cy1 = from.top + from.height / 2;
+    var cx2 = to.left + to.width / 2;
+    var cy2 = to.top + to.height / 2;
+    var dx = cx1 - cx2;
+    var dy = cy1 - cy2;
+    var scale = from.width / to.width;
+
+    viewerImg.style.transition = 'transform .35s cubic-bezier(.4,0,.6,1), opacity .3s ease';
+    viewerImg.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+    viewerImg.style.opacity = '0.2';
+
+    viewer.classList.remove('show');
+
+    setTimeout(function(){
+      viewerImg.src = '';
+      viewerImg.style.transition = '';
+      viewerImg.style.transform = '';
+      viewerImg.style.opacity = '';
+      _lastTriggerEl = null;
+    }, 380);
   }
+
   $('viewer-close').onclick = closeViewer;
   viewer.onclick = function(e){ if (e.target === viewer) closeViewer(); };
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && viewer.classList.contains('show')) closeViewer();
+  });
 
   document.addEventListener('click', function(e){
     var t = e.target;
     if (!t || t.tagName.toLowerCase() !== 'button') return;
+    // 跳过下拉菜单按钮
+    if (t.classList && t.classList.contains('dropdown-trigger')) return;
     var id = t.getAttribute('data-id');
     var act = t.getAttribute('data-act');
     if (id && act) doVote(id, act, t);
@@ -903,6 +1145,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
       .then(function(r){ return r.json(); })
       .then(function(s){
         monthDeadlines = s.deadlines || {};
+        rebuildPanel();
         updateMonthSelectUI();
       })
       .catch(function(){});
