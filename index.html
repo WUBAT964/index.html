@@ -254,6 +254,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   -webkit-appearance: none;
   box-shadow: 0 4px 14px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.1);
   transition: transform .2s ease, box-shadow .2s ease, background-color .3s ease;
+  white-space: nowrap;
 }
 .fab:active { transform: scale(0.95); }
 .fab:hover { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
@@ -265,20 +266,20 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   -webkit-backdrop-filter: blur(10px);
 }
 .fab-power.active {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(16,185,129,.4);
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(16,185,129,.45) !important;
 }
 .fab-power .icon { font-size: 1.1em; }
 
 .fab-admin {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(99,102,241,.4);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(99,102,241,.45) !important;
 }
 .fab-admin .icon { font-size: 1.1em; }
 
-/* 管理面板 */
+/* ============ 👑 管理面板（FLIP 动画） ============ */
 .admin-modal {
   display: none;
   position: fixed;
@@ -291,20 +292,23 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   opacity: 0;
   transition: opacity .3s ease;
 }
-.admin-modal.show { display: flex; opacity: 1; }
+.admin-modal.show {
+  display: flex;
+  opacity: 1;
+}
 .admin-box {
   background: #fff;
   border-radius: 16px;
   padding: 24px;
   width: 100%;
-  max-width: 460px;
+  max-width: 420px;
   max-height: 80vh;
   overflow-y: auto;
-  transform: scale(.9);
-  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
   box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  /* FLIP 动画由 JS 控制，这里不用 transition */
+  will-change: transform, opacity;
+  transform-origin: center center;
 }
-.admin-modal.show .admin-box { transform: scale(1); }
 .admin-box h2 {
   margin: 0 0 16px;
   font-size: 1.3em;
@@ -321,30 +325,11 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 }
 .admin-section h3 {
   margin: 0 0 10px;
-  font-size: .95em;
+  font-size: .9em;
   color: #666;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .5px;
-}
-.admin-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  font-size: .95em;
-  border-bottom: 1px solid #eef0f3;
-}
-.admin-row:last-child { border-bottom: none; }
-.admin-row .label { color: #666; }
-.admin-row .value {
-  color: #111;
-  font-weight: 600;
-  font-family: "SF Mono", Menlo, Consolas, monospace;
-  font-size: .9em;
-  word-break: break-all;
-  text-align: right;
-  max-width: 60%;
 }
 .admin-device-id {
   background: #eef2ff;
@@ -352,39 +337,51 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   padding: 10px 12px;
   border-radius: 8px;
   font-family: "SF Mono", Menlo, Consolas, monospace;
-  font-size: .85em;
+  font-size: .82em;
   word-break: break-all;
   cursor: pointer;
   user-select: all;
-  margin-top: 8px;
+  margin-top: 6px;
   transition: background .2s ease;
 }
 .admin-device-id:hover { background: #e0e7ff; }
-.admin-device-id:active { background: #c7d2fe; }
-.admin-btn-row {
+
+/* 画质选项按钮 */
+.quality-options {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 6px;
 }
-.admin-btn {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  font-size: .9em;
-  font-weight: 600;
+.quality-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
   font-family: inherit;
   cursor: pointer;
+  text-align: left;
   -webkit-appearance: none;
-  transition: filter .2s ease, transform .1s ease;
+  transition: border-color .2s ease, background-color .2s ease, transform .1s ease;
 }
-.admin-btn:active { transform: scale(.97); }
-.admin-btn.danger { background: #fee2e2; color: #dc2626; }
-.admin-btn.danger:hover { filter: brightness(.95); }
-.admin-btn.primary { background: #eef2ff; color: #4f46e5; }
-.admin-btn.primary:hover { filter: brightness(.95); }
-.admin-btn.ghost { background: #f3f4f6; color: #555; }
-.admin-btn.ghost:hover { filter: brightness(.95); }
+.quality-btn:active { transform: scale(.98); }
+.quality-btn:hover { border-color: #c7d2fe; background: #fafaff; }
+.quality-btn.active {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+}
+.quality-btn .q-icon { font-size: 1.4em; flex-shrink: 0; }
+.quality-btn .q-text { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.quality-btn .q-name { font-weight: bold; color: #333; font-size: .95em; }
+.quality-btn .q-desc { font-size: .75em; color: #888; }
+.quality-btn.active .q-name { color: #4f46e5; }
+.quality-btn.active .q-desc { color: #6366f1; }
+
 .admin-close {
   width: 100%;
   padding: 12px;
@@ -396,7 +393,10 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   font-weight: 600;
   cursor: pointer;
   margin-top: 6px;
+  -webkit-appearance: none;
+  transition: filter .2s ease;
 }
+.admin-close:hover { filter: brightness(1.1); }
 
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(16px) scale(0.96); }
@@ -459,15 +459,11 @@ body.has-hover.perf-high .modal-box {
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.9);
 }
-body.has-hover.perf-high .fab-power {
+body.has-hover.perf-high .fab-power:not(.active) {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.9);
-}
-body.has-hover.perf-high .fab-admin {
-  backdrop-filter: blur(14px) saturate(180%);
-  -webkit-backdrop-filter: blur(14px) saturate(180%);
 }
 
 body.perf-mid .card { box-shadow: 0 1px 4px rgba(0,0,0,.06); transition: transform .2s ease; }
@@ -507,7 +503,6 @@ body.perf-lite .month-tip { transition: none; }
 
 body.perf-lite .card, body.perf-lite .podium, body.perf-lite .podium-card,
 body.perf-lite .dropdown-trigger, body.perf-lite .dropdown-panel, body.perf-lite .modal-box,
-body.perf-lite .fab-power, body.perf-lite .fab-admin,
 body.perf-mid .dropdown-trigger, body.perf-mid .dropdown-panel, body.perf-mid .modal-box,
 body.is-touch .card, body.is-touch .podium, body.is-touch .podium-card,
 body.is-touch .dropdown-trigger, body.is-touch .dropdown-panel, body.is-touch .modal-box {
@@ -521,8 +516,29 @@ body.is-touch .card, body.is-touch .podium, body.is-touch .podium-card,
 body.is-touch .dropdown-trigger, body.is-touch .dropdown-panel, body.is-touch .modal-box {
   background: #fff !important;
 }
-body.perf-lite .fab-power, body.is-touch .fab-power {
+
+body.perf-lite .fab-power:not(.active),
+body.is-touch .fab-power:not(.active) {
   background: rgba(255,255,255,.95) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #555 !important;
+}
+body.perf-lite .fab-power.active,
+body.is-touch .fab-power.active {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(16,185,129,.45) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.perf-lite .fab-admin,
+body.is-touch .fab-admin {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(99,102,241,.45) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 body.is-touch .podium { background: #fff !important; }
 
@@ -567,8 +583,16 @@ body.is-touch .podium { background: #fff !important; }
   .podium-votes { font-size: .9em; margin-top: 4px; }
   .viewer-close { font-size: 28px; top: 10px; right: 12px; }
 
-  .fab-group { right: 12px; bottom: 12px; gap: 8px; }
-  .fab { padding: 8px 14px; font-size: .82em; }
+  .fab-group {
+    right: auto;
+    left: 12px;
+    top: 12px;
+    bottom: auto;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .fab { padding: 7px 12px; font-size: .78em; gap: 4px; }
+  .fab .icon { font-size: 1em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -623,7 +647,7 @@ body.is-touch .podium { background: #fff !important; }
   <img id="viewer-img" src="" alt="">
 </div>
 
-<!-- ⚡ 右下角悬浮按钮 -->
+<!-- ⚡ 悬浮按钮组 -->
 <div class="fab-group">
   <button type="button" class="fab fab-power" id="btn-power" title="省电模式">
     <span class="icon">⚡</span>
@@ -635,53 +659,40 @@ body.is-touch .podium { background: #fff !important; }
   </button>
 </div>
 
-<!-- 👑 管理面板 -->
+<!-- 👑 管理面板（FLIP 动画） -->
 <div class="admin-modal" id="admin-modal">
-  <div class="admin-box">
+  <div class="admin-box" id="admin-box">
     <h2>👑 管理面板</h2>
 
     <div class="admin-section">
-      <h3>本机设备 ID（点击复制）</h3>
+      <h3>本机设备 ID</h3>
       <div class="admin-device-id" id="admin-device-id">—</div>
     </div>
 
     <div class="admin-section">
-      <h3>设备信息</h3>
-      <div class="admin-row">
-        <span class="label">性能档位</span>
-        <span class="value" id="admin-perf">—</span>
-      </div>
-      <div class="admin-row">
-        <span class="label">省电模式</span>
-        <span class="value" id="admin-lite">—</span>
-      </div>
-      <div class="admin-row">
-        <span class="label">CPU 核心</span>
-        <span class="value" id="admin-cores">—</span>
-      </div>
-      <div class="admin-row">
-        <span class="label">内存 (GB)</span>
-        <span class="value" id="admin-mem">—</span>
-      </div>
-      <div class="admin-row">
-        <span class="label">屏幕</span>
-        <span class="value" id="admin-screen">—</span>
-      </div>
-      <div class="admin-row">
-        <span class="label">时区</span>
-        <span class="value" id="admin-tz">—</span>
-      </div>
-    </div>
-
-    <div class="admin-section">
-      <h3>操作</h3>
-      <div class="admin-btn-row">
-        <button type="button" class="admin-btn primary" id="admin-copy">复制设备 ID</button>
-        <button type="button" class="admin-btn ghost" id="admin-clear-user">清除本地用户</button>
-      </div>
-      <div class="admin-btn-row">
-        <button type="button" class="admin-btn danger" id="admin-reset-lite">重置省电模式</button>
-        <button type="button" class="admin-btn danger" id="admin-reset-device">重置设备 ID</button>
+      <h3>画质档位</h3>
+      <div class="quality-options" id="quality-options">
+        <button type="button" class="quality-btn" data-perf="perf-high">
+          <span class="q-icon">✨</span>
+          <span class="q-text">
+            <span class="q-name">高画质</span>
+            <span class="q-desc">全动画 · 毛玻璃</span>
+          </span>
+        </button>
+        <button type="button" class="quality-btn" data-perf="perf-mid">
+          <span class="q-icon">🌤️</span>
+          <span class="q-text">
+            <span class="q-name">中画质</span>
+            <span class="q-desc">基础动画 · 无毛玻璃</span>
+          </span>
+        </button>
+        <button type="button" class="quality-btn" data-perf="perf-lite">
+          <span class="q-icon">⚡</span>
+          <span class="q-text">
+            <span class="q-name">低画质</span>
+            <span class="q-desc">无动画 · 最省电</span>
+          </span>
+        </button>
       </div>
     </div>
 
@@ -695,7 +706,7 @@ body.is-touch .podium { background: #fff !important; }
   var body = document.body;
   if (!body) return;
 
-  // ---------- 1. 生成设备指纹 ----------
+  // ---------- 1. 设备指纹 ----------
   function getDeviceId(){
     var saved = localStorage.getItem('device_id');
     if (saved) return saved;
@@ -747,9 +758,9 @@ body.is-touch .podium { background: #fff !important; }
 
   // ---------- 2. 管理员白名单 ----------
   var ADMIN_IDS = [
-    'dev-msw0i6up35xnt3nk4a',                        // ← 你的设备（用短 ID 形式）
-    '154bde98eb07421f81d75657af6e7f12',              // ← 你的设备（用长 ID 形式）
-    'dev-154bde98eb07421f81d75657af6e7f12',          // ← 兼容带 dev- 前缀
+    'dev-msw0i6up35xnt3nk4a',
+    '154bde98eb07421f81d75657af6e7f12',
+    'dev-154bde98eb07421f81d75657af6e7f12',
   ];
 
   var isAdmin = ADMIN_IDS.indexOf(DEVICE_ID) !== -1;
@@ -758,126 +769,235 @@ body.is-touch .podium { background: #fff !important; }
   var hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   body.classList.add(hasHover ? 'has-hover' : 'is-touch');
 
-  // ---------- 4. 性能分档 ----------
-  var perfLevel = 'perf-lite';
+  // ---------- 4. 自动性能档 ----------
+  var autoLevel = 'perf-lite';
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     var mem = navigator.deviceMemory;
     var cores = navigator.hardwareConcurrency || 2;
     if (mem === undefined) {
-      perfLevel = cores >= 8 ? 'perf-high' : cores >= 4 ? 'perf-mid' : 'perf-lite';
+      autoLevel = cores >= 8 ? 'perf-high' : cores >= 4 ? 'perf-mid' : 'perf-lite';
     } else if (mem >= 8) {
-      perfLevel = 'perf-high';
+      autoLevel = 'perf-high';
     } else if (mem === 4) {
-      perfLevel = cores >= 4 ? 'perf-high' : 'perf-mid';
+      autoLevel = cores >= 4 ? 'perf-high' : 'perf-mid';
     } else if (mem >= 2) {
-      perfLevel = 'perf-mid';
+      autoLevel = 'perf-mid';
     } else {
-      perfLevel = 'perf-lite';
+      autoLevel = 'perf-lite';
     }
   }
 
-  // ---------- 5. 省电模式 ----------
+  // ---------- 5. 最终档位（force_perf 优先） ----------
+  var forcePerf = localStorage.getItem('force_perf') || '';
   var userLite = localStorage.getItem('perf_lite') === '1';
-  var finalLevel = userLite ? 'perf-lite' : perfLevel;
+
+  var finalLevel;
+  if (forcePerf === 'perf-high' || forcePerf === 'perf-mid' || forcePerf === 'perf-lite') {
+    finalLevel = forcePerf;
+  } else if (userLite) {
+    finalLevel = 'perf-lite';
+  } else {
+    finalLevel = autoLevel;
+  }
 
   body.classList.add(finalLevel);
-  if (finalLevel === 'perf-lite') body.classList.add('perf-lite');
 
   console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin +
-              ' 原始档=' + perfLevel + ' 省电=' + userLite + ' 最终=' + finalLevel);
+              ' 自动档=' + autoLevel + ' force=' + (forcePerf || '—') +
+              ' 省电=' + userLite + ' 最终=' + finalLevel);
 
   window.__DEVICE__ = {
     id: DEVICE_ID,
     isAdmin: isAdmin,
-    perfLevel: perfLevel,
+    autoLevel: autoLevel,
+    forcePerf: forcePerf,
     userLite: userLite,
     finalLevel: finalLevel
   };
 
-  // ---------- 7. 省电模式按钮 ----------
-  var btnPower = document.getElementById('btn-power');
-  if (btnPower){
-    function refreshPowerBtn(){
-      var lite = localStorage.getItem('perf_lite') === '1';
-      var textEl = btnPower.querySelector('.text');
-      if (lite){
-        btnPower.classList.add('active');
-        if (textEl) textEl.textContent = '已省电';
+  // ---------- 6. 统一设置档位 ----------
+  function setLevel(level, saveAs){
+    // 清除旧档
+    body.classList.remove('perf-high', 'perf-mid', 'perf-lite');
+    body.classList.add(level);
+
+    // 保存设置
+    if (saveAs === 'force'){
+      localStorage.setItem('force_perf', level);
+      if (level === 'perf-lite') localStorage.setItem('perf_lite', '1');
+      else localStorage.removeItem('perf_lite');
+    } else if (saveAs === 'power'){
+      if (level === 'perf-lite') {
+        localStorage.setItem('perf_lite', '1');
+        localStorage.removeItem('force_perf');
       } else {
-        btnPower.classList.remove('active');
-        if (textEl) textEl.textContent = '省电模式';
+        localStorage.removeItem('perf_lite');
+        localStorage.removeItem('force_perf');
       }
     }
+
+    // 更新 UI
     refreshPowerBtn();
+    updateQualityUI();
 
-    btnPower.addEventListener('click', function(){
-      var lite = localStorage.getItem('perf_lite') === '1';
-      var next = lite ? '0' : '1';
-      localStorage.setItem('perf_lite', next);
-
-      var b = document.body;
-      b.classList.remove('perf-high', 'perf-mid', 'perf-lite');
-      var level = next === '1' ? 'perf-lite' : perfLevel;
-      b.classList.add(level);
-      if (level === 'perf-lite') b.classList.add('perf-lite');
-
-      refreshPowerBtn();
-      console.log('[省电模式]', next === '1' ? '开启' : '关闭', '→ ' + level);
-    });
+    console.log('[档位切换] → ' + level + ' (saveAs=' + saveAs + ')');
   }
 
-  // ---------- 8. 管理员按钮 + 面板 ----------
+  // ---------- 7. 省电模式按钮 ----------
+  var btnPower = document.getElementById('btn-power');
+  function refreshPowerBtn(){
+    var isLite = body.classList.contains('perf-lite');
+    var textEl = btnPower.querySelector('.text');
+    if (isLite){
+      btnPower.classList.add('active');
+      if (textEl) textEl.textContent = '省电模式已开启';
+    } else {
+      btnPower.classList.remove('active');
+      if (textEl) textEl.textContent = '省电模式';
+    }
+  }
+  refreshPowerBtn();
+
+  btnPower.addEventListener('click', function(){
+    var isLite = body.classList.contains('perf-lite');
+    var next = isLite ? autoLevel : 'perf-lite';
+    setLevel(next, 'power');
+  });
+
+  // ---------- 8. 管理面板 ----------
   var btnAdmin = document.getElementById('btn-admin');
   var adminModal = document.getElementById('admin-modal');
+  var adminBox = document.getElementById('admin-box');
   var adminClose = document.getElementById('admin-close');
 
-  if (isAdmin && btnAdmin && adminModal){
+  function updateQualityUI(){
+    var current = body.classList.contains('perf-high') ? 'perf-high' :
+                  body.classList.contains('perf-mid') ? 'perf-mid' : 'perf-lite';
+    var btns = document.querySelectorAll('.quality-btn');
+    for (var i = 0; i < btns.length; i++){
+      btns[i].classList.toggle('active', btns[i].getAttribute('data-perf') === current);
+    }
+  }
+
+  if (isAdmin && btnAdmin && adminModal && adminBox){
     btnAdmin.style.display = '';
 
+    // 填充设备信息
     function fillAdminPanel(){
-      var d = window.__DEVICE__;
       var elId = document.getElementById('admin-device-id');
-      if (elId) elId.textContent = d.id;
-      var elPerf = document.getElementById('admin-perf');
-      if (elPerf) elPerf.textContent = d.perfLevel;
-      var elLite = document.getElementById('admin-lite');
-      if (elLite) elLite.textContent = (localStorage.getItem('perf_lite') === '1') ? '开启' : '关闭';
-      var elCores = document.getElementById('admin-cores');
-      if (elCores) elCores.textContent = (navigator.hardwareConcurrency || '?') + ' 核';
-      var elMem = document.getElementById('admin-mem');
-      if (elMem) elMem.textContent = navigator.deviceMemory !== undefined ? String(navigator.deviceMemory) : '未知';
-      var elScreen = document.getElementById('admin-screen');
-      if (elScreen) elScreen.textContent = screen.width + ' × ' + screen.height + ' @' + (window.devicePixelRatio || 1) + 'x';
-      var elTz = document.getElementById('admin-tz');
-      if (elTz) elTz.textContent = (Intl.DateTimeFormat().resolvedOptions().timeZone) || '未知';
+      if (elId) elId.textContent = window.__DEVICE__.id;
+      updateQualityUI();
     }
 
-    btnAdmin.addEventListener('click', function(){
+    // ============ 🖼️ FLIP 动画打开 ============
+    function openAdminModal(){
       fillAdminPanel();
+
+      // 拿到 👑 按钮的位置
+      var from = btnAdmin.getBoundingClientRect();
+
+      // 先显示 modal（此时 opacity 从 0 开始，背景淡入）
       adminModal.classList.add('show');
-    });
 
-    adminClose.addEventListener('click', function(){
+      // 下一帧：拿 box 最终位置 + 设为起始状态
+      requestAnimationFrame(function(){
+        var to = adminBox.getBoundingClientRect();
+        if (to.width === 0 || to.height === 0) return;
+
+        var cx1 = from.left + from.width / 2;
+        var cy1 = from.top + from.height / 2;
+        var cx2 = to.left + to.width / 2;
+        var cy2 = to.top + to.height / 2;
+        var dx = cx1 - cx2;
+        var dy = cy1 - cy2;
+        var scale = Math.max(0.1, from.width / to.width);
+
+        // 立即设为起始状态（禁用过渡）
+        adminBox.style.transition = 'none';
+        adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+        adminBox.style.opacity = '0.6';
+
+        void adminBox.offsetWidth;
+
+        // 下一帧开始飞行动画
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){
+            adminBox.style.transition = 'transform .45s cubic-bezier(.34,1.15,.64,1), opacity .3s ease';
+            adminBox.style.transform = 'translate(0, 0) scale(1)';
+            adminBox.style.opacity = '1';
+          });
+        });
+      });
+    }
+
+    // ============ 🖼️ FLIP 动画关闭 ============
+    function closeAdminModal(){
+      var from = btnAdmin.getBoundingClientRect();
+      var to = adminBox.getBoundingClientRect();
+
+      var cx1 = from.left + from.width / 2;
+      var cy1 = from.top + from.height / 2;
+      var cx2 = to.left + to.width / 2;
+      var cy2 = to.top + to.height / 2;
+      var dx = cx1 - cx2;
+      var dy = cy1 - cy2;
+      var scale = Math.max(0.1, from.width / to.width);
+
+      adminBox.style.transition = 'transform .35s cubic-bezier(.4,0,.6,1), opacity .3s ease';
+      adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+      adminBox.style.opacity = '0';
+
       adminModal.classList.remove('show');
+
+      setTimeout(function(){
+        adminBox.style.transition = '';
+        adminBox.style.transform = '';
+        adminBox.style.opacity = '';
+      }, 400);
+    }
+
+    // 打开
+    btnAdmin.addEventListener('click', function(e){
+      e.stopPropagation();
+      openAdminModal();
     });
 
+    // 关闭按钮
+    adminClose.addEventListener('click', closeAdminModal);
+
+    // 点击遮罩关闭
     adminModal.addEventListener('click', function(e){
-      if (e.target === adminModal) adminModal.classList.remove('show');
+      if (e.target === adminModal) closeAdminModal();
     });
 
+    // ESC 关闭
     document.addEventListener('keydown', function(e){
       if (e.key === 'Escape' && adminModal.classList.contains('show')){
-        adminModal.classList.remove('show');
+        closeAdminModal();
       }
     });
 
+    // 画质切换
+    var qualityBtns = document.querySelectorAll('.quality-btn');
+    for (var i = 0; i < qualityBtns.length; i++){
+      (function(btn){
+        btn.addEventListener('click', function(e){
+          e.stopPropagation();
+          var level = btn.getAttribute('data-perf');
+          if (!level) return;
+          setLevel(level, 'force');
+        });
+      })(qualityBtns[i]);
+    }
+
+    // 设备 ID 点击复制
     var elId = document.getElementById('admin-device-id');
     if (elId){
       elId.addEventListener('click', function(){
         var txt = elId.textContent;
         if (navigator.clipboard && navigator.clipboard.writeText){
           navigator.clipboard.writeText(txt).then(function(){
-            var orig = elId.textContent;
+            var orig = txt;
             elId.textContent = '✅ 已复制：' + orig;
             setTimeout(function(){ elId.textContent = orig; }, 1500);
           });
@@ -888,44 +1008,9 @@ body.is-touch .podium { background: #fff !important; }
           ta.select();
           try { document.execCommand('copy'); } catch(e){}
           document.body.removeChild(ta);
-          var orig = elId.textContent;
+          var orig = txt;
           elId.textContent = '✅ 已复制：' + orig;
           setTimeout(function(){ elId.textContent = orig; }, 1500);
-        }
-      });
-    }
-
-    var btnCopy = document.getElementById('admin-copy');
-    if (btnCopy){
-      btnCopy.addEventListener('click', function(){
-        if (elId) elId.click();
-      });
-    }
-
-    var btnClearUser = document.getElementById('admin-clear-user');
-    if (btnClearUser){
-      btnClearUser.addEventListener('click', function(){
-        if (confirm('确定清除本地用户信息？需要重新登录。')){
-          localStorage.removeItem('chef_user');
-          location.reload();
-        }
-      });
-    }
-
-    var btnResetLite = document.getElementById('admin-reset-lite');
-    if (btnResetLite){
-      btnResetLite.addEventListener('click', function(){
-        localStorage.removeItem('perf_lite');
-        location.reload();
-      });
-    }
-
-    var btnResetDevice = document.getElementById('admin-reset-device');
-    if (btnResetDevice){
-      btnResetDevice.addEventListener('click', function(){
-        if (confirm('确定重置设备 ID？重置后可能失去管理员权限。')){
-          localStorage.removeItem('device_id');
-          location.reload();
         }
       });
     }
@@ -940,7 +1025,10 @@ body.is-touch .podium { background: #fff !important; }
   var API = 'https://exemption-eliminate-watts-merchant.trycloudflare.com';
   var CDN = 'https://cdn.jsdelivr.net/gh/WUBAT964/images@main';
 
-  var isLowEnd = document.body.classList.contains('perf-lite');
+  // ⚡ 动态判断是否低端（切换画质后立即生效）
+  function isLowEnd(){
+    return document.body.classList.contains('perf-lite');
+  }
 
   var currentMonth = '';
   var DEADLINE = null;
@@ -1153,7 +1241,7 @@ body.is-touch .podium { background: #fff !important; }
     var grid = $('grid');
     var podium = $('podium');
 
-    if (!isLowEnd){
+    if (!isLowEnd()){
       grid.classList.add('fading-out');
       if (podium.style.display !== 'none') podium.classList.add('fading-out');
     }
@@ -1182,7 +1270,7 @@ body.is-touch .podium { background: #fff !important; }
         dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
         updateCountdown();
 
-        if (!isLowEnd){
+        if (!isLowEnd()){
           _animNextRender = true;
           grid.classList.add('animate');
           setTimeout(function(){ grid.classList.remove('animate'); }, 900);
@@ -1190,7 +1278,7 @@ body.is-touch .podium { background: #fff !important; }
 
         render();
 
-        if (!isLowEnd){
+        if (!isLowEnd()){
           requestAnimationFrame(function(){
             grid.classList.remove('fading-out');
             podium.classList.remove('fading-out');
@@ -1221,7 +1309,7 @@ body.is-touch .podium { background: #fff !important; }
           dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
           updateCountdown();
 
-          if (!isLowEnd){
+          if (!isLowEnd()){
             _animNextRender = true;
             grid.classList.add('animate');
             setTimeout(function(){ grid.classList.remove('animate'); }, 900);
@@ -1229,7 +1317,7 @@ body.is-touch .podium { background: #fff !important; }
 
           loadVotes();
 
-          if (!isLowEnd){
+          if (!isLowEnd()){
             requestAnimationFrame(function(){
               grid.classList.remove('fading-out');
               podium.classList.remove('fading-out');
@@ -1238,7 +1326,7 @@ body.is-touch .podium { background: #fff !important; }
         });
     };
 
-    if (isLowEnd) doUpdate();
+    if (isLowEnd()) doUpdate();
     else setTimeout(doUpdate, 250);
   }
 
@@ -1249,6 +1337,7 @@ body.is-touch .podium { background: #fff !important; }
     var maxed = getTotalVoted() >= 3;
     var playAnim = _animNextRender;
     _animNextRender = false;
+    var lowEnd = isLowEnd();
 
     var readonly = isAllMonthsView();
 
@@ -1264,7 +1353,7 @@ body.is-touch .podium { background: #fff !important; }
 
       var card = document.createElement('div');
       card.className = 'card';
-      if (playAnim && !isLowEnd) {
+      if (playAnim && !lowEnd) {
         card.style.animationDelay = (i * 0.03) + 's';
       }
 
@@ -1311,7 +1400,7 @@ body.is-touch .podium { background: #fff !important; }
         votesEl.className = 'votes';
         votesEl.id = 'v-' + id;
         votesEl.textContent = total + ' 票';
-        if (oldVotes[id] !== undefined && oldVotes[id] !== total && !isLowEnd){
+        if (oldVotes[id] !== undefined && oldVotes[id] !== total && !lowEnd){
           votesEl.classList.add('bump');
           setTimeout((function(el){ return function(){ el.classList.remove('bump'); }; })(votesEl), 400);
         }
@@ -1609,7 +1698,7 @@ body.is-touch .podium { background: #fff !important; }
     if (!t || t.tagName.toLowerCase() !== 'button') return;
     if (t.classList && t.classList.contains('dropdown-trigger')) return;
     if (t.classList && t.classList.contains('fab')) return;
-    if (t.classList && t.classList.contains('admin-btn')) return;
+    if (t.classList && t.classList.contains('quality-btn')) return;
     if (t.classList && t.classList.contains('admin-close')) return;
     var id = t.getAttribute('data-id');
     var act = t.getAttribute('data-act');
