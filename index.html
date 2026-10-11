@@ -229,7 +229,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   z-index: 100000;
 }
 
-/* ============ ⚡ 悬浮按钮组（右下角） ============ */
+/* ============ ⚡ 悬浮按钮组 ============ */
 .fab-group {
   position: fixed;
   right: 18px;
@@ -258,7 +258,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .fab:active { transform: scale(0.95); }
 .fab:hover { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
 
-/* 省电模式按钮 */
 .fab-power {
   background: rgba(255,255,255,.9);
   color: #555;
@@ -272,7 +271,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 }
 .fab-power .icon { font-size: 1.1em; }
 
-/* 管理员按钮 */
 .fab-admin {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
@@ -405,10 +403,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ========================================================
-   🎯 设备识别类
-   ======================================================== */
-
 body.has-hover .card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 body.has-hover .card img:hover { transform: scale(1.03); }
 body.has-hover .dropdown-item:hover { background: #eef2ff; color: #4f46e5; }
@@ -417,7 +411,6 @@ body.has-hover .viewer-close:hover { background: rgba(255,255,255,.28); transfor
 body.has-hover .podium-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,.15); }
 body.has-hover button:not(:disabled):active { transform: scale(0.96); }
 
-/* 电脑高配：毛玻璃 */
 body.has-hover.perf-high .card {
   background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(14px) saturate(180%);
@@ -477,7 +470,6 @@ body.has-hover.perf-high .fab-admin {
   -webkit-backdrop-filter: blur(14px) saturate(180%);
 }
 
-/* 中端设备 */
 body.perf-mid .card { box-shadow: 0 1px 4px rgba(0,0,0,.06); transition: transform .2s ease; }
 body.perf-mid .card img { transition: transform .25s ease; }
 body.perf-mid .grid.animate .card { animation-duration: .3s; }
@@ -485,7 +477,6 @@ body.perf-mid .dropdown-panel { box-shadow: 0 6px 20px rgba(0,0,0,.12); transiti
 body.perf-mid .podium-card { transition: none; }
 body.perf-mid .viewer { transition: opacity .2s ease; }
 
-/* 低端设备 */
 body.perf-lite .grid { transition: none; }
 body.perf-lite .grid.fading-out { opacity: 1; transform: none; }
 body.perf-lite .grid.animate .card { animation: none; }
@@ -514,7 +505,6 @@ body.perf-lite .viewer-close { transition: none; }
 body.perf-lite .countdown { transition: none; }
 body.perf-lite .month-tip { transition: none; }
 
-/* 一律禁毛玻璃（非电脑高配） */
 body.perf-lite .card, body.perf-lite .podium, body.perf-lite .podium-card,
 body.perf-lite .dropdown-trigger, body.perf-lite .dropdown-panel, body.perf-lite .modal-box,
 body.perf-lite .fab-power, body.perf-lite .fab-admin,
@@ -723,7 +713,6 @@ body.is-touch .podium { background: #fff !important; }
       navigator.platform || ''
     ];
 
-    // canvas 指纹（更稳定，不同设备有差异）
     try {
       var c = document.createElement('canvas');
       c.width = 200; c.height = 50;
@@ -739,7 +728,6 @@ body.is-touch .podium { background: #fff !important; }
       parts.push(c.toDataURL().slice(-80));
     } catch(e){}
 
-    // 简单 hash
     var str = parts.join('||');
     var h1 = 0x811c9dc5;
     for (var i = 0; i < str.length; i++){
@@ -758,9 +746,10 @@ body.is-touch .podium { background: #fff !important; }
   var DEVICE_ID = getDeviceId();
 
   // ---------- 2. 管理员白名单 ----------
-  // ⚠️ 把你的设备 ID 填到这里
   var ADMIN_IDS = [
-    // 'dev-xxxxxxxxxxx',
+    'dev-msw0i6up35xnt3nk4a',                        // ← 你的设备（用短 ID 形式）
+    '154bde98eb07421f81d75657af6e7f12',              // ← 你的设备（用长 ID 形式）
+    'dev-154bde98eb07421f81d75657af6e7f12',          // ← 兼容带 dev- 前缀
   ];
 
   var isAdmin = ADMIN_IDS.indexOf(DEVICE_ID) !== -1;
@@ -787,7 +776,7 @@ body.is-touch .podium { background: #fff !important; }
     }
   }
 
-  // ---------- 5. 省电模式（用户偏好优先） ----------
+  // ---------- 5. 省电模式 ----------
   var userLite = localStorage.getItem('perf_lite') === '1';
   var finalLevel = userLite ? 'perf-lite' : perfLevel;
 
@@ -797,7 +786,6 @@ body.is-touch .podium { background: #fff !important; }
   console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin +
               ' 原始档=' + perfLevel + ' 省电=' + userLite + ' 最终=' + finalLevel);
 
-  // ---------- 6. 保存状态到全局，供其他脚本读取 ----------
   window.__DEVICE__ = {
     id: DEVICE_ID,
     isAdmin: isAdmin,
@@ -827,7 +815,6 @@ body.is-touch .podium { background: #fff !important; }
       var next = lite ? '0' : '1';
       localStorage.setItem('perf_lite', next);
 
-      // 切换 body class
       var b = document.body;
       b.classList.remove('perf-high', 'perf-mid', 'perf-lite');
       var level = next === '1' ? 'perf-lite' : perfLevel;
@@ -884,7 +871,6 @@ body.is-touch .podium { background: #fff !important; }
       }
     });
 
-    // 点击设备 ID 复制
     var elId = document.getElementById('admin-device-id');
     if (elId){
       elId.addEventListener('click', function(){
