@@ -7,26 +7,18 @@
 <style>
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-/* ============ 🎨 背景渐变 ============ */
-html {
-  min-height: 100%;
-}
+html { min-height: 100%; }
 body {
   font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
   margin: 0;
   padding: 14px;
   font-size: 16px;
   min-height: 100vh;
-
-  /* ✅ 淡蓝紫 → 淡青绿 斜向渐变 */
   background: linear-gradient(135deg, #eef2ff 0%, #f4f7f6 45%, #ecfdf5 100%);
   background-attachment: fixed;
   background-size: cover;
-
-  /* 兼容不支持 fixed 的浏览器 */
   background-color: #f4f7f6;
 }
-/* 顶部加一层柔和高光，让渐变有层次 */
 body::before {
   content: '';
   position: fixed;
@@ -36,7 +28,6 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
-/* 页面内容浮在背景层之上 */
 body > * {
   position: relative;
   z-index: 1;
@@ -76,10 +67,9 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 10px 20px;
   font-size: .95em; font-weight: 600; font-family: inherit; color: #333;
-  background: rgba(255,255,255,.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1.5px solid rgba(229,231,235,.9); border-radius: 999px;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 999px;
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
   cursor: pointer; text-align: left;
   transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease;
@@ -92,9 +82,7 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
 .dropdown-panel {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0;
-  background: rgba(255,255,255,.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #fff;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.08);
   padding: 6px;
@@ -128,7 +116,6 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .month-tip.readonly { background: #6c757d; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em; }
 
-/* ============ 📦 菜品网格：电脑 4 列 ============ */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -140,10 +127,11 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .grid.fading-out { opacity: 0; transform: translateY(10px); }
 
 .card {
-  background: #fff; border-radius: 10px; overflow: hidden;
+  background: #fff;
+  border-radius: 10px; overflow: hidden;
   box-shadow: 0 2px 6px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
   display: flex; flex-direction: column;
-  transition: transform .25s ease, box-shadow .25s ease;
+  transition: transform .25s ease, box-shadow .25s ease, background-color .3s ease;
 }
 .grid.animate .card { animation: cardIn .4s cubic-bezier(.22,.61,.36,1) both; }
 
@@ -169,7 +157,6 @@ button {
 .remove { background: #6c757d; }
 button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
-/* ============ 🏆 领奖台 ============ */
 .podium {
   background: #fff; border-radius: 12px; padding: 16px;
   margin: 0 auto 20px;
@@ -203,7 +190,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .podium-date { color: #888; font-size: .9em; margin-top: 4px; }
 .podium-votes { color: #ff9800; font-weight: bold; margin-top: 6px; font-size: 1.15em; }
 
-/* ============ 弹窗 ============ */
 .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); justify-content: center; align-items: center; opacity: 0; transition: opacity .3s ease; }
 .modal.show { display: flex; opacity: 1; }
 .modal-box {
@@ -222,7 +208,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .modal-box button { width: 100%; padding: 13px; background: #007bff; color: #fff; border: none; border-radius: 6px; font-size: 1.1em; margin-top: 10px; }
 .err { color: #d9534f; font-size: .95em; margin-bottom: 8px; display: none; }
 
-/* ============ 🖼️ 图片查看器 ============ */
 .viewer {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,.92); z-index: 99999;
@@ -244,38 +229,266 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   z-index: 100000;
 }
 
+/* ============ ⚡ 悬浮按钮组（右下角） ============ */
+.fab-group {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+.fab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: .9em;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  -webkit-appearance: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.1);
+  transition: transform .2s ease, box-shadow .2s ease, background-color .3s ease;
+}
+.fab:active { transform: scale(0.95); }
+.fab:hover { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+
+/* 省电模式按钮 */
+.fab-power {
+  background: rgba(255,255,255,.9);
+  color: #555;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.fab-power.active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(16,185,129,.4);
+}
+.fab-power .icon { font-size: 1.1em; }
+
+/* 管理员按钮 */
+.fab-admin {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(99,102,241,.4);
+}
+.fab-admin .icon { font-size: 1.1em; }
+
+/* 管理面板 */
+.admin-modal {
+  display: none;
+  position: fixed;
+  z-index: 10001;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.admin-modal.show { display: flex; opacity: 1; }
+.admin-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 80vh;
+  overflow-y: auto;
+  transform: scale(.9);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+.admin-modal.show .admin-box { transform: scale(1); }
+.admin-box h2 {
+  margin: 0 0 16px;
+  font-size: 1.3em;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-section {
+  margin-bottom: 18px;
+  padding: 14px;
+  background: #f9fafb;
+  border-radius: 10px;
+}
+.admin-section h3 {
+  margin: 0 0 10px;
+  font-size: .95em;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.admin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: .95em;
+  border-bottom: 1px solid #eef0f3;
+}
+.admin-row:last-child { border-bottom: none; }
+.admin-row .label { color: #666; }
+.admin-row .value {
+  color: #111;
+  font-weight: 600;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: .9em;
+  word-break: break-all;
+  text-align: right;
+  max-width: 60%;
+}
+.admin-device-id {
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: .85em;
+  word-break: break-all;
+  cursor: pointer;
+  user-select: all;
+  margin-top: 8px;
+  transition: background .2s ease;
+}
+.admin-device-id:hover { background: #e0e7ff; }
+.admin-device-id:active { background: #c7d2fe; }
+.admin-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.admin-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: .9em;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+  transition: filter .2s ease, transform .1s ease;
+}
+.admin-btn:active { transform: scale(.97); }
+.admin-btn.danger { background: #fee2e2; color: #dc2626; }
+.admin-btn.danger:hover { filter: brightness(.95); }
+.admin-btn.primary { background: #eef2ff; color: #4f46e5; }
+.admin-btn.primary:hover { filter: brightness(.95); }
+.admin-btn.ghost { background: #f3f4f6; color: #555; }
+.admin-btn.ghost:hover { filter: brightness(.95); }
+.admin-close {
+  width: 100%;
+  padding: 12px;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(16px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ========================================================
-   🎯 自动识别类
+   🎯 设备识别类
    ======================================================== */
 
 body.has-hover .card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 body.has-hover .card img:hover { transform: scale(1.03); }
-body.has-hover .dropdown-trigger:hover { border-color: #c7d2fe; background: rgba(255,255,255,.95); box-shadow: 0 4px 12px rgba(99,102,241,.12); }
 body.has-hover .dropdown-item:hover { background: #eef2ff; color: #4f46e5; }
 body.has-hover button:not(:disabled):hover { filter: brightness(1.1); }
 body.has-hover .viewer-close:hover { background: rgba(255,255,255,.28); transform: rotate(90deg); }
 body.has-hover .podium-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,.15); }
 body.has-hover button:not(:disabled):active { transform: scale(0.96); }
 
+/* 电脑高配：毛玻璃 */
+body.has-hover.perf-high .card {
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+body.has-hover.perf-high .card:hover {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 28px rgba(99,102,241,.16), inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+body.has-hover.perf-high .podium {
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 16px rgba(99,102,241,.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+body.has-hover.perf-high .podium-card { background: rgba(255, 255, 255, 0.7); }
+body.has-hover.perf-high .dropdown-trigger {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 10px rgba(99,102,241,.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+body.has-hover.perf-high .dropdown-trigger:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #c7d2fe;
+  box-shadow: 0 6px 16px rgba(99,102,241,.15), inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+body.has-hover.perf-high .dropdown.open .dropdown-trigger {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99,102,241,.18);
+}
+body.has-hover.perf-high .dropdown-panel {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 40px rgba(99,102,241,.18), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+body.has-hover.perf-high .modal-box {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+body.has-hover.perf-high .fab-power {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+body.has-hover.perf-high .fab-admin {
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+}
+
+/* 中端设备 */
 body.perf-mid .card { box-shadow: 0 1px 4px rgba(0,0,0,.06); transition: transform .2s ease; }
 body.perf-mid .card img { transition: transform .25s ease; }
 body.perf-mid .grid.animate .card { animation-duration: .3s; }
 body.perf-mid .dropdown-panel { box-shadow: 0 6px 20px rgba(0,0,0,.12); transition: opacity .15s ease, transform .2s ease; }
 body.perf-mid .podium-card { transition: none; }
 body.perf-mid .viewer { transition: opacity .2s ease; }
-body.perf-mid .dropdown-trigger { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
-body.perf-mid .dropdown-panel { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
-body.perf-mid body::before { display: none; }
 
+/* 低端设备 */
 body.perf-lite .grid { transition: none; }
 body.perf-lite .grid.fading-out { opacity: 1; transform: none; }
 body.perf-lite .grid.animate .card { animation: none; }
-
 body.perf-lite .card {
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
   transition: none;
@@ -286,9 +499,9 @@ body.perf-lite .card img { transition: none; }
 body.perf-lite .votes { transition: none; }
 body.perf-lite .votes.bump { transform: none; }
 body.perf-lite button { transition: none; }
-body.perf-lite .dropdown-trigger { transition: none; backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
+body.perf-lite .dropdown-trigger { transition: none; }
 body.perf-lite .dropdown-arrow { transition: transform .15s linear; }
-body.perf-lite .dropdown-panel { transition: opacity .15s ease; transform: none; backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
+body.perf-lite .dropdown-panel { transition: opacity .15s ease; transform: none; }
 body.perf-lite .dropdown.open .dropdown-panel { transform: none; }
 body.perf-lite .podium { transition: none; }
 body.perf-lite .podium.fading-out { opacity: 1; transform: none; }
@@ -300,16 +513,29 @@ body.perf-lite .viewer { transition: none; }
 body.perf-lite .viewer-close { transition: none; }
 body.perf-lite .countdown { transition: none; }
 body.perf-lite .month-tip { transition: none; }
-body.perf-lite body::before { display: none; }
 
-/* 低端设备：渐变改成纯色（省 GPU） */
-body.perf-lite,
-html:has(body.perf-lite) body {
-  background: #f4f7f6 !important;
-  background-attachment: scroll !important;
+/* 一律禁毛玻璃（非电脑高配） */
+body.perf-lite .card, body.perf-lite .podium, body.perf-lite .podium-card,
+body.perf-lite .dropdown-trigger, body.perf-lite .dropdown-panel, body.perf-lite .modal-box,
+body.perf-lite .fab-power, body.perf-lite .fab-admin,
+body.perf-mid .dropdown-trigger, body.perf-mid .dropdown-panel, body.perf-mid .modal-box,
+body.is-touch .card, body.is-touch .podium, body.is-touch .podium-card,
+body.is-touch .dropdown-trigger, body.is-touch .dropdown-panel, body.is-touch .modal-box {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
+body.perf-lite .card, body.perf-lite .podium, body.perf-lite .podium-card,
+body.perf-lite .dropdown-trigger, body.perf-lite .dropdown-panel, body.perf-lite .modal-box,
+body.perf-mid .dropdown-trigger, body.perf-mid .dropdown-panel, body.perf-mid .modal-box,
+body.is-touch .card, body.is-touch .podium, body.is-touch .podium-card,
+body.is-touch .dropdown-trigger, body.is-touch .dropdown-panel, body.is-touch .modal-box {
+  background: #fff !important;
+}
+body.perf-lite .fab-power, body.is-touch .fab-power {
+  background: rgba(255,255,255,.95) !important;
+}
+body.is-touch .podium { background: #fff !important; }
 
-/* ====== 平板：3 列 ====== */
 @media (max-width: 1024px) {
   .grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .card img, .no-img { height: 160px; }
@@ -318,7 +544,6 @@ html:has(body.perf-lite) body {
   .podium-card img, .podium-card .no-img { height: 160px; }
 }
 
-/* ====== 手机：2 列 ====== */
 @media (max-width: 768px) {
   body { padding: 8px; font-size: 15px; }
   h1 { font-size: 1.5em; }
@@ -331,7 +556,6 @@ html:has(body.perf-lite) body {
   .month-tip { font-size: .9em; padding: 8px; margin-bottom: 12px; }
   .user-info { font-size: .95em; }
 
-  /* ✅ 手机 2 列 */
   .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .card img, .no-img { height: 140px; }
   .info { padding: 10px; }
@@ -342,7 +566,6 @@ html:has(body.perf-lite) body {
   button { padding: 9px 2px; font-size: .88em; }
   .btns { gap: 5px; margin-top: 6px; }
 
-  /* 领奖台手机端 3 列 */
   .podium { padding: 10px; margin-bottom: 12px; max-width: 100%; }
   .podium-title { font-size: 1.1em; margin-bottom: 10px; }
   .podium-grid { gap: 6px; }
@@ -353,18 +576,15 @@ html:has(body.perf-lite) body {
   .podium-date { font-size: .72em; margin-top: 2px; }
   .podium-votes { font-size: .9em; margin-top: 4px; }
   .viewer-close { font-size: 28px; top: 10px; right: 12px; }
+
+  .fab-group { right: 12px; bottom: 12px; gap: 8px; }
+  .fab { padding: 8px 14px; font-size: .82em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
-  }
-  /* 系统偏好减少动画时也去掉渐变 backdrop-filter */
-  .dropdown-trigger, .dropdown-panel {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: #fff !important;
   }
 }
 </style>
@@ -413,39 +633,317 @@ html:has(body.perf-lite) body {
   <img id="viewer-img" src="" alt="">
 </div>
 
+<!-- ⚡ 右下角悬浮按钮 -->
+<div class="fab-group">
+  <button type="button" class="fab fab-power" id="btn-power" title="省电模式">
+    <span class="icon">⚡</span>
+    <span class="text">省电模式</span>
+  </button>
+  <button type="button" class="fab fab-admin" id="btn-admin" style="display:none" title="管理面板">
+    <span class="icon">👑</span>
+    <span class="text">管理</span>
+  </button>
+</div>
+
+<!-- 👑 管理面板 -->
+<div class="admin-modal" id="admin-modal">
+  <div class="admin-box">
+    <h2>👑 管理面板</h2>
+
+    <div class="admin-section">
+      <h3>本机设备 ID（点击复制）</h3>
+      <div class="admin-device-id" id="admin-device-id">—</div>
+    </div>
+
+    <div class="admin-section">
+      <h3>设备信息</h3>
+      <div class="admin-row">
+        <span class="label">性能档位</span>
+        <span class="value" id="admin-perf">—</span>
+      </div>
+      <div class="admin-row">
+        <span class="label">省电模式</span>
+        <span class="value" id="admin-lite">—</span>
+      </div>
+      <div class="admin-row">
+        <span class="label">CPU 核心</span>
+        <span class="value" id="admin-cores">—</span>
+      </div>
+      <div class="admin-row">
+        <span class="label">内存 (GB)</span>
+        <span class="value" id="admin-mem">—</span>
+      </div>
+      <div class="admin-row">
+        <span class="label">屏幕</span>
+        <span class="value" id="admin-screen">—</span>
+      </div>
+      <div class="admin-row">
+        <span class="label">时区</span>
+        <span class="value" id="admin-tz">—</span>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h3>操作</h3>
+      <div class="admin-btn-row">
+        <button type="button" class="admin-btn primary" id="admin-copy">复制设备 ID</button>
+        <button type="button" class="admin-btn ghost" id="admin-clear-user">清除本地用户</button>
+      </div>
+      <div class="admin-btn-row">
+        <button type="button" class="admin-btn danger" id="admin-reset-lite">重置省电模式</button>
+        <button type="button" class="admin-btn danger" id="admin-reset-device">重置设备 ID</button>
+      </div>
+    </div>
+
+    <button type="button" class="admin-close" id="admin-close">关闭</button>
+  </div>
+</div>
+
 <script>
-// ============ 🎯 设备性能识别 ============
+// ============ 🎯 设备识别 + 性能分档 + 管理员 ============
 (function detectPerformance(){
   var body = document.body;
   if (!body) return;
 
+  // ---------- 1. 生成设备指纹 ----------
+  function getDeviceId(){
+    var saved = localStorage.getItem('device_id');
+    if (saved) return saved;
+
+    var parts = [
+      navigator.userAgent,
+      navigator.language || '',
+      navigator.languages ? navigator.languages.join(',') : '',
+      navigator.hardwareConcurrency || '',
+      navigator.deviceMemory || '',
+      screen.width + 'x' + screen.height,
+      screen.colorDepth || '',
+      new Date().getTimezoneOffset(),
+      (Intl.DateTimeFormat().resolvedOptions().timeZone) || '',
+      navigator.platform || ''
+    ];
+
+    // canvas 指纹（更稳定，不同设备有差异）
+    try {
+      var c = document.createElement('canvas');
+      c.width = 200; c.height = 50;
+      var ctx = c.getContext('2d');
+      ctx.textBaseline = 'top';
+      ctx.font = '14px Arial';
+      ctx.fillStyle = '#f60';
+      ctx.fillRect(125, 1, 62, 20);
+      ctx.fillStyle = '#069';
+      ctx.fillText('device-fp', 2, 15);
+      ctx.fillStyle = 'rgba(102,204,0,0.7)';
+      ctx.fillText('device-fp', 4, 17);
+      parts.push(c.toDataURL().slice(-80));
+    } catch(e){}
+
+    // 简单 hash
+    var str = parts.join('||');
+    var h1 = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++){
+      h1 ^= str.charCodeAt(i);
+      h1 = (h1 * 0x01000193) >>> 0;
+    }
+    var h2 = 5381;
+    for (var i = 0; i < str.length; i++){
+      h2 = ((h2 << 5) + h2 + str.charCodeAt(i)) >>> 0;
+    }
+    var id = 'dev-' + h1.toString(36) + h2.toString(36);
+    localStorage.setItem('device_id', id);
+    return id;
+  }
+
+  var DEVICE_ID = getDeviceId();
+
+  // ---------- 2. 管理员白名单 ----------
+  // ⚠️ 把你的设备 ID 填到这里
+  var ADMIN_IDS = [
+    // 'dev-xxxxxxxxxxx',
+  ];
+
+  var isAdmin = ADMIN_IDS.indexOf(DEVICE_ID) !== -1;
+
+  // ---------- 3. hover / touch ----------
   var hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   body.classList.add(hasHover ? 'has-hover' : 'is-touch');
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    body.classList.add('perf-lite');
-    console.log('[设备] 系统偏好减少动画 → perf-lite');
-    return;
+  // ---------- 4. 性能分档 ----------
+  var perfLevel = 'perf-lite';
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var mem = navigator.deviceMemory;
+    var cores = navigator.hardwareConcurrency || 2;
+    if (mem === undefined) {
+      perfLevel = cores >= 8 ? 'perf-high' : cores >= 4 ? 'perf-mid' : 'perf-lite';
+    } else if (mem >= 8) {
+      perfLevel = 'perf-high';
+    } else if (mem === 4) {
+      perfLevel = cores >= 4 ? 'perf-high' : 'perf-mid';
+    } else if (mem >= 2) {
+      perfLevel = 'perf-mid';
+    } else {
+      perfLevel = 'perf-lite';
+    }
   }
 
-  var mem = navigator.deviceMemory;
-  var cores = navigator.hardwareConcurrency || 2;
+  // ---------- 5. 省电模式（用户偏好优先） ----------
+  var userLite = localStorage.getItem('perf_lite') === '1';
+  var finalLevel = userLite ? 'perf-lite' : perfLevel;
 
-  var level;
-  if (mem === undefined) {
-    level = cores >= 8 ? 'perf-high' : cores >= 4 ? 'perf-mid' : 'perf-lite';
-  } else if (mem >= 8) {
-    level = 'perf-high';
-  } else if (mem === 4) {
-    level = cores >= 4 ? 'perf-high' : 'perf-mid';
-  } else if (mem >= 2) {
-    level = 'perf-mid';
-  } else {
-    level = 'perf-lite';
+  body.classList.add(finalLevel);
+  if (finalLevel === 'perf-lite') body.classList.add('perf-lite');
+
+  console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin +
+              ' 原始档=' + perfLevel + ' 省电=' + userLite + ' 最终=' + finalLevel);
+
+  // ---------- 6. 保存状态到全局，供其他脚本读取 ----------
+  window.__DEVICE__ = {
+    id: DEVICE_ID,
+    isAdmin: isAdmin,
+    perfLevel: perfLevel,
+    userLite: userLite,
+    finalLevel: finalLevel
+  };
+
+  // ---------- 7. 省电模式按钮 ----------
+  var btnPower = document.getElementById('btn-power');
+  if (btnPower){
+    function refreshPowerBtn(){
+      var lite = localStorage.getItem('perf_lite') === '1';
+      var textEl = btnPower.querySelector('.text');
+      if (lite){
+        btnPower.classList.add('active');
+        if (textEl) textEl.textContent = '已省电';
+      } else {
+        btnPower.classList.remove('active');
+        if (textEl) textEl.textContent = '省电模式';
+      }
+    }
+    refreshPowerBtn();
+
+    btnPower.addEventListener('click', function(){
+      var lite = localStorage.getItem('perf_lite') === '1';
+      var next = lite ? '0' : '1';
+      localStorage.setItem('perf_lite', next);
+
+      // 切换 body class
+      var b = document.body;
+      b.classList.remove('perf-high', 'perf-mid', 'perf-lite');
+      var level = next === '1' ? 'perf-lite' : perfLevel;
+      b.classList.add(level);
+      if (level === 'perf-lite') b.classList.add('perf-lite');
+
+      refreshPowerBtn();
+      console.log('[省电模式]', next === '1' ? '开启' : '关闭', '→ ' + level);
+    });
   }
 
-  body.classList.add(level);
-  console.log('[设备] mem=' + mem + ' cores=' + cores + ' → ' + level);
+  // ---------- 8. 管理员按钮 + 面板 ----------
+  var btnAdmin = document.getElementById('btn-admin');
+  var adminModal = document.getElementById('admin-modal');
+  var adminClose = document.getElementById('admin-close');
+
+  if (isAdmin && btnAdmin && adminModal){
+    btnAdmin.style.display = '';
+
+    function fillAdminPanel(){
+      var d = window.__DEVICE__;
+      var elId = document.getElementById('admin-device-id');
+      if (elId) elId.textContent = d.id;
+      var elPerf = document.getElementById('admin-perf');
+      if (elPerf) elPerf.textContent = d.perfLevel;
+      var elLite = document.getElementById('admin-lite');
+      if (elLite) elLite.textContent = (localStorage.getItem('perf_lite') === '1') ? '开启' : '关闭';
+      var elCores = document.getElementById('admin-cores');
+      if (elCores) elCores.textContent = (navigator.hardwareConcurrency || '?') + ' 核';
+      var elMem = document.getElementById('admin-mem');
+      if (elMem) elMem.textContent = navigator.deviceMemory !== undefined ? String(navigator.deviceMemory) : '未知';
+      var elScreen = document.getElementById('admin-screen');
+      if (elScreen) elScreen.textContent = screen.width + ' × ' + screen.height + ' @' + (window.devicePixelRatio || 1) + 'x';
+      var elTz = document.getElementById('admin-tz');
+      if (elTz) elTz.textContent = (Intl.DateTimeFormat().resolvedOptions().timeZone) || '未知';
+    }
+
+    btnAdmin.addEventListener('click', function(){
+      fillAdminPanel();
+      adminModal.classList.add('show');
+    });
+
+    adminClose.addEventListener('click', function(){
+      adminModal.classList.remove('show');
+    });
+
+    adminModal.addEventListener('click', function(e){
+      if (e.target === adminModal) adminModal.classList.remove('show');
+    });
+
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && adminModal.classList.contains('show')){
+        adminModal.classList.remove('show');
+      }
+    });
+
+    // 点击设备 ID 复制
+    var elId = document.getElementById('admin-device-id');
+    if (elId){
+      elId.addEventListener('click', function(){
+        var txt = elId.textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(function(){
+            var orig = elId.textContent;
+            elId.textContent = '✅ 已复制：' + orig;
+            setTimeout(function(){ elId.textContent = orig; }, 1500);
+          });
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = txt;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); } catch(e){}
+          document.body.removeChild(ta);
+          var orig = elId.textContent;
+          elId.textContent = '✅ 已复制：' + orig;
+          setTimeout(function(){ elId.textContent = orig; }, 1500);
+        }
+      });
+    }
+
+    var btnCopy = document.getElementById('admin-copy');
+    if (btnCopy){
+      btnCopy.addEventListener('click', function(){
+        if (elId) elId.click();
+      });
+    }
+
+    var btnClearUser = document.getElementById('admin-clear-user');
+    if (btnClearUser){
+      btnClearUser.addEventListener('click', function(){
+        if (confirm('确定清除本地用户信息？需要重新登录。')){
+          localStorage.removeItem('chef_user');
+          location.reload();
+        }
+      });
+    }
+
+    var btnResetLite = document.getElementById('admin-reset-lite');
+    if (btnResetLite){
+      btnResetLite.addEventListener('click', function(){
+        localStorage.removeItem('perf_lite');
+        location.reload();
+      });
+    }
+
+    var btnResetDevice = document.getElementById('admin-reset-device');
+    if (btnResetDevice){
+      btnResetDevice.addEventListener('click', function(){
+        if (confirm('确定重置设备 ID？重置后可能失去管理员权限。')){
+          localStorage.removeItem('device_id');
+          location.reload();
+        }
+      });
+    }
+  }
 })();
 </script>
 
@@ -1124,6 +1622,9 @@ html:has(body.perf-lite) body {
     var t = e.target;
     if (!t || t.tagName.toLowerCase() !== 'button') return;
     if (t.classList && t.classList.contains('dropdown-trigger')) return;
+    if (t.classList && t.classList.contains('fab')) return;
+    if (t.classList && t.classList.contains('admin-btn')) return;
+    if (t.classList && t.classList.contains('admin-close')) return;
     var id = t.getAttribute('data-id');
     var act = t.getAttribute('data-act');
     if (id && act) doVote(id, act, t);
