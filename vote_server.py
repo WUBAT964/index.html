@@ -4,6 +4,7 @@
 - 按月份设置投票截止时间
 - 完整投票日志（用菜 ID + 时间戳）
 - 统计接口 /api/stats（含设备/浏览器/登录/投票记录）
+- Client Hints 支持：精确识别 Windows 10 / 11
 """
 import os
 import sys
@@ -33,13 +34,12 @@ CURRENT_MONTH_FILE = os.path.join(BASE_DIR, "current_month.txt")
 
 SYNC_INTERVAL = 30
 MAX_VOTES_PER_USER = 3
-MAX_VOTE_LOG = 50  # 每人最多保留 50 条投票记录
+MAX_VOTE_LOG = 50
 
 CST = timezone(timedelta(hours=8))
 
 VOTE_DEADLINES = {
     "2026-09": datetime(2026, 10, 12, 0, 0, 0, tzinfo=CST),
-    # "2026-10": datetime(2026, 11, 12, 0, 0, 0, tzinfo=CST),
 }
 
 _dish_month_cache = {}
@@ -159,14 +159,38 @@ def get_client_ip():
     return request.remote_addr or '未知'
 
 
-def record_device(phone, device_id, ua):
+def record_device(phone, device_id, ua, ua_display='', ua_detail=None):
+    """记录设备信息（含 Client Hints）"""
     user = users_data.get(phone)
     if not user:
         return
     devices = user.setdefault('devices', [])
-    ua_parsed = parse_user_agent(ua)
+    ua_parsed = ua_display or parse_user_agent(ua)
     ip = get_client_ip()
     now = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S')
+
+    # 解析 Client Hints
+    ch = ua_detail or {}
+    platform = ch.get('platform', '') or ''
+    platform_version = ch.get('platformVersion', '') or ''
+    arch = ch.get('architecture', '') or ''
+    ua_full = ch.get('uaFullVersion', '') or ''
+
+    # Windows 精细版本
+    win_name = ''
+    if platform == 'Windows' and platform_version:
+        try:
+            major = int(platform_version.split('.')[0])
+            if major >= 13:
+                win_name = 'Windows 11'
+            elif major == 10:
+                win_name = 'Windows 10'
+            elif major == 6:
+                win_name = 'Windows 8.1'
+            elif major == 1:
+                win_name = 'Windows 7'
+        except Exception:
+            pass
 
     for d in devices:
         if d.get('id') == device_id:
@@ -174,12 +198,22 @@ def record_device(phone, device_id, ua):
             d['last_ip'] = ip
             d['ua'] = ua
             d['ua_parsed'] = ua_parsed
+            d['platform'] = platform
+            d['platform_version'] = platform_version
+            d['windows_name'] = win_name
+            d['architecture'] = arch
+            d['ua_full_version'] = ua_full
             d['login_count'] = d.get('login_count', 1) + 1
             return
     devices.append({
         "id": device_id or '未知',
         "ua": ua,
         "ua_parsed": ua_parsed,
+        "platform": platform,
+        "platform_version": platform_version,
+        "windows_name": win_name,
+        "architecture": arch,
+        "ua_full_version": ua_full,
         "first_login": now,
         "last_login": now,
         "last_ip": ip,
@@ -337,7 +371,6 @@ def api_current_month():
 def api_vote_status():
     month = request.args.get('month', '').strip()
     now = datetime.now(CST)
-
     if month:
         dl = get_deadline_for_month(month)
         return jsonify({
@@ -368,6 +401,8 @@ def api_register():
     phone = (data.get('phone') or '').strip()
     device_id = (data.get('device_id') or '').strip()
     ua = request.headers.get('User-Agent', '')
+    ua_display = (data.get('ua_display') or '').strip()
+    ua_detail = data.get('ua_detail') or None
 
     if not phone:
         return jsonify({"error": "手机号不能为空"}), 400
@@ -379,7 +414,7 @@ def api_register():
             existing = users_data[phone]
             if existing['name'] != name:
                 return jsonify({"error": "该手机号已被其他姓名使用！"}), 400
-            record_device(phone, device_id, ua)
+            record_device(phone, device_id, ua, ua_display, ua_detail)
             save_users()
             log(f"[注册] 🔑 老用户登录 {existing['name']}({phone}) · {parse_user_agent(ua)} · {get_client_ip()}")
             return jsonify({
@@ -399,7 +434,7 @@ def api_register():
             "devices": [],
             "vote_log": []
         }
-        record_device(phone, device_id, ua)
+        record_device(phone, device_id, ua, ua_display, ua_detail)
         save_users()
         log(f"[注册] 👤 新用户注册 {name}({phone}) · {parse_user_agent(ua)} · {get_client_ip()}，共 {len(users_data)} 位用户")
         return jsonify({
@@ -447,7 +482,6 @@ def api_vote():
             voted_dishes[dish_id] = voted_dishes.get(dish_id, 0) + 1
             vote_cache[dish_id] = vote_cache.get(dish_id, 0) + 1
 
-            # ✅ 记录投票时间
             vote_log.append({
                 "dish": dish_id,
                 "action": "add",
@@ -470,7 +504,6 @@ def api_vote():
                 del voted_dishes[dish_id]
             vote_cache[dish_id] = max(0, vote_cache.get(dish_id, 0) - 1)
 
-            # ✅ 记录取消时间
             vote_log.append({
                 "dish": dish_id,
                 "action": "remove",
