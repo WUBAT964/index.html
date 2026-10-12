@@ -35,6 +35,7 @@ CURRENT_MONTH_FILE = os.path.join(BASE_DIR, "current_month.txt")
 SYNC_INTERVAL = 30
 MAX_VOTES_PER_USER = 3
 MAX_VOTE_LOG = 50
+MAX_LOGIN_LOG = 50   # 每个设备最多保留 50 条登录记录
 
 CST = timezone(timedelta(hours=8))
 
@@ -213,6 +214,15 @@ def record_device(phone, device_id, ua, ua_display='', ua_detail=None):
             d['architecture'] = arch
             d['ua_full_version'] = ua_full
             d['login_count'] = d.get('login_count', 1) + 1
+
+            # ✅ 记录每次登录的时间和 IP
+            login_times = d.setdefault('login_times', [])
+            login_times.append({
+                "time": now,
+                "ip": ip
+            })
+            if len(login_times) > MAX_LOGIN_LOG:
+                login_times[:] = login_times[-MAX_LOGIN_LOG:]
             return
     devices.append({
         "id": device_id or '未知',
@@ -226,7 +236,8 @@ def record_device(phone, device_id, ua, ua_display='', ua_detail=None):
         "first_login": now,
         "last_login": now,
         "last_ip": ip,
-        "login_count": 1
+        "login_count": 1,
+        "login_times": [{"time": now, "ip": ip}]
     })
 
 
