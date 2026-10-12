@@ -588,8 +588,10 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     var uaName = d.ua_parsed || '未知设备';
     if (d.windows_name){
       uaName = uaName.replace('Windows 10/11', d.windows_name);
-      if (d.platform_version){
-        uaName += ' (' + d.platform_version + ')';
+      // Win10/11 不加括号版本号（platformVersion 对用户没意义）
+      // 只有 Win7/8/8.1 才显示
+      if (d.windows_name === 'Windows 7' || d.windows_name === 'Windows 8' || d.windows_name === 'Windows 8.1'){
+        if (d.platform_version) uaName += ' (' + d.platform_version + ')';
       }
     }
     return uaName;
@@ -649,9 +651,8 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 
         var uaName = buildUaDisplay(d);
         var extra = [];
-        if (d.platform_version) extra.push('平台版本 ' + d.platform_version);
         if (d.architecture) extra.push('架构 ' + d.architecture);
-        if (d.ua_full_version) extra.push('浏览器版本 ' + d.ua_full_version);
+        if (d.ua_full_version) extra.push('版本 ' + d.ua_full_version);
 
         dbody.innerHTML =
           '<div class="device-ua">' + uaName + '</div>' +
