@@ -122,8 +122,7 @@ body.no-gradient::before { display: none !important; }
   box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255,255,255,.9);
   transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, background-color .3s ease;
   animation: cardIn .55s cubic-bezier(.22,.61,.36,1) both;
-  cursor: pointer;
-  position: relative;
+  cursor: pointer; position: relative;
 }
 .user-card:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(99,102,241,.18); background: rgba(255,255,255,.78); }
 .user-card::after {
@@ -158,41 +157,32 @@ body.no-gradient::before { display: none !important; }
 .dish-tag:hover { transform: scale(1.12); background: #ddd6fe; }
 .not-voted-tip { color: #aaa; font-size: .85em; font-style: italic; }
 
-/* ========== 🖥️ 卡片上的设备/浏览器/时间 ========== */
-.device-strip {
-  margin-top: 12px; padding-top: 12px;
-  border-top: 1px dashed rgba(99,102,241,.2);
-}
+.device-strip { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(99,102,241,.2); }
 .device-strip-title {
   font-size: .7em; color: #888; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .5px;
-  margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
 }
 .device-strip-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 6px 10px;
-  background: rgba(238,242,255,.6);
-  border-radius: 8px;
-  margin-bottom: 5px;
+  padding: 6px 10px; background: rgba(238,242,255,.6);
+  border-radius: 8px; margin-bottom: 5px;
   font-size: .78em; line-height: 1.4;
   animation: fadeSlideIn .4s cubic-bezier(.22,.61,.36,1) both;
 }
 .device-strip-item:last-child { margin-bottom: 0; }
-.device-strip-icon {
-  font-size: 1.2em; flex-shrink: 0; line-height: 1;
-}
-.device-strip-body {
-  flex: 1; min-width: 0;
-}
-.device-strip-ua {
-  color: #4f46e5; font-weight: 700;
+.device-strip-icon { font-size: 1.2em; flex-shrink: 0; line-height: 1; }
+.device-strip-body { flex: 1; min-width: 0; }
+.device-strip-ua { color: #4f46e5; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.device-strip-id {
+  font-size: .78em; color: #888;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  margin-top: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .device-strip-time {
   color: #888; font-size: .9em;
   font-family: "SF Mono", Menlo, Consolas, monospace;
   white-space: nowrap;
-  margin-left: 6px;
 }
 .device-strip-more {
   font-size: .72em; color: #aaa;
@@ -200,7 +190,6 @@ body.no-gradient::before { display: none !important; }
   font-style: italic;
 }
 
-/* 投票记录简要 */
 .vote-log-list { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(99,102,241,.2); }
 .vote-log-title {
   font-size: .72em; color: #888; font-weight: 700;
@@ -225,17 +214,13 @@ body.no-gradient::before { display: none !important; }
 
 .empty-tip { text-align: center; color: #888; padding: 60px 20px; font-size: .95em; animation: fadeSlideIn .5s ease both; }
 
-/* ============ 🔍 详情弹窗 ============ */
 .detail-modal {
   display: flex; position: fixed; z-index: 10001; inset: 0;
   background: rgba(0,0,0,.5); justify-content: center; align-items: center;
   padding: 16px; visibility: hidden; opacity: 0; pointer-events: none;
   transition: opacity .35s ease, visibility 0s .4s;
 }
-.detail-modal.show {
-  visibility: visible; opacity: 1; pointer-events: auto;
-  transition: opacity .35s ease, visibility 0s 0s;
-}
+.detail-modal.show { visibility: visible; opacity: 1; pointer-events: auto; transition: opacity .35s ease, visibility 0s 0s; }
 .detail-box {
   background: #fff; border-radius: 20px; padding: 22px;
   width: 100%; max-width: 520px; max-height: 85vh;
@@ -244,25 +229,17 @@ body.no-gradient::before { display: none !important; }
   will-change: transform, opacity, border-radius;
   transform-origin: center center;
 }
-.detail-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 12px; margin-bottom: 14px; flex-shrink: 0;
-}
+.detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-shrink: 0; }
 .detail-title-wrap { flex: 1; min-width: 0; }
-.detail-name {
-  font-size: 1.35em; font-weight: 800; color: #333;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.detail-name { font-size: 1.35em; font-weight: 800; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .detail-sub { font-size: .82em; color: #888; margin-top: 2px; }
 .detail-close {
-  flex-shrink: 0;
-  width: 32px; height: 32px;
+  flex-shrink: 0; width: 32px; height: 32px;
   border: none; background: #f3f4f6; border-radius: 50%;
   color: #666; font-size: 1.1em; font-weight: bold;
   cursor: pointer; -webkit-appearance: none;
   transition: background-color .2s ease, transform .25s ease;
-  display: flex; align-items: center; justify-content: center;
-  line-height: 1;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
 }
 .detail-close:hover { background: #e5e7eb; transform: rotate(90deg); }
 
@@ -277,8 +254,7 @@ body.no-gradient::before { display: none !important; }
 
 .detail-summary {
   display: flex; gap: 10px; flex-wrap: wrap;
-  padding: 12px; background: #f9fafb;
-  border-radius: 12px;
+  padding: 12px; background: #f9fafb; border-radius: 12px;
 }
 .summary-item { flex: 1; min-width: 80px; text-align: center; }
 .summary-num {
@@ -290,14 +266,11 @@ body.no-gradient::before { display: none !important; }
 }
 .summary-label { font-size: .72em; color: #888; margin-top: 2px; }
 
-/* 时间线 */
 .timeline-list { position: relative; }
 .timeline-item {
   display: flex; align-items: flex-start; gap: 10px;
-  padding: 10px 12px;
-  background: rgba(249,250,251,.8);
-  border-radius: 10px;
-  margin-bottom: 8px;
+  padding: 10px 12px; background: rgba(249,250,251,.8);
+  border-radius: 10px; margin-bottom: 8px;
   border-left: 3px solid #6366f1;
   transition: background-color .2s ease;
 }
@@ -327,6 +300,24 @@ body.no-gradient::before { display: none !important; }
 .detail-device-item .device-icon { font-size: 1.4em; flex-shrink: 0; }
 .detail-device-item .device-body { flex: 1; min-width: 0; }
 .detail-device-item .device-ua { font-weight: 700; color: #4f46e5; margin-bottom: 2px; }
+.device-id-row {
+  font-size: .85em; color: #666;
+  margin: 4px 0 6px; word-break: break-all;
+}
+.device-id-row code {
+  background: #eef2ff; color: #4f46e5;
+  padding: 1px 6px; border-radius: 4px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: .9em; cursor: pointer; user-select: all;
+  transition: background .2s ease;
+}
+.device-id-row code:hover { background: #ddd6fe; }
+.device-id-row code:active { background: #c7d2fe; }
+.device-extra {
+  font-size: .78em; color: #888;
+  margin: 4px 0;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+}
 .detail-device-item .device-meta { font-size: .9em; color: #888; word-break: break-all; }
 .detail-device-item .device-meta .sep { color: #ccc; margin: 0 4px; }
 
@@ -592,6 +583,18 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     return dishNames[did] || ('菜#' + did);
   }
 
+  // 处理 Windows 精确版本显示
+  function buildUaDisplay(d){
+    var uaName = d.ua_parsed || '未知设备';
+    if (d.windows_name){
+      uaName = uaName.replace('Windows 10/11', d.windows_name);
+      if (d.platform_version){
+        uaName += ' (' + d.platform_version + ')';
+      }
+    }
+    return uaName;
+  }
+
   // ============ 📋 详情弹窗 ============
   var detailModal = null;
   var detailBox = null;
@@ -614,7 +617,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     var body = $('detail-body');
     body.innerHTML = '';
 
-    // 1) 概要
+    // 概要
     var summary = document.createElement('div');
     summary.className = 'detail-section';
     summary.innerHTML =
@@ -626,12 +629,11 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       '</div>';
     body.appendChild(summary);
 
-    // 2) 设备信息（移到时间线前面）
+    // 设备
     if (user.devices && user.devices.length > 0){
       var devSection = document.createElement('div');
       devSection.className = 'detail-section';
-      devSection.innerHTML =
-        '<div class="detail-section-title">🖥️ 登录设备（' + user.devices.length + '）</div>';
+      devSection.innerHTML = '<div class="detail-section-title">🖥️ 登录设备（' + user.devices.length + '）</div>';
 
       user.devices.forEach(function(d){
         var item = document.createElement('div');
@@ -644,8 +646,17 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 
         var dbody = document.createElement('div');
         dbody.className = 'device-body';
+
+        var uaName = buildUaDisplay(d);
+        var extra = [];
+        if (d.platform_version) extra.push('平台版本 ' + d.platform_version);
+        if (d.architecture) extra.push('架构 ' + d.architecture);
+        if (d.ua_full_version) extra.push('浏览器版本 ' + d.ua_full_version);
+
         dbody.innerHTML =
-          '<div class="device-ua">' + (d.ua_parsed || '未知设备') + '</div>' +
+          '<div class="device-ua">' + uaName + '</div>' +
+          '<div class="device-id-row">🔑 设备 ID：<code>' + (d.id || '未知') + '</code></div>' +
+          (extra.length ? '<div class="device-extra">' + extra.join(' · ') + '</div>' : '') +
           '<div class="device-meta">' +
             (d.first_login ? '首次 ' + d.first_login : '') +
             (d.last_login ? ' <span class="sep">·</span> 最近 ' + d.last_login : '') +
@@ -653,7 +664,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
             (d.last_ip && d.last_ip !== '未知' ? ' <span class="sep">·</span> IP ' + d.last_ip : '') +
           '</div>';
         item.appendChild(dbody);
-
         devSection.appendChild(item);
       });
       body.appendChild(devSection);
@@ -666,12 +676,11 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       body.appendChild(devEmpty);
     }
 
-    // 3) 投票时间线
+    // 时间线
     var logSection = document.createElement('div');
     logSection.className = 'detail-section';
     var logs = (user.vote_log || []).slice().reverse();
-    logSection.innerHTML =
-      '<div class="detail-section-title">🗳️ 投票时间线（' + logs.length + ' 条，最新在前）</div>';
+    logSection.innerHTML = '<div class="detail-section-title">🗳️ 投票时间线（' + logs.length + ' 条，最新在前）</div>';
 
     if (logs.length === 0){
       var empty = document.createElement('div');
@@ -685,15 +694,12 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
         var item = document.createElement('div');
         item.className = 'timeline-item' + (v.action === 'remove' ? ' remove' : '');
         item.style.animationDelay = (idx * 0.03) + 's';
-
         var icon = document.createElement('div');
         icon.className = 'timeline-icon';
         icon.textContent = v.action === 'add' ? '➕' : '➖';
         item.appendChild(icon);
-
         var content = document.createElement('div');
         content.className = 'timeline-content';
-
         var actionLine = document.createElement('div');
         actionLine.className = 'timeline-action';
         var verb = v.action === 'add' ? '投票' : '取消';
@@ -702,12 +708,10 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
           '<span class="dish-id">#' + v.dish + '</span>' +
           (v.month ? '<span class="timeline-month">' + v.month + '</span>' : '');
         content.appendChild(actionLine);
-
         var timeLine = document.createElement('div');
         timeLine.className = 'timeline-time';
         timeLine.textContent = '🕐 ' + fmtFullTime(v.time);
         content.appendChild(timeLine);
-
         item.appendChild(content);
         list.appendChild(item);
       });
@@ -715,34 +719,23 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     }
     body.appendChild(logSection);
 
-    // 打开 FLIP
     detailModal.classList.add('show');
     requestAnimationFrame(function(){
       var from = cardEl.getBoundingClientRect();
       var to = detailBox.getBoundingClientRect();
       if (to.width === 0 || to.height === 0) return;
-
-      var cx1 = from.left + from.width / 2;
-      var cy1 = from.top + from.height / 2;
-      var cx2 = to.left + to.width / 2;
-      var cy2 = to.top + to.height / 2;
-      var dx = cx1 - cx2;
-      var dy = cy1 - cy2;
+      var cx1 = from.left + from.width / 2, cy1 = from.top + from.height / 2;
+      var cx2 = to.left + to.width / 2, cy2 = to.top + to.height / 2;
+      var dx = cx1 - cx2, dy = cy1 - cy2;
       var scale = Math.max(0.08, from.width / to.width);
-
       detailBox.style.transition = 'none';
       detailBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
       detailBox.style.borderRadius = '16px';
       detailBox.style.opacity = '0';
-
       void detailBox.offsetWidth;
-
       requestAnimationFrame(function(){
         requestAnimationFrame(function(){
-          detailBox.style.transition =
-            'transform .5s cubic-bezier(.32, .72, 0, 1), ' +
-            'border-radius .5s cubic-bezier(.32, .72, 0, 1), ' +
-            'opacity .3s ease';
+          detailBox.style.transition = 'transform .5s cubic-bezier(.32, .72, 0, 1), border-radius .5s cubic-bezier(.32, .72, 0, 1), opacity .3s ease';
           detailBox.style.transform = 'translate(0, 0) scale(1)';
           detailBox.style.borderRadius = '20px';
           detailBox.style.opacity = '1';
@@ -758,28 +751,17 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       detailModal.classList.remove('show');
       return;
     }
-
     var from = card.getBoundingClientRect();
     var to = detailBox.getBoundingClientRect();
-
-    var cx1 = from.left + from.width / 2;
-    var cy1 = from.top + from.height / 2;
-    var cx2 = to.left + to.width / 2;
-    var cy2 = to.top + to.height / 2;
-    var dx = cx1 - cx2;
-    var dy = cy1 - cy2;
+    var cx1 = from.left + from.width / 2, cy1 = from.top + from.height / 2;
+    var cx2 = to.left + to.width / 2, cy2 = to.top + to.height / 2;
+    var dx = cx1 - cx2, dy = cy1 - cy2;
     var scale = Math.max(0.08, from.width / to.width);
-
-    detailBox.style.transition =
-      'transform .42s cubic-bezier(.4, 0, .2, 1), ' +
-      'border-radius .42s cubic-bezier(.4, 0, .2, 1), ' +
-      'opacity .3s ease';
+    detailBox.style.transition = 'transform .42s cubic-bezier(.4, 0, .2, 1), border-radius .42s cubic-bezier(.4, 0, .2, 1), opacity .3s ease';
     detailBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
     detailBox.style.borderRadius = '16px';
     detailBox.style.opacity = '0';
-
     detailModal.classList.remove('show');
-
     setTimeout(function(){
       detailBox.style.transition = '';
       detailBox.style.transform = '';
@@ -854,7 +836,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       card.className = 'user-card' + (u.total === 0 ? ' not-voted' : '');
       card.style.animationDelay = (i * 0.04) + 's';
 
-      // 头部
       var header = document.createElement('div');
       header.className = 'user-card-header';
       var name = document.createElement('div');
@@ -873,7 +854,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       header.appendChild(badge);
       card.appendChild(header);
 
-      // 票数标签
       if (u.total > 0){
         var tagWrap = document.createElement('div');
         tagWrap.className = 'dish-tags';
@@ -901,7 +881,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
         card.appendChild(tip);
       }
 
-      // ✅ 卡片上直接显示设备/浏览器/时间
+      // 卡片上的设备/浏览器/时间
       if (u.devices && u.devices.length > 0){
         var strip = document.createElement('div');
         strip.className = 'device-strip';
@@ -910,7 +890,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
         stripTitle.textContent = '🖥️ 登录设备（' + u.devices.length + '）';
         strip.appendChild(stripTitle);
 
-        // 只显示最近 2 个
         var recent = u.devices.slice().sort(function(a, b){
           return (b.last_login || '').localeCompare(a.last_login || '');
         }).slice(0, 2);
@@ -927,13 +906,16 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 
           var dbody = document.createElement('div');
           dbody.className = 'device-strip-body';
+
+          var uaName = buildUaDisplay(d);
+
           dbody.innerHTML =
-            '<div class="device-strip-ua">' + (d.ua_parsed || '未知设备') + '</div>' +
+            '<div class="device-strip-ua">' + uaName + '</div>' +
+            '<div class="device-strip-id" title="设备指纹 ID">🔑 ' + (d.id || '未知') + '</div>' +
             '<div class="device-strip-time">' +
               (d.last_login ? '最近 ' + fmtShortTime(d.last_login) : (d.first_login ? '首次 ' + fmtShortTime(d.first_login) : '')) +
             '</div>';
           item.appendChild(dbody);
-
           strip.appendChild(item);
         });
 
@@ -943,7 +925,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
           more.textContent = '点击查看全部 ' + u.devices.length + ' 台';
           strip.appendChild(more);
         }
-
         card.appendChild(strip);
       }
 
@@ -978,7 +959,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
         card.appendChild(logList);
       }
 
-      // 点击查看详情
       card.addEventListener('click', function(){
         openDetail(u, card);
       });
@@ -1015,7 +995,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       console.log('[统计] 详情打开中，跳过刷新');
       return;
     }
-
     var empty = $('empty-tip');
     if (allUsers.length === 0){
       empty.textContent = '加载中...';
@@ -1060,7 +1039,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   function bindDetail(){
     detailModal = $('detail-modal');
     detailBox = $('detail-box');
-
     $('detail-close').addEventListener('click', function(e){
       e.stopPropagation();
       closeDetail();
