@@ -692,7 +692,11 @@ body.perf-lite .fab-admin, body.is-touch .fab-admin {
           browser = d.fullVersionList[0].brand + ' ' + d.fullVersionList[0].version.split('.')[0];
         }
       }
-      window.__DEVICE__.uaDisplay = platform + ' ' + pv + ' · ' + browser;
+      // ✅ 不传具体 platformVersion，让 stats.html 用后端的 windows_name 精准替换
+      var platformSimple = platform;
+      if (platform === 'Windows') platformSimple = 'Windows 10/11';
+      else if (pv) platformSimple = platform + ' ' + pv;
+      window.__DEVICE__.uaDisplay = platformSimple + ' · ' + browser;
       console.log('[设备详细]', window.__DEVICE__.uaDisplay, d);
     }).catch(function(){});
   }
