@@ -158,6 +158,49 @@ body.no-gradient::before { display: none !important; }
 .dish-tag:hover { transform: scale(1.12); background: #ddd6fe; }
 .not-voted-tip { color: #aaa; font-size: .85em; font-style: italic; }
 
+/* ========== 🖥️ 卡片上的设备/浏览器/时间 ========== */
+.device-strip {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px dashed rgba(99,102,241,.2);
+}
+.device-strip-title {
+  font-size: .7em; color: #888; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.device-strip-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px;
+  background: rgba(238,242,255,.6);
+  border-radius: 8px;
+  margin-bottom: 5px;
+  font-size: .78em; line-height: 1.4;
+  animation: fadeSlideIn .4s cubic-bezier(.22,.61,.36,1) both;
+}
+.device-strip-item:last-child { margin-bottom: 0; }
+.device-strip-icon {
+  font-size: 1.2em; flex-shrink: 0; line-height: 1;
+}
+.device-strip-body {
+  flex: 1; min-width: 0;
+}
+.device-strip-ua {
+  color: #4f46e5; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.device-strip-time {
+  color: #888; font-size: .9em;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+.device-strip-more {
+  font-size: .72em; color: #aaa;
+  text-align: right; margin-top: 4px;
+  font-style: italic;
+}
+
+/* 投票记录简要 */
 .vote-log-list { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(99,102,241,.2); }
 .vote-log-title {
   font-size: .72em; color: #888; font-weight: 700;
@@ -180,28 +223,9 @@ body.no-gradient::before { display: none !important; }
 .vote-log-dish.remove { background: #fee2e2; color: #dc2626; }
 .vote-log-time { color: #888; font-size: .92em; margin-left: auto; font-family: "SF Mono", Menlo, Consolas, monospace; }
 
-.device-list { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(99,102,241,.2); }
-.device-title {
-  font-size: .72em; color: #888; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
-}
-.device-item {
-  display: flex; align-items: flex-start; gap: 8px;
-  padding: 8px 10px; background: rgba(238,242,255,.6);
-  border-radius: 8px; margin-bottom: 6px;
-  font-size: .78em; line-height: 1.5;
-  animation: fadeSlideIn .4s cubic-bezier(.22,.61,.36,1) both;
-}
-.device-item:last-child { margin-bottom: 0; }
-.device-icon { font-size: 1.3em; flex-shrink: 0; line-height: 1; margin-top: 1px; }
-.device-body { flex: 1; min-width: 0; color: #555; }
-.device-ua { font-weight: 700; color: #4f46e5; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.device-meta { font-size: .92em; color: #888; word-break: break-all; }
-.device-meta .sep { color: #ccc; margin: 0 4px; }
-
 .empty-tip { text-align: center; color: #888; padding: 60px 20px; font-size: .95em; animation: fadeSlideIn .5s ease both; }
 
-/* ============ 🔍 详情弹窗（FLIP 动画） ============ */
+/* ============ 🔍 详情弹窗 ============ */
 .detail-modal {
   display: flex; position: fixed; z-index: 10001; inset: 0;
   background: rgba(0,0,0,.5); justify-content: center; align-items: center;
@@ -229,9 +253,7 @@ body.no-gradient::before { display: none !important; }
   font-size: 1.35em; font-weight: 800; color: #333;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.detail-sub {
-  font-size: .82em; color: #888; margin-top: 2px;
-}
+.detail-sub { font-size: .82em; color: #888; margin-top: 2px; }
 .detail-close {
   flex-shrink: 0;
   width: 32px; height: 32px;
@@ -244,14 +266,8 @@ body.no-gradient::before { display: none !important; }
 }
 .detail-close:hover { background: #e5e7eb; transform: rotate(90deg); }
 
-.detail-body {
-  overflow-y: auto; flex: 1; min-height: 0;
-  padding-right: 4px;
-  margin-right: -4px;
-}
-.detail-section {
-  margin-bottom: 18px;
-}
+.detail-body { overflow-y: auto; flex: 1; min-height: 0; padding-right: 4px; margin-right: -4px; }
+.detail-section { margin-bottom: 18px; }
 .detail-section-title {
   font-size: .78em; font-weight: 700; color: #888;
   text-transform: uppercase; letter-spacing: .5px;
@@ -264,9 +280,7 @@ body.no-gradient::before { display: none !important; }
   padding: 12px; background: #f9fafb;
   border-radius: 12px;
 }
-.summary-item {
-  flex: 1; min-width: 80px; text-align: center;
-}
+.summary-item { flex: 1; min-width: 80px; text-align: center; }
 .summary-num {
   font-size: 1.4em; font-weight: 800;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -288,38 +302,19 @@ body.no-gradient::before { display: none !important; }
   transition: background-color .2s ease;
 }
 .timeline-item:hover { background: #eef2ff; }
-.timeline-item.remove {
-  border-left-color: #ef4444;
-  background: rgba(254,242,242,.6);
-}
+.timeline-item.remove { border-left-color: #ef4444; background: rgba(254,242,242,.6); }
 .timeline-item.remove:hover { background: #fee2e2; }
-
-.timeline-icon {
-  flex-shrink: 0; font-size: 1.1em; line-height: 1.2;
-}
+.timeline-icon { flex-shrink: 0; font-size: 1.1em; line-height: 1.2; }
 .timeline-content { flex: 1; min-width: 0; }
-.timeline-action {
-  font-size: .92em; font-weight: 600; color: #333;
-  margin-bottom: 3px;
-}
-.timeline-action .dish-name {
-  color: #4f46e5;
-  font-weight: 700;
-}
+.timeline-action { font-size: .92em; font-weight: 600; color: #333; margin-bottom: 3px; }
+.timeline-action .dish-name { color: #4f46e5; font-weight: 700; }
 .timeline-item.remove .timeline-action .dish-name { color: #dc2626; }
-.timeline-action .dish-id {
-  color: #aaa; font-size: .85em; margin-left: 4px;
-}
-.timeline-time {
-  font-size: .78em; color: #888;
-  font-family: "SF Mono", Menlo, Consolas, monospace;
-}
+.timeline-action .dish-id { color: #aaa; font-size: .85em; margin-left: 4px; }
+.timeline-time { font-size: .78em; color: #888; font-family: "SF Mono", Menlo, Consolas, monospace; }
 .timeline-month {
-  display: inline-block;
-  background: #eef2ff; color: #6366f1;
+  display: inline-block; background: #eef2ff; color: #6366f1;
   padding: 1px 8px; border-radius: 999px;
-  font-size: .7em; font-weight: 700;
-  margin-left: 6px;
+  font-size: .7em; font-weight: 700; margin-left: 6px;
 }
 
 .detail-device-item {
@@ -329,7 +324,11 @@ body.no-gradient::before { display: none !important; }
   font-size: .85em; line-height: 1.5;
 }
 .detail-device-item:last-child { margin-bottom: 0; }
-.detail-device-item .device-icon { font-size: 1.4em; }
+.detail-device-item .device-icon { font-size: 1.4em; flex-shrink: 0; }
+.detail-device-item .device-body { flex: 1; min-width: 0; }
+.detail-device-item .device-ua { font-weight: 700; color: #4f46e5; margin-bottom: 2px; }
+.detail-device-item .device-meta { font-size: .9em; color: #888; word-break: break-all; }
+.detail-device-item .device-meta .sep { color: #ccc; margin: 0 4px; }
 
 .detail-empty {
   text-align: center; color: #aaa; padding: 30px 20px;
@@ -382,7 +381,7 @@ body.no-transition, body.no-transition *, body.no-transition *::before, body.no-
   transition: none !important; animation-duration: .01ms !important;
 }
 body.no-anim .stat-card, body.no-anim .user-card, body.no-anim .dish-tag,
-body.no-anim .page-header, body.no-anim .filter-tabs, body.no-anim .device-item,
+body.no-anim .page-header, body.no-anim .filter-tabs, body.no-anim .device-strip-item,
 body.no-anim .vote-log-item, body.no-anim .month-bar, body.no-anim .empty-tip,
 body.no-anim .timeline-item {
   animation: none !important; opacity: 1 !important; transform: none !important;
@@ -392,7 +391,7 @@ body.no-hover .dish-tag:hover, body.no-hover .back-link:hover, body.no-hover .fa
   transform: none !important;
 }
 body.perf-lite .stat-card, body.perf-lite .user-card, body.perf-lite .dish-tag,
-body.perf-lite .page-header, body.perf-lite .filter-tabs, body.perf-lite .device-item,
+body.perf-lite .page-header, body.perf-lite .filter-tabs, body.perf-lite .device-strip-item,
 body.perf-lite .vote-log-item, body.perf-lite .month-bar, body.perf-lite .timeline-item {
   animation: none !important;
 }
@@ -418,8 +417,8 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   .dish-tag { font-size: .72em; padding: 3px 8px; }
   .filter-tabs { margin-bottom: 12px; gap: 6px; }
   .tab { padding: 7px 12px; font-size: .78em; }
-  .device-item { font-size: .72em; padding: 6px 8px; }
-  .device-icon { font-size: 1.1em; }
+  .device-strip-item { font-size: .72em; padding: 5px 8px; }
+  .device-strip-icon { font-size: 1.05em; }
   .vote-log-item { font-size: .72em; padding: 5px 8px; }
   .fab-group { right: auto; left: 12px; top: 12px; bottom: auto; flex-direction: row; align-items: flex-start; }
   .fab { padding: 7px 12px; font-size: .78em; gap: 4px; }
@@ -475,7 +474,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 <div class="user-grid" id="user-grid"></div>
 <div class="empty-tip" id="empty-tip" style="display:none">暂无数据</div>
 
-<!-- 详情弹窗 -->
 <div class="detail-modal" id="detail-modal">
   <div class="detail-box" id="detail-box">
     <div class="detail-header">
@@ -546,7 +544,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   var allUsers = [];
   var currentFilter = 'all';
   var currentMonth = '';
-  var dishNames = {};   // { "1": "炆行鸡", ... }
+  var dishNames = {};
 
   function $(id){ return document.getElementById(id); }
 
@@ -601,9 +599,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   function openDetail(user, cardEl){
     _detailOpenedFrom = cardEl;
 
-    // 填充标题
     $('detail-name').textContent = user.name || '未知';
-    var totalDays = 0;
     var totalVotes = 0;
     var totalCancels = 0;
     (user.vote_log || []).forEach(function(v){
@@ -613,7 +609,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     $('detail-sub').textContent =
       '总票数：' + (user.total || 0) + ' · 投票 ' + totalVotes + ' 次 · 取消 ' + totalCancels + ' 次';
 
-    // 填充 body
     var body = $('detail-body');
     body.innerHTML = '';
 
@@ -629,10 +624,50 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       '</div>';
     body.appendChild(summary);
 
-    // 2) 投票时间线
+    // 2) 设备信息（移到时间线前面）
+    if (user.devices && user.devices.length > 0){
+      var devSection = document.createElement('div');
+      devSection.className = 'detail-section';
+      devSection.innerHTML =
+        '<div class="detail-section-title">🖥️ 登录设备（' + user.devices.length + '）</div>';
+
+      user.devices.forEach(function(d){
+        var item = document.createElement('div');
+        item.className = 'detail-device-item';
+
+        var icon = document.createElement('div');
+        icon.className = 'device-icon';
+        icon.textContent = getDeviceIcon(d.ua_parsed);
+        item.appendChild(icon);
+
+        var dbody = document.createElement('div');
+        dbody.className = 'device-body';
+        dbody.innerHTML =
+          '<div class="device-ua">' + (d.ua_parsed || '未知设备') + '</div>' +
+          '<div class="device-meta">' +
+            (d.first_login ? '首次 ' + d.first_login : '') +
+            (d.last_login ? ' <span class="sep">·</span> 最近 ' + d.last_login : '') +
+            (d.login_count ? ' <span class="sep">·</span> 登录 ' + d.login_count + ' 次' : '') +
+            (d.last_ip && d.last_ip !== '未知' ? ' <span class="sep">·</span> IP ' + d.last_ip : '') +
+          '</div>';
+        item.appendChild(dbody);
+
+        devSection.appendChild(item);
+      });
+      body.appendChild(devSection);
+    } else {
+      var devEmpty = document.createElement('div');
+      devEmpty.className = 'detail-section';
+      devEmpty.innerHTML =
+        '<div class="detail-section-title">🖥️ 登录设备</div>' +
+        '<div class="detail-empty">暂无设备记录（该用户尚未在新版本登录过）</div>';
+      body.appendChild(devEmpty);
+    }
+
+    // 3) 投票时间线
     var logSection = document.createElement('div');
     logSection.className = 'detail-section';
-    var logs = (user.vote_log || []).slice().reverse(); // 最新在前
+    var logs = (user.vote_log || []).slice().reverse();
     logSection.innerHTML =
       '<div class="detail-section-title">🗳️ 投票时间线（' + logs.length + ' 条，最新在前）</div>';
 
@@ -678,42 +713,8 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     }
     body.appendChild(logSection);
 
-    // 3) 设备
-    if (user.devices && user.devices.length > 0){
-      var devSection = document.createElement('div');
-      devSection.className = 'detail-section';
-      devSection.innerHTML =
-        '<div class="detail-section-title">🖥️ 登录设备（' + user.devices.length + '）</div>';
-
-      user.devices.forEach(function(d){
-        var item = document.createElement('div');
-        item.className = 'detail-device-item';
-
-        var icon = document.createElement('div');
-        icon.className = 'device-icon';
-        icon.textContent = getDeviceIcon(d.ua_parsed);
-        item.appendChild(icon);
-
-        var dbody = document.createElement('div');
-        dbody.className = 'device-body';
-        dbody.innerHTML =
-          '<div class="device-ua">' + (d.ua_parsed || '未知设备') + '</div>' +
-          '<div class="device-meta">' +
-            (d.first_login ? '首次 ' + d.first_login : '') +
-            (d.last_login ? ' <span class="sep">·</span> 最近 ' + d.last_login : '') +
-            (d.login_count ? ' <span class="sep">·</span> 登录 ' + d.login_count + ' 次' : '') +
-            (d.last_ip && d.last_ip !== '未知' ? ' <span class="sep">·</span> IP ' + d.last_ip : '') +
-          '</div>';
-        item.appendChild(dbody);
-
-        devSection.appendChild(item);
-      });
-      body.appendChild(devSection);
-    }
-
-    // 打开：FLIP 动画
+    // 打开 FLIP
     detailModal.classList.add('show');
-
     requestAnimationFrame(function(){
       var from = cardEl.getBoundingClientRect();
       var to = detailBox.getBoundingClientRect();
@@ -897,20 +898,66 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
         card.appendChild(tip);
       }
 
-      // 最近 5 条
+      // ✅ 卡片上直接显示设备/浏览器/时间
+      if (u.devices && u.devices.length > 0){
+        var strip = document.createElement('div');
+        strip.className = 'device-strip';
+        var stripTitle = document.createElement('div');
+        stripTitle.className = 'device-strip-title';
+        stripTitle.textContent = '🖥️ 登录设备（' + u.devices.length + '）';
+        strip.appendChild(stripTitle);
+
+        // 只显示最近 2 个
+        var recent = u.devices.slice().sort(function(a, b){
+          return (b.last_login || '').localeCompare(a.last_login || '');
+        }).slice(0, 2);
+
+        recent.forEach(function(d, di){
+          var item = document.createElement('div');
+          item.className = 'device-strip-item';
+          item.style.animationDelay = (0.3 + di * 0.06) + 's';
+
+          var icon = document.createElement('span');
+          icon.className = 'device-strip-icon';
+          icon.textContent = getDeviceIcon(d.ua_parsed);
+          item.appendChild(icon);
+
+          var dbody = document.createElement('div');
+          dbody.className = 'device-strip-body';
+          dbody.innerHTML =
+            '<div class="device-strip-ua">' + (d.ua_parsed || '未知设备') + '</div>' +
+            '<div class="device-strip-time">' +
+              (d.last_login ? '最近 ' + fmtShortTime(d.last_login) : (d.first_login ? '首次 ' + fmtShortTime(d.first_login) : '')) +
+            '</div>';
+          item.appendChild(dbody);
+
+          strip.appendChild(item);
+        });
+
+        if (u.devices.length > 2){
+          var more = document.createElement('div');
+          more.className = 'device-strip-more';
+          more.textContent = '点击查看全部 ' + u.devices.length + ' 台';
+          strip.appendChild(more);
+        }
+
+        card.appendChild(strip);
+      }
+
+      // 最近 3 条投票
       if (logs.length > 0){
         var logList = document.createElement('div');
         logList.className = 'vote-log-list';
         var logTitle = document.createElement('div');
         logTitle.className = 'vote-log-title';
-        logTitle.textContent = '🗳️ 最近 ' + Math.min(5, logs.length) + ' 条';
+        logTitle.textContent = '🗳️ 最近 ' + Math.min(3, logs.length) + ' 条';
         logList.appendChild(logTitle);
 
-        var recent = logs.slice(-5).reverse();
-        recent.forEach(function(v, vi){
+        var recentLogs = logs.slice(-3).reverse();
+        recentLogs.forEach(function(v, vi){
           var item = document.createElement('div');
           item.className = 'vote-log-item';
-          item.style.animationDelay = (0.3 + vi * 0.05) + 's';
+          item.style.animationDelay = (0.35 + vi * 0.05) + 's';
           var icon = document.createElement('span');
           icon.className = 'vote-log-icon';
           icon.textContent = v.action === 'add' ? '➕' : '➖';
