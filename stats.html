@@ -321,6 +321,52 @@ body.no-gradient::before { display: none !important; }
 .detail-device-item .device-meta { font-size: .9em; color: #888; word-break: break-all; }
 .detail-device-item .device-meta .sep { color: #ccc; margin: 0 4px; }
 
+/* 登录历史 */
+.login-history {
+  margin-top: 8px;
+  border-radius: 8px;
+  background: rgba(249,250,251,.8);
+  overflow: hidden;
+}
+.login-history > summary {
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: .82em;
+  color: #4f46e5;
+  font-weight: 600;
+  list-style: none;
+  user-select: none;
+  transition: background-color .2s ease;
+}
+.login-history > summary::-webkit-details-marker { display: none; }
+.login-history > summary::before {
+  content: '▸ ';
+  display: inline-block;
+  transition: transform .2s ease;
+}
+.login-history[open] > summary::before {
+  transform: rotate(90deg);
+}
+.login-history > summary:hover {
+  background: rgba(238,242,255,.8);
+}
+.login-history-list {
+  padding: 4px 12px 10px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.login-history-item {
+  font-size: .78em;
+  color: #666;
+  padding: 4px 0;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  border-bottom: 1px dashed rgba(99,102,241,.12);
+  word-break: break-all;
+}
+.login-history-item:last-child {
+  border-bottom: none;
+}
+
 .detail-empty {
   text-align: center; color: #aaa; padding: 30px 20px;
   font-size: .9em; font-style: italic;
@@ -662,8 +708,32 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
             (d.first_login ? '首次 ' + d.first_login : '') +
             (d.last_login ? ' <span class="sep">·</span> 最近 ' + d.last_login : '') +
             (d.login_count ? ' <span class="sep">·</span> 登录 ' + d.login_count + ' 次' : '') +
-            (d.last_ip && d.last_ip !== '未知' ? ' <span class="sep">·</span> IP ' + d.last_ip : '') +
           '</div>';
+
+        // ✅ 登录历史（可展开）
+        var times = d.login_times || [];
+        if (times.length > 0){
+          var historyWrap = document.createElement('details');
+          historyWrap.className = 'login-history';
+          var summary = document.createElement('summary');
+          summary.textContent = '🕐 查看全部 ' + times.length + ' 次登录记录';
+          historyWrap.appendChild(summary);
+
+          var histList = document.createElement('div');
+          histList.className = 'login-history-list';
+          // 倒序：最新的在前
+          times.slice().reverse().forEach(function(t){
+            var line = document.createElement('div');
+            line.className = 'login-history-item';
+            var timeStr = t.time || '?';
+            var ipStr = t.ip && t.ip !== '未知' ? ' · IP ' + t.ip : '';
+            line.textContent = timeStr + ipStr;
+            histList.appendChild(line);
+          });
+          historyWrap.appendChild(histList);
+          dbody.appendChild(historyWrap);
+        }
+
         item.appendChild(dbody);
         devSection.appendChild(item);
       });
