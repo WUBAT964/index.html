@@ -726,8 +726,9 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
             var line = document.createElement('div');
             line.className = 'login-history-item';
             var timeStr = t.time || '?';
-            var ipStr = t.ip && t.ip !== '未知' ? ' · IP ' + t.ip : '';
-            line.textContent = timeStr + ipStr;
+            var loc = t.location ? ' · 📍 ' + t.location : '';
+            var ipStr = t.ip && t.ip !== '未知' ? ' · ' + t.ip : '';
+            line.textContent = timeStr + loc + ipStr;
             histList.appendChild(line);
           });
           historyWrap.appendChild(histList);
