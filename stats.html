@@ -545,6 +545,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   var currentFilter = 'all';
   var currentMonth = '';
   var dishNames = {};
+  var _detailOpen = false;
 
   function $(id){ return document.getElementById(id); }
 
@@ -598,6 +599,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 
   function openDetail(user, cardEl){
     _detailOpenedFrom = cardEl;
+    _detailOpen = true;
 
     $('detail-name').textContent = user.name || '未知';
     var totalVotes = 0;
@@ -750,6 +752,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   }
 
   function closeDetail(){
+    _detailOpen = false;
     var card = _detailOpenedFrom;
     if (!card){
       detailModal.classList.remove('show');
@@ -1008,6 +1011,11 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   }
 
   function loadStats(){
+    if (_detailOpen) {
+      console.log('[统计] 详情打开中，跳过刷新');
+      return;
+    }
+
     var empty = $('empty-tip');
     if (allUsers.length === 0){
       empty.textContent = '加载中...';
