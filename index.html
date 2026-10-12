@@ -10,11 +10,7 @@
 html { min-height: 100%; }
 body {
   font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
-  margin: 0;
-  padding: 14px;
-  font-size: 16px;
-  min-height: 100vh;
-  /* 加强渐变：4 个彩色光斑 + 线性渐变 */
+  margin: 0; padding: 14px; font-size: 16px; min-height: 100vh;
   background:
     radial-gradient(circle at 8% 4%,  rgba(99,102,241,.35), transparent 42%),
     radial-gradient(circle at 95% 12%, rgba(168,85,247,.28), transparent 42%),
@@ -26,26 +22,13 @@ body {
   background-color: #dbeafe;
 }
 body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 55vh;
+  content: ''; position: fixed; top: 0; left: 0; right: 0; height: 55vh;
   background: radial-gradient(ellipse at top, rgba(255,255,255,.55), transparent 65%);
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: none; z-index: 0;
 }
-body > * {
-  position: relative;
-  z-index: 1;
-}
-
-body.no-gradient {
-  background: #eef2ff !important;
-  background-attachment: scroll !important;
-}
-body.no-gradient::before {
-  display: none !important;
-}
+body > * { position: relative; z-index: 1; }
+body.no-gradient { background: #eef2ff !important; background-attachment: scroll !important; }
+body.no-gradient::before { display: none !important; }
 
 h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
@@ -54,8 +37,7 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   background: linear-gradient(90deg, #ff5252, #ff9800);
   padding: 12px; border-radius: 8px; margin: 0 auto 12px;
   max-width: 480px; font-size: 1.05em;
-  box-shadow: 0 2px 10px rgba(255,82,82,.35);
-  letter-spacing: .5px;
+  box-shadow: 0 2px 10px rgba(255,82,82,.35); letter-spacing: .5px;
   transition: background .5s ease, box-shadow .5s ease;
 }
 .countdown.ended { background: linear-gradient(90deg, #999, #777); box-shadow: none; font-size: 1em; }
@@ -69,53 +51,38 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 
 .month-picker {
   display: flex; justify-content: center; align-items: center; gap: 10px;
-  max-width: 480px; margin: 0 auto 12px;
-  position: relative; z-index: 200;
+  max-width: 480px; margin: 0 auto 12px; position: relative; z-index: 200;
 }
 .month-picker label { color: #555; font-weight: 600; font-size: .95em; flex-shrink: 0; }
-
 .dropdown { position: relative; flex: 1; max-width: 260px; min-width: 170px; }
-
 .dropdown-trigger {
   flex: none !important; width: 100%;
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 10px 20px;
-  font-size: .95em; font-weight: 600; font-family: inherit; color: #333;
-  background: #fff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 999px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-  cursor: pointer; text-align: left;
+  padding: 10px 20px; font-size: .95em; font-weight: 600; font-family: inherit; color: #333;
+  background: #fff; border: 1.5px solid #e5e7eb; border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04); cursor: pointer; text-align: left;
   transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease;
 }
 .dropdown-trigger:active { transform: none; }
 .dropdown.open .dropdown-trigger { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,.15); }
-
 .dropdown-arrow { transition: transform .3s cubic-bezier(.22,.61,.36,1); flex-shrink: 0; }
 .dropdown.open .dropdown-arrow { transform: rotate(180deg); }
-
 .dropdown-panel {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0;
-  background: #fff;
-  border-radius: 16px;
+  background: #fff; border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.08);
-  padding: 6px;
-  max-height: 0; overflow: hidden;
-  opacity: 0;
-  transform: translateY(-8px) scale(0.96);
-  transform-origin: top center;
+  padding: 6px; max-height: 0; overflow: hidden; opacity: 0;
+  transform: translateY(-8px) scale(0.96); transform-origin: top center;
   pointer-events: none;
   transition: opacity .22s ease, transform .28s cubic-bezier(.22,.61,.36,1), max-height .3s cubic-bezier(.22,.61,.36,1);
   z-index: 1000;
 }
 .dropdown.open .dropdown-panel { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; max-height: 320px; overflow-y: auto; }
-
 .dropdown-item {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px; border-radius: 10px;
   font-size: .92em; font-weight: 500; color: #333;
-  cursor: pointer;
-  transition: background .15s ease, color .15s ease;
+  cursor: pointer; transition: background .15s ease, color .15s ease;
   user-select: none;
 }
 .dropdown-item.active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-weight: 600; }
@@ -131,9 +98,7 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .user-info { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 14px; font-size: 1em; }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
   max-width: 1400px; margin: 0 auto;
   opacity: 1; transform: translateY(0);
   transition: opacity .25s ease, transform .25s ease;
@@ -141,16 +106,37 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 .grid.fading-out { opacity: 0; transform: translateY(10px); }
 
 .card {
-  background: #fff;
-  border-radius: 10px; overflow: hidden;
+  background: #fff; border-radius: 10px; overflow: hidden;
   box-shadow: 0 2px 6px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
   display: flex; flex-direction: column;
   transition: transform .25s ease, box-shadow .25s ease, background-color .3s ease;
 }
 .grid.animate .card { animation: cardIn .4s cubic-bezier(.22,.61,.36,1) both; }
 
-.card img { width: 100%; height: 200px; object-fit: cover; display: block; background: #eee; cursor: pointer; transition: transform .35s ease; }
-.no-img { width: 100%; height: 200px; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-size: 1em; }
+/* ✅ 图片外层容器，固定高度 */
+.img-wrap {
+  width: 100%; height: 200px; background: #eee; overflow: hidden;
+  position: relative; flex-shrink: 0;
+}
+.img-wrap img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  background: #eee; cursor: pointer; transition: transform .35s ease;
+}
+.img-wrap .no-img {
+  width: 100%; height: 100%; background: #eee;
+  display: flex; align-items: center; justify-content: center;
+  color: #999; font-size: 1em;
+}
+/* 兼容旧式 img 直接挂 .card 下 */
+.card > img, .card > .no-img {
+  width: 100%; height: 200px; object-fit: cover; display: block;
+  background: #eee; cursor: pointer; transition: transform .35s ease;
+}
+.no-img {
+  width: 100%; height: 200px; background: #eee;
+  display: flex; align-items: center; justify-content: center;
+  color: #999; font-size: 1em;
+}
 
 .info { padding: 12px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
 .name { font-weight: bold; color: #333; font-size: 1.15em; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -172,17 +158,16 @@ button {
 button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 
 .podium {
-  background: #fff; border-radius: 12px; padding: 16px;
-  margin: 0 auto 20px;
-  max-width: 1080px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  background: #fff; border-radius: 12px; padding: 16px; margin: 0 auto 20px;
+  max-width: 1080px; box-shadow: 0 2px 8px rgba(0,0,0,.1);
   transition: opacity .25s ease, transform .25s ease;
 }
 .podium.fading-out { opacity: 0; transform: translateY(10px); }
 .podium-title { text-align: center; color: #ff9800; font-weight: bold; margin-bottom: 14px; font-size: 1.3em; }
 .podium-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .podium-card {
-  border-radius: 10px; overflow: hidden; position: relative; border: 3px solid #eee; background: #fff;
+  border-radius: 10px; overflow: hidden; position: relative;
+  border: 3px solid #eee; background: #fff;
   transition: box-shadow .3s ease;
 }
 .podium-card.r1 { border-color: #FFD700; }
@@ -195,6 +180,13 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .podium-card.r2 .podium-badge { background: #C0C0C0; }
 .podium-card.r3 .podium-badge { background: #CD7F32; color: #fff; }
 
+.podium-card .img-wrap {
+  width: 100%; height: 200px; background: #eee; overflow: hidden; flex-shrink: 0;
+}
+.podium-card .img-wrap img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.podium-card .img-wrap .no-img { width: 100%; height: 100%; }
 .podium-card img { width: 100%; height: 200px; object-fit: cover; display: block; background: #eee; }
 .podium-card .no-img { width: 100%; height: 200px; }
 
@@ -244,27 +236,14 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 }
 
 .fab-group {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 9000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-end;
+  position: fixed; right: 18px; bottom: 18px; z-index: 9000;
+  display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
 }
 .fab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  font-size: .9em;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  -webkit-appearance: none;
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px; border-radius: 999px;
+  font-size: .9em; font-weight: 600; font-family: inherit;
+  cursor: pointer; border: none; -webkit-appearance: none;
   box-shadow: 0 4px 14px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.1);
   transition: transform .2s ease, box-shadow .2s ease, background-color .3s ease;
   white-space: nowrap;
@@ -273,196 +252,72 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 .fab:hover { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
 
 .fab-power {
-  background: rgba(255,255,255,.9);
-  color: #555;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255,255,255,.9); color: #555;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .fab-power.active {
   background: linear-gradient(135deg, #10b981, #059669) !important;
   color: #fff !important;
   box-shadow: 0 4px 16px rgba(16,185,129,.45) !important;
 }
-.fab-power .icon { font-size: 1.1em; }
-
 .fab-admin {
   background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
   color: #fff !important;
   box-shadow: 0 4px 16px rgba(99,102,241,.45) !important;
 }
-.fab-admin .icon { font-size: 1.1em; }
 
-/* ============ 👑 管理面板（苹果风折叠展开） ============ */
+/* 管理面板 */
 .admin-modal {
-  display: flex;
-  position: fixed;
-  z-index: 10001;
-  inset: 0;
-  background: rgba(0,0,0,.5);
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
+  display: flex; position: fixed; z-index: 10001; inset: 0;
+  background: rgba(0,0,0,.5); justify-content: center; align-items: center;
+  padding: 16px; visibility: hidden; opacity: 0; pointer-events: none;
   transition: opacity .35s ease, visibility 0s .4s;
 }
-.admin-modal.show {
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity .35s ease, visibility 0s 0s;
-}
+.admin-modal.show { visibility: visible; opacity: 1; pointer-events: auto; transition: opacity .35s ease, visibility 0s 0s; }
 .admin-box {
-  background: #fff;
-  border-radius: 20px;
-  padding: 22px;
-  width: 100%;
-  max-width: 400px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow:
-    0 20px 60px rgba(0,0,0,.3),
-    0 0 0 1px rgba(255,255,255,.5) inset;
-  will-change: transform, opacity, border-radius;
-  transform-origin: center center;
+  background: #fff; border-radius: 20px; padding: 22px;
+  width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.5) inset;
+  will-change: transform, opacity, border-radius; transform-origin: center center;
 }
-
-.admin-box h2,
-.admin-box .admin-section,
-.admin-box .admin-close {
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity .35s ease, transform .4s cubic-bezier(.22,.61,.36,1);
-}
-.admin-modal.show .admin-box h2 { transition-delay: .12s; opacity: 1; transform: none; }
-.admin-modal.show .admin-box .admin-section:nth-of-type(1) { transition-delay: .18s; opacity: 1; transform: none; }
-.admin-modal.show .admin-box .admin-section:nth-of-type(2) { transition-delay: .24s; opacity: 1; transform: none; }
-.admin-modal.show .admin-box .admin-close { transition-delay: .3s; opacity: 1; transform: none; }
-
-.admin-box h2 {
-  margin: 0 0 16px;
-  font-size: 1.25em;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.admin-section {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #f9fafb;
-  border-radius: 10px;
-}
-.admin-section h3 {
-  margin: 0 0 8px;
-  font-size: .85em;
-  color: #666;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-}
+.admin-box h2 { margin: 0 0 16px; font-size: 1.25em; color: #333; display: flex; align-items: center; gap: 8px; }
+.admin-section { margin-bottom: 16px; padding: 12px; background: #f9fafb; border-radius: 10px; }
+.admin-section h3 { margin: 0 0 8px; font-size: .85em; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
 .admin-device-id {
-  background: #eef2ff;
-  color: #4f46e5;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-family: "SF Mono", Menlo, Consolas, monospace;
-  font-size: .78em;
-  word-break: break-all;
-  cursor: pointer;
-  user-select: all;
+  background: #eef2ff; color: #4f46e5; padding: 8px 10px; border-radius: 8px;
+  font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .78em;
+  word-break: break-all; cursor: pointer; user-select: all;
 }
-
-.switch-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 4px;
-}
+.switch-list { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
 .switch-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 4px;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-  border-radius: 8px;
-  transition: background .15s ease;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 4px; gap: 10px; cursor: pointer; user-select: none;
+  border-radius: 8px; transition: background .15s ease;
 }
 .switch-row:hover { background: #eef2ff; }
-.switch-row + .switch-row {
-  border-top: 1px solid #eef0f3;
-}
-.switch-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-.switch-label .s-icon {
-  font-size: 1.15em;
-  flex-shrink: 0;
-  width: 1.4em;
-  text-align: center;
-}
-.switch-label .s-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.switch-label .s-name {
-  font-size: .95em;
-  font-weight: 600;
-  color: #333;
-}
-.switch-label .s-desc {
-  font-size: .72em;
-  color: #888;
-}
+.switch-row + .switch-row { border-top: 1px solid #eef0f3; }
+.switch-label { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.switch-label .s-icon { font-size: 1.15em; flex-shrink: 0; width: 1.4em; text-align: center; }
+.switch-label .s-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.switch-label .s-name { font-size: .95em; font-weight: 600; color: #333; }
+.switch-label .s-desc { font-size: .72em; color: #888; }
 .switch-toggle {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  background: #d1d5db;
-  border-radius: 12px;
-  flex-shrink: 0;
+  position: relative; width: 44px; height: 24px;
+  background: #d1d5db; border-radius: 12px; flex-shrink: 0;
   transition: background-color .25s ease;
 }
 .switch-toggle::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; background: #fff; border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0,0,0,.2);
   transition: transform .25s cubic-bezier(.34,1.56,.64,1);
 }
-.switch-row.on .switch-toggle {
-  background: linear-gradient(135deg, #10b981, #059669);
-}
-.switch-row.on .switch-toggle::after {
-  transform: translateX(20px);
-}
-
+.switch-row.on .switch-toggle { background: linear-gradient(135deg, #10b981, #059669); }
+.switch-row.on .switch-toggle::after { transform: translateX(20px); }
 .admin-close {
-  width: 100%;
-  padding: 11px;
-  background: #6366f1;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: .95em;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 6px;
-  -webkit-appearance: none;
+  width: 100%; padding: 11px; background: #6366f1; color: #fff;
+  border: none; border-radius: 8px; font-size: .95em; font-weight: 600;
+  cursor: pointer; margin-top: 6px; -webkit-appearance: none;
   transition: filter .2s ease;
 }
 .admin-close:hover { filter: brightness(1.1); }
@@ -472,6 +327,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* 特性开关 */
 body.has-hover .card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 body.has-hover .card img:hover { transform: scale(1.03); }
 body.has-hover .dropdown-item:hover { background: #eef2ff; color: #4f46e5; }
@@ -480,97 +336,51 @@ body.has-hover .viewer-close:hover { background: rgba(255,255,255,.28); transfor
 body.has-hover .podium-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,.15); }
 body.has-hover button:not(:disabled):active { transform: scale(0.96); }
 
-body.no-hover .card:hover,
-body.no-hover .card img:hover,
-body.no-hover .dropdown-trigger:hover,
-body.no-hover .dropdown-item:hover,
-body.no-hover .podium-card:hover,
-body.no-hover button:not(:disabled):hover,
-body.no-hover .viewer-close:hover,
-body.no-hover .fab:hover {
-  transform: none !important;
-  filter: none !important;
-  box-shadow: inherit !important;
-  background-color: inherit !important;
+body.no-hover .card:hover, body.no-hover .card img:hover,
+body.no-hover .dropdown-trigger:hover, body.no-hover .dropdown-item:hover,
+body.no-hover .podium-card:hover, body.no-hover button:not(:disabled):hover,
+body.no-hover .viewer-close:hover, body.no-hover .fab:hover {
+  transform: none !important; filter: none !important;
+  box-shadow: inherit !important; background-color: inherit !important;
 }
 body.no-hover .card:hover { box-shadow: 0 2px 6px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04) !important; }
 
-body.no-transition,
-body.no-transition *,
-body.no-transition *::before,
-body.no-transition *::after {
-  transition: none !important;
-  animation-duration: .01ms !important;
+body.no-transition, body.no-transition *, body.no-transition *::before, body.no-transition *::after {
+  transition: none !important; animation-duration: .01ms !important;
 }
 body.no-transition .grid.animate .card { animation: none !important; }
 body.no-transition .grid.fading-out { opacity: 1 !important; transform: none !important; }
-
 body.no-anim .grid.animate .card { animation: none !important; }
 body.no-anim .grid.fading-out { opacity: 1 !important; transform: none !important; }
 
 body.has-hover.glass-on .card {
   background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(14px) saturate(180%);
-  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
-body.has-hover.glass-on .card:hover {
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 12px 28px rgba(99,102,241,.16), inset 0 1px 0 rgba(255, 255, 255, 1);
-}
+body.has-hover.glass-on .card:hover { background: rgba(255, 255, 255, 0.78); box-shadow: 0 12px 28px rgba(99,102,241,.16), inset 0 1px 0 rgba(255, 255, 255, 1); }
 body.has-hover.glass-on .podium {
   background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 4px 16px rgba(99,102,241,.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 body.has-hover.glass-on .podium-card { background: rgba(255, 255, 255, 0.7); }
 body.has-hover.glass-on .dropdown-trigger {
   background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 10px rgba(99,102,241,.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-body.has-hover.glass-on .dropdown-trigger:hover {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: #c7d2fe;
-}
-body.has-hover.glass-on .dropdown.open .dropdown-trigger {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 4px rgba(99,102,241,.18);
+  backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);
 }
 body.has-hover.glass-on .dropdown-panel {
   background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 12px 40px rgba(99,102,241,.18), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(24px) saturate(200%); -webkit-backdrop-filter: blur(24px) saturate(200%);
 }
-body.has-hover.glass-on .modal-box {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-}
-body.has-hover.glass-on .fab-power:not(.active) {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(14px) saturate(180%);
-  -webkit-backdrop-filter: blur(14px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-}
+body.has-hover.glass-on .modal-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+body.has-hover.glass-on .fab-power:not(.active) { background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 
-body.no-glass .card,
-body.no-glass .podium,
-body.no-glass .podium-card,
-body.no-glass .dropdown-trigger,
-body.no-glass .dropdown-panel,
-body.no-glass .modal-box,
+body.no-glass .card, body.no-glass .podium, body.no-glass .podium-card,
+body.no-glass .dropdown-trigger, body.no-glass .dropdown-panel, body.no-glass .modal-box,
 body.no-glass .fab-power:not(.active) {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
 }
 body.no-glass .card { background: #fff !important; border: none; }
 body.no-glass .podium { background: #fff !important; border: none; }
@@ -580,20 +390,10 @@ body.no-glass .dropdown-panel { background: #fff !important; }
 body.no-glass .modal-box { background: #fff !important; }
 body.no-glass .fab-power:not(.active) { background: rgba(255,255,255,.95) !important; }
 
-body.perf-mid .card { box-shadow: 0 1px 4px rgba(0,0,0,.06); transition: transform .2s ease; }
-body.perf-mid .card img { transition: transform .25s ease; }
-body.perf-mid .grid.animate .card { animation-duration: .3s; }
-body.perf-mid .dropdown-panel { box-shadow: 0 6px 20px rgba(0,0,0,.12); transition: opacity .15s ease, transform .2s ease; }
-body.perf-mid .podium-card { transition: none; }
-body.perf-mid .viewer { transition: opacity .2s ease; }
-
 body.perf-lite .grid { transition: none; }
 body.perf-lite .grid.fading-out { opacity: 1; transform: none; }
 body.perf-lite .grid.animate .card { animation: none; }
-body.perf-lite .card {
-  box-shadow: 0 1px 3px rgba(0,0,0,.06);
-  transition: none;
-}
+body.perf-lite .card { box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: none; }
 body.perf-lite .card img { transition: none; }
 body.perf-lite .votes { transition: none; }
 body.perf-lite .votes.bump { transform: none; }
@@ -618,8 +418,7 @@ body.perf-lite .dropdown-trigger, body.perf-lite .dropdown-panel, body.perf-lite
 body.perf-mid .dropdown-trigger, body.perf-mid .dropdown-panel, body.perf-mid .modal-box,
 body.is-touch .card, body.is-touch .podium, body.is-touch .podium-card,
 body.is-touch .dropdown-trigger, body.is-touch .dropdown-panel, body.is-touch .modal-box {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
 }
 body.perf-lite .card, body.perf-lite .podium, body.perf-lite .podium-card,
 body.perf-lite .dropdown-trigger, body.perf-lite .dropdown-panel, body.perf-lite .modal-box,
@@ -629,37 +428,25 @@ body.is-touch .dropdown-trigger, body.is-touch .dropdown-panel, body.is-touch .m
   background: #fff !important;
 }
 
-body.perf-lite .fab-power:not(.active),
-body.is-touch .fab-power:not(.active) {
+body.perf-lite .fab-power:not(.active), body.is-touch .fab-power:not(.active) {
   background: rgba(255,255,255,.95) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  color: #555 !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important; color: #555 !important;
 }
-body.perf-lite .fab-power.active,
-body.is-touch .fab-power.active {
+body.perf-lite .fab-power.active, body.is-touch .fab-power.active {
   background: linear-gradient(135deg, #10b981, #059669) !important;
-  color: #fff !important;
-  box-shadow: 0 4px 16px rgba(16,185,129,.45) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  color: #fff !important; box-shadow: 0 4px 16px rgba(16,185,129,.45) !important;
 }
-body.perf-lite .fab-admin,
-body.is-touch .fab-admin {
+body.perf-lite .fab-admin, body.is-touch .fab-admin {
   background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
   color: #fff !important;
-  box-shadow: 0 4px 16px rgba(99,102,241,.45) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
-body.is-touch .podium { background: #fff !important; }
 
 @media (max-width: 1024px) {
   .grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .card img, .no-img { height: 160px; }
+  .img-wrap { height: 160px; }
   .podium { max-width: 800px; }
   .podium-grid { gap: 12px; }
-  .podium-card img, .podium-card .no-img { height: 160px; }
+  .podium-card .img-wrap { height: 160px; }
 }
 
 @media (max-width: 768px) {
@@ -673,9 +460,8 @@ body.is-touch .podium { background: #fff !important; }
   .dropdown-item { padding: 9px 12px; font-size: .88em; }
   .month-tip { font-size: .9em; padding: 8px; margin-bottom: 12px; }
   .user-info { font-size: .95em; }
-
   .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .card img, .no-img { height: 140px; }
+  .img-wrap { height: 140px; }
   .info { padding: 10px; }
   .name { font-size: 1.05em; margin-bottom: 3px; }
   .chef { font-size: .88em; margin: 3px 0; }
@@ -683,28 +469,18 @@ body.is-touch .podium { background: #fff !important; }
   .votes { font-size: 1.05em; margin: 5px 0; }
   button { padding: 9px 2px; font-size: .88em; }
   .btns { gap: 5px; margin-top: 6px; }
-
   .podium { padding: 10px; margin-bottom: 12px; max-width: 100%; }
   .podium-title { font-size: 1.1em; margin-bottom: 10px; }
   .podium-grid { gap: 6px; }
-  .podium-card img, .podium-card .no-img { height: 100px; }
+  .podium-card .img-wrap { height: 100px; }
   .podium-info { padding: 6px; }
   .podium-name { font-size: .92em; }
   .podium-chef { font-size: .75em; margin-top: 2px; }
   .podium-date { font-size: .72em; margin-top: 2px; }
   .podium-votes { font-size: .9em; margin-top: 4px; }
   .viewer-close { font-size: 28px; top: 10px; right: 12px; }
-
-  .fab-group {
-    right: auto;
-    left: 12px;
-    top: 12px;
-    bottom: auto;
-    flex-direction: row;
-    align-items: flex-start;
-  }
+  .fab-group { right: auto; left: 12px; top: 12px; bottom: auto; flex-direction: row; align-items: flex-start; }
   .fab { padding: 7px 12px; font-size: .78em; gap: 4px; }
-  .fab .icon { font-size: 1em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -773,72 +549,50 @@ body.is-touch .podium { background: #fff !important; }
 <div class="admin-modal" id="admin-modal">
   <div class="admin-box" id="admin-box">
     <h2>👑 管理面板</h2>
-
     <div class="admin-section">
       <h3>本机设备 ID</h3>
       <div class="admin-device-id" id="admin-device-id">—</div>
     </div>
-
     <div class="admin-section">
       <h3>特效开关</h3>
       <div class="switch-list">
         <div class="switch-row on" data-feature="glass" id="sw-glass">
           <div class="switch-label">
             <span class="s-icon">🌫️</span>
-            <span class="s-text">
-              <span class="s-name">毛玻璃</span>
-              <span class="s-desc">卡片半透明模糊</span>
-            </span>
+            <span class="s-text"><span class="s-name">毛玻璃</span><span class="s-desc">卡片半透明模糊</span></span>
           </div>
           <div class="switch-toggle"></div>
         </div>
-
         <div class="switch-row on" data-feature="gradient" id="sw-gradient">
           <div class="switch-label">
             <span class="s-icon">🎨</span>
-            <span class="s-text">
-              <span class="s-name">渐变背景</span>
-              <span class="s-desc">彩色光斑渐变</span>
-            </span>
+            <span class="s-text"><span class="s-name">渐变背景</span><span class="s-desc">彩色光斑渐变</span></span>
           </div>
           <div class="switch-toggle"></div>
         </div>
-
         <div class="switch-row on" data-feature="anim" id="sw-anim">
           <div class="switch-label">
             <span class="s-icon">✨</span>
-            <span class="s-text">
-              <span class="s-name">入场动画</span>
-              <span class="s-desc">卡片错峰淡入</span>
-            </span>
+            <span class="s-text"><span class="s-name">入场动画</span><span class="s-desc">卡片错峰淡入</span></span>
           </div>
           <div class="switch-toggle"></div>
         </div>
-
         <div class="switch-row on" data-feature="hover" id="sw-hover">
           <div class="switch-label">
             <span class="s-icon">🖱️</span>
-            <span class="s-text">
-              <span class="s-name">悬停效果</span>
-              <span class="s-desc">鼠标悬停上浮/放大</span>
-            </span>
+            <span class="s-text"><span class="s-name">悬停效果</span><span class="s-desc">鼠标悬停上浮/放大</span></span>
           </div>
           <div class="switch-toggle"></div>
         </div>
-
         <div class="switch-row on" data-feature="transition" id="sw-transition">
           <div class="switch-label">
             <span class="s-icon">🌀</span>
-            <span class="s-text">
-              <span class="s-name">过渡动画</span>
-              <span class="s-desc">弹窗/下拉菜单平滑</span>
-            </span>
+            <span class="s-text"><span class="s-name">过渡动画</span><span class="s-desc">弹窗/下拉菜单平滑</span></span>
           </div>
           <div class="switch-toggle"></div>
         </div>
       </div>
     </div>
-
     <button type="button" class="admin-close" id="admin-close">关闭</button>
   </div>
 </div>
@@ -852,58 +606,41 @@ body.is-touch .podium { background: #fff !important; }
   function getDeviceId(){
     var saved = localStorage.getItem('device_id');
     if (saved) return saved;
-
     var parts = [
-      navigator.userAgent,
-      navigator.language || '',
+      navigator.userAgent, navigator.language || '',
       navigator.languages ? navigator.languages.join(',') : '',
-      navigator.hardwareConcurrency || '',
-      navigator.deviceMemory || '',
-      screen.width + 'x' + screen.height,
-      screen.colorDepth || '',
+      navigator.hardwareConcurrency || '', navigator.deviceMemory || '',
+      screen.width + 'x' + screen.height, screen.colorDepth || '',
       new Date().getTimezoneOffset(),
       (Intl.DateTimeFormat().resolvedOptions().timeZone) || '',
       navigator.platform || ''
     ];
-
     try {
       var c = document.createElement('canvas');
       c.width = 200; c.height = 50;
       var ctx = c.getContext('2d');
-      ctx.textBaseline = 'top';
-      ctx.font = '14px Arial';
-      ctx.fillStyle = '#f60';
-      ctx.fillRect(125, 1, 62, 20);
-      ctx.fillStyle = '#069';
-      ctx.fillText('device-fp', 2, 15);
-      ctx.fillStyle = 'rgba(102,204,0,0.7)';
-      ctx.fillText('device-fp', 4, 17);
+      ctx.textBaseline = 'top'; ctx.font = '14px Arial';
+      ctx.fillStyle = '#f60'; ctx.fillRect(125, 1, 62, 20);
+      ctx.fillStyle = '#069'; ctx.fillText('device-fp', 2, 15);
+      ctx.fillStyle = 'rgba(102,204,0,0.7)'; ctx.fillText('device-fp', 4, 17);
       parts.push(c.toDataURL().slice(-80));
     } catch(e){}
-
     var str = parts.join('||');
     var h1 = 0x811c9dc5;
-    for (var i = 0; i < str.length; i++){
-      h1 ^= str.charCodeAt(i);
-      h1 = (h1 * 0x01000193) >>> 0;
-    }
+    for (var i = 0; i < str.length; i++){ h1 ^= str.charCodeAt(i); h1 = (h1 * 0x01000193) >>> 0; }
     var h2 = 5381;
-    for (var i = 0; i < str.length; i++){
-      h2 = ((h2 << 5) + h2 + str.charCodeAt(i)) >>> 0;
-    }
+    for (var i = 0; i < str.length; i++){ h2 = ((h2 << 5) + h2 + str.charCodeAt(i)) >>> 0; }
     var id = 'dev-' + h1.toString(36) + h2.toString(36);
     localStorage.setItem('device_id', id);
     return id;
   }
 
   var DEVICE_ID = getDeviceId();
-
   var ADMIN_IDS = [
     'dev-msw0i6up35xnt3nk4a',
     '154bde98eb07421f81d75657af6e7f12',
     'dev-154bde98eb07421f81d75657af6e7f12',
   ];
-
   var isAdmin = ADMIN_IDS.indexOf(DEVICE_ID) !== -1;
 
   var hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -913,23 +650,15 @@ body.is-touch .podium { background: #fff !important; }
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     var mem = navigator.deviceMemory;
     var cores = navigator.hardwareConcurrency || 2;
-    if (mem === undefined) {
-      autoLevel = cores >= 8 ? 'perf-high' : cores >= 4 ? 'perf-mid' : 'perf-lite';
-    } else if (mem >= 8) {
-      autoLevel = 'perf-high';
-    } else if (mem === 4) {
-      autoLevel = cores >= 4 ? 'perf-high' : 'perf-mid';
-    } else if (mem >= 2) {
-      autoLevel = 'perf-mid';
-    } else {
-      autoLevel = 'perf-lite';
-    }
+    if (mem === undefined) autoLevel = cores >= 8 ? 'perf-high' : cores >= 4 ? 'perf-mid' : 'perf-lite';
+    else if (mem >= 8) autoLevel = 'perf-high';
+    else if (mem === 4) autoLevel = cores >= 4 ? 'perf-high' : 'perf-mid';
+    else if (mem >= 2) autoLevel = 'perf-mid';
+    else autoLevel = 'perf-lite';
   }
-
   body.classList.add(autoLevel);
 
   var FEATURES = ['glass', 'gradient', 'anim', 'hover', 'transition'];
-
   function loadFeatureState(){
     var state = {};
     FEATURES.forEach(function(f){
@@ -938,7 +667,6 @@ body.is-touch .podium { background: #fff !important; }
     });
     return state;
   }
-
   function applyFeature(f, on){
     if (f === 'glass')    { body.classList.toggle('glass-on', on); body.classList.toggle('no-glass', !on); }
     if (f === 'gradient') body.classList.toggle('no-gradient', !on);
@@ -946,31 +674,18 @@ body.is-touch .podium { background: #fff !important; }
     if (f === 'hover')    body.classList.toggle('no-hover', !on);
     if (f === 'transition') body.classList.toggle('no-transition', !on);
   }
-
   var featState = loadFeatureState();
-  FEATURES.forEach(function(f){
-    applyFeature(f, featState[f]);
-  });
+  FEATURES.forEach(function(f){ applyFeature(f, featState[f]); });
 
   console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin + ' 档位=' + autoLevel);
-
-  window.__DEVICE__ = {
-    id: DEVICE_ID,
-    isAdmin: isAdmin,
-    autoLevel: autoLevel
-  };
+  window.__DEVICE__ = { id: DEVICE_ID, isAdmin: isAdmin, autoLevel: autoLevel };
 
   var btnPower = document.getElementById('btn-power');
   function refreshPowerBtn(){
     var lite = localStorage.getItem('perf_lite') === '1';
     var textEl = btnPower.querySelector('.text');
-    if (lite){
-      btnPower.classList.add('active');
-      if (textEl) textEl.textContent = '省电模式已开启';
-    } else {
-      btnPower.classList.remove('active');
-      if (textEl) textEl.textContent = '省电模式';
-    }
+    if (lite){ btnPower.classList.add('active'); if (textEl) textEl.textContent = '省电模式已开启'; }
+    else { btnPower.classList.remove('active'); if (textEl) textEl.textContent = '省电模式'; }
   }
   refreshPowerBtn();
 
@@ -978,11 +693,9 @@ body.is-touch .podium { background: #fff !important; }
     var lite = localStorage.getItem('perf_lite') === '1';
     var next = lite ? '0' : '1';
     localStorage.setItem('perf_lite', next);
-
     var level = next === '1' ? 'perf-lite' : autoLevel;
     body.classList.remove('perf-high', 'perf-mid', 'perf-lite');
     body.classList.add(level);
-
     refreshPowerBtn();
   });
 
@@ -993,7 +706,6 @@ body.is-touch .podium { background: #fff !important; }
 
   if (isAdmin && btnAdmin && adminModal && adminBox){
     btnAdmin.style.display = '';
-
     var elId = document.getElementById('admin-device-id');
     if (elId) elId.textContent = DEVICE_ID;
 
@@ -1020,38 +732,27 @@ body.is-touch .podium { background: #fff !important; }
       })(rows[i]);
     }
 
-    // ============ 🍎 苹果风折叠展开 ============
     function openAdminModal(){
       syncSwitches();
-
       var from = btnAdmin.getBoundingClientRect();
       adminModal.classList.add('show');
-
       requestAnimationFrame(function(){
         var to = adminBox.getBoundingClientRect();
         if (to.width === 0 || to.height === 0) return;
-
         var cx1 = from.left + from.width / 2;
         var cy1 = from.top + from.height / 2;
         var cx2 = to.left + to.width / 2;
         var cy2 = to.top + to.height / 2;
-        var dx = cx1 - cx2;
-        var dy = cy1 - cy2;
+        var dx = cx1 - cx2, dy = cy1 - cy2;
         var scale = Math.max(0.08, from.width / to.width);
-
         adminBox.style.transition = 'none';
         adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
         adminBox.style.borderRadius = '50%';
         adminBox.style.opacity = '0';
-
         void adminBox.offsetWidth;
-
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
-            adminBox.style.transition =
-              'transform .55s cubic-bezier(.32, .72, 0, 1), ' +
-              'border-radius .55s cubic-bezier(.32, .72, 0, 1), ' +
-              'opacity .3s ease';
+            adminBox.style.transition = 'transform .55s cubic-bezier(.32, .72, 0, 1), border-radius .55s cubic-bezier(.32, .72, 0, 1), opacity .3s ease';
             adminBox.style.transform = 'translate(0, 0) scale(1)';
             adminBox.style.borderRadius = '20px';
             adminBox.style.opacity = '1';
@@ -1059,57 +760,28 @@ body.is-touch .podium { background: #fff !important; }
         });
       });
     }
-
     function closeAdminModal(){
       var from = btnAdmin.getBoundingClientRect();
       var to = adminBox.getBoundingClientRect();
-
-      var cx1 = from.left + from.width / 2;
-      var cy1 = from.top + from.height / 2;
-      var cx2 = to.left + to.width / 2;
-      var cy2 = to.top + to.height / 2;
-      var dx = cx1 - cx2;
-      var dy = cy1 - cy2;
+      var cx1 = from.left + from.width / 2, cy1 = from.top + from.height / 2;
+      var cx2 = to.left + to.width / 2, cy2 = to.top + to.height / 2;
+      var dx = cx1 - cx2, dy = cy1 - cy2;
       var scale = Math.max(0.08, from.width / to.width);
-
-      adminBox.style.transition =
-        'transform .45s cubic-bezier(.4, 0, .2, 1), ' +
-        'border-radius .45s cubic-bezier(.4, 0, .2, 1), ' +
-        'opacity .3s ease';
+      adminBox.style.transition = 'transform .45s cubic-bezier(.4, 0, .2, 1), border-radius .45s cubic-bezier(.4, 0, .2, 1), opacity .3s ease';
       adminBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
       adminBox.style.borderRadius = '50%';
       adminBox.style.opacity = '0';
-
       adminModal.classList.remove('show');
-
       setTimeout(function(){
-        adminBox.style.transition = '';
-        adminBox.style.transform = '';
-        adminBox.style.borderRadius = '';
-        adminBox.style.opacity = '';
+        adminBox.style.transition = ''; adminBox.style.transform = '';
+        adminBox.style.borderRadius = ''; adminBox.style.opacity = '';
       }, 500);
     }
 
-    btnAdmin.addEventListener('click', function(e){
-      e.stopPropagation();
-      if (adminModal.classList.contains('show')) return;
-      openAdminModal();
-    });
-
-    adminClose.addEventListener('click', function(e){
-      e.stopPropagation();
-      closeAdminModal();
-    });
-
-    adminModal.addEventListener('click', function(e){
-      if (e.target === adminModal) closeAdminModal();
-    });
-
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && adminModal.classList.contains('show')){
-        closeAdminModal();
-      }
-    });
+    btnAdmin.addEventListener('click', function(e){ e.stopPropagation(); if (adminModal.classList.contains('show')) return; openAdminModal(); });
+    adminClose.addEventListener('click', function(e){ e.stopPropagation(); closeAdminModal(); });
+    adminModal.addEventListener('click', function(e){ if (e.target === adminModal) closeAdminModal(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && adminModal.classList.contains('show')) closeAdminModal(); });
 
     if (elId){
       elId.addEventListener('click', function(){
@@ -1120,16 +792,6 @@ body.is-touch .podium { background: #fff !important; }
             elId.textContent = '✅ 已复制：' + orig;
             setTimeout(function(){ elId.textContent = orig; }, 1500);
           });
-        } else {
-          var ta = document.createElement('textarea');
-          ta.value = txt;
-          document.body.appendChild(ta);
-          ta.select();
-          try { document.execCommand('copy'); } catch(e){}
-          document.body.removeChild(ta);
-          var orig = txt;
-          elId.textContent = '✅ 已复制：' + orig;
-          setTimeout(function(){ elId.textContent = orig; }, 1500);
         }
       });
     }
@@ -1143,7 +805,6 @@ body.is-touch .podium { background: #fff !important; }
 
   var API = 'https://exemption-eliminate-watts-merchant.trycloudflare.com';
 
-  // ✅ 4 个 CDN 自动 fallback（手机网络下 jsDelivr 可能被墙）
   var CDN_LIST = [
     'https://cdn.jsdelivr.net/gh/WUBAT964/images@main',
     'https://raw.githack.com/WUBAT964/images/main',
@@ -1158,21 +819,14 @@ body.is-touch .podium { background: #fff !important; }
   var _animNextRender = false;
 
   var NAME_MAP = {
-    "1_炆行鸡.jpg":             "1_wenxingji.jpg",
-    "2_酸汤猪脚.jpg":           "2_suantangzhujiao.jpg",
-    "3_酸菜鱼.jpg":             "3_suancaiyu.jpg",
-    "6_白切五花肉、膈山肉.jpg":  "6_baqiewuhuarou.jpg",
-    "8_紫苏炆鸭.jpg":           "8_zisuwenya.jpg",
-    "9_水煮肉片.jpg":           "9_shuizhuroupian.jpg",
-    "10_蒸排骨.jpg":            "10_zhengpaigu.jpg",
-    "11_肉沫豆腐.jpg":          "11_roumodoufu.jpg",
-    "12_五花肉.jpg":            "12_wuhuarou.jpg",
-    "13_排骨炆五彩椒.jpg":      "13_paiguwencaijiao.jpg",
-    "15_五花肉.jpg":            "15_wuhuarou.jpg",
-    "17_啤酒鸭.jpg":            "17_pijiua.jpg",
-    "18_排骨炆芋头.jpg":        "18_paiguweiyutou.jpg",
-    "20_豆腐炆鱼.jpg":          "20_doufuweiyu.jpg",
-    "21_清蒸鲈鱼.jpg":          "21_qingzhengluyu.jpg"
+    "1_炆行鸡.jpg":"1_wenxingji.jpg","2_酸汤猪脚.jpg":"2_suantangzhujiao.jpg",
+    "3_酸菜鱼.jpg":"3_suancaiyu.jpg","6_白切五花肉、膈山肉.jpg":"6_baqiewuhuarou.jpg",
+    "8_紫苏炆鸭.jpg":"8_zisuwenya.jpg","9_水煮肉片.jpg":"9_shuizhuroupian.jpg",
+    "10_蒸排骨.jpg":"10_zhengpaigu.jpg","11_肉沫豆腐.jpg":"11_roumodoufu.jpg",
+    "12_五花肉.jpg":"12_wuhuarou.jpg","13_排骨炆五彩椒.jpg":"13_paiguwencaijiao.jpg",
+    "15_五花肉.jpg":"15_wuhuarou.jpg","17_啤酒鸭.jpg":"17_pijiua.jpg",
+    "18_排骨炆芋头.jpg":"18_paiguweiyutou.jpg","20_豆腐炆鱼.jpg":"20_doufuweiyu.jpg",
+    "21_清蒸鲈鱼.jpg":"21_qingzhengluyu.jpg"
   };
 
   var votes = {};
@@ -1201,14 +855,8 @@ body.is-touch .podium { background: #fff !important; }
     if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
     return s;
   }
-  function isVoteOpen(){
-    if (DEADLINE === null) return true;
-    return Date.now() < DEADLINE;
-  }
-  function isAllMonthsView(){
-    return !currentMonth;
-  }
-
+  function isVoteOpen(){ if (DEADLINE === null) return true; return Date.now() < DEADLINE; }
+  function isAllMonthsView(){ return !currentMonth; }
   function imgFilename(f){
     if (!f) return '';
     f = String(f).trim();
@@ -1219,105 +867,66 @@ body.is-touch .podium { background: #fff !important; }
     return name;
   }
 
-  function imgUrl(f){
-    var name = imgFilename(f);
-    if (!name) return '';
-    return CDN_LIST[0] + '/' + name;
-  }
-
-  // ============ 🖼️ 多 CDN 自动 fallback ============
+  // 多 CDN 自动 fallback
   var _cdnWorking = {};
   function createImg(filename, onSuccess, onError){
     var name = imgFilename(filename);
     if (!name) return null;
-
     var img = document.createElement('img');
     img.loading = 'lazy';
     img.decoding = 'async';
     img.alt = '';
-
     var startIdx = _cdnWorking[name] || 0;
     var idx = startIdx;
-
     function tryNext(){
-      if (idx >= CDN_LIST.length){
-        if (onError) onError();
-        return;
-      }
+      if (idx >= CDN_LIST.length){ if (onError) onError(); return; }
       img.src = CDN_LIST[idx] + '/' + name;
     }
-
-    img.onload = function(){
-      _cdnWorking[name] = idx;
-      if (onSuccess) onSuccess(img);
-    };
-
+    img.onload = function(){ _cdnWorking[name] = idx; if (onSuccess) onSuccess(img); };
     img.onerror = function(){
       idx++;
-      if (idx < CDN_LIST.length){
-        setTimeout(tryNext, 100);
-      } else {
-        if (onError) onError();
-      }
+      if (idx < CDN_LIST.length) setTimeout(tryNext, 100);
+      else if (onError) onError();
     };
-
     tryNext();
     return img;
   }
 
   var lastOpenState = null;
-
   function pad2(n){ return n < 10 ? '0' + n : String(n); }
 
   function updateCountdown(){
     var el = $('countdown');
     if (!el) return;
-
     if (!currentMonth){
       el.className = 'countdown free';
       el.innerHTML = '📅 全部月份汇总 · 选择上方月份查看倒计时';
-      if (lastOpenState !== 'all'){
-        lastOpenState = 'all';
-        render();
-      }
+      if (lastOpenState !== 'all'){ lastOpenState = 'all'; render(); }
       return;
     }
-
     if (DEADLINE === null){
       el.className = 'countdown free';
       el.innerHTML = '⏰ ' + currentMonth + ' 投票进行中（未设截止）';
-      if (lastOpenState !== true){
-        lastOpenState = true;
-        render();
-      }
+      if (lastOpenState !== true){ lastOpenState = true; render(); }
       return;
     }
-
     var diff = DEADLINE - Date.now();
-
     if (diff <= 0){
       el.className = 'countdown ended';
       el.innerHTML = '⏰ ' + currentMonth + ' 投票已结束 · 感谢参与';
-      if (lastOpenState !== false){
-        lastOpenState = false;
-        render();
-      }
+      if (lastOpenState !== false){ lastOpenState = false; render(); }
       return;
     }
-
     if (lastOpenState !== true){
       lastOpenState = true;
       if ($('grid').children.length > 0) render();
     }
-
     var days = Math.floor(diff / 86400000);
     var hours = Math.floor((diff % 86400000) / 3600000);
     var mins  = Math.floor((diff % 3600000) / 60000);
     var secs  = Math.floor((diff % 60000) / 1000);
-
     el.className = 'countdown';
-    el.innerHTML =
-      '⏰ ' + currentMonth + ' 投票还剩 ' +
+    el.innerHTML = '⏰ ' + currentMonth + ' 投票还剩 ' +
       '<span class="num">' + days + '</span>天 ' +
       '<span class="num">' + pad2(hours) + '</span>:' +
       '<span class="num">' + pad2(mins) + '</span>:' +
@@ -1325,29 +934,18 @@ body.is-touch .podium { background: #fff !important; }
   }
 
   var _monthList = [];
-
   function renderMonthSelect(months){
     _monthList = months.slice();
     var trigger = $('month-trigger');
     var dropdown = $('month-dropdown');
-
     if (!trigger._bound){
       trigger._bound = true;
-      trigger.onclick = function(e){
-        e.stopPropagation();
-        dropdown.classList.toggle('open');
-      };
-      document.addEventListener('click', function(e){
-        if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
-      });
-      document.addEventListener('keydown', function(e){
-        if (e.key === 'Escape') dropdown.classList.remove('open');
-      });
+      trigger.onclick = function(e){ e.stopPropagation(); dropdown.classList.toggle('open'); };
+      document.addEventListener('click', function(e){ if (!dropdown.contains(e.target)) dropdown.classList.remove('open'); });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') dropdown.classList.remove('open'); });
     }
-
     rebuildPanel();
   }
-
   function rebuildPanel(){
     var panel = $('month-panel');
     if (!panel) return;
@@ -1359,35 +957,29 @@ body.is-touch .podium { background: #fff !important; }
       appendItem(panel, m, m, open);
     });
   }
-
   function appendItem(panel, value, label, open){
     var item = document.createElement('div');
     item.className = 'dropdown-item';
     if (value === currentMonth) item.classList.add('active');
     if (open === false) item.classList.add('ended');
     item.setAttribute('data-value', value);
-
     var text = document.createElement('span');
     text.textContent = label;
     item.appendChild(text);
-
     if (open !== null){
       var dot = document.createElement('span');
       dot.className = 'status-dot';
       dot.textContent = open === false ? '🔴' : '🟢';
       item.appendChild(dot);
     }
-
     item.onclick = function(e){
       e.stopPropagation();
       $('month-dropdown').classList.remove('open');
       if (value === currentMonth) return;
       loadMonth(value);
     };
-
     panel.appendChild(item);
   }
-
   function updateMonthSelectUI(){
     var label = $('month-label');
     if (label) label.textContent = currentMonth || '全部月份（汇总）';
@@ -1410,44 +1002,34 @@ body.is-touch .podium { background: #fff !important; }
   function loadMonth(month){
     var grid = $('grid');
     var podium = $('podium');
-
     if (!isLowEnd()){
       grid.classList.add('fading-out');
       if (podium.style.display !== 'none') podium.classList.add('fading-out');
     }
-
     var doUpdate = function(){
       currentMonth = month || '';
       var tip = $('month-tip');
-
       if (!currentMonth){
         dishes = allDishesCache.slice();
         tip.textContent = '📅 全部菜品展示（共 ' + dishes.length + ' 道）· 仅供浏览';
         tip.classList.add('readonly');
       } else {
-        dishes = allDishesCache.filter(function(d){
-          return (d.date || '').indexOf(currentMonth) === 0;
-        });
+        dishes = allDishesCache.filter(function(d){ return (d.date || '').indexOf(currentMonth) === 0; });
         tip.textContent = '📅 ' + currentMonth + ' 菜品（共 ' + dishes.length + ' 道）';
         tip.classList.remove('readonly');
       }
-
       updateMonthSelectUI();
-
       if (!currentMonth){
         DEADLINE = null;
         lastOpenState = null;
         dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
         updateCountdown();
-
         if (!isLowEnd()){
           _animNextRender = true;
           grid.classList.add('animate');
           setTimeout(function(){ grid.classList.remove('animate'); }, 900);
         }
-
         render();
-
         if (!isLowEnd()){
           requestAnimationFrame(function(){
             grid.classList.remove('fading-out');
@@ -1456,37 +1038,26 @@ body.is-touch .podium { background: #fff !important; }
         }
         return;
       }
-
-      var url = API + '/api/vote_status?month=' + encodeURIComponent(currentMonth);
-
-      fetch(url)
+      fetch(API + '/api/vote_status?month=' + encodeURIComponent(currentMonth))
         .then(function(r){ return r.json(); })
         .then(function(s){
           if (s.deadline){
             var t = Date.parse(s.deadline);
             if (isNaN(t)) t = Date.parse(s.deadline.replace(/\+08:00$/, ''));
             DEADLINE = isNaN(t) ? null : t;
-          } else {
-            DEADLINE = null;
-          }
+          } else DEADLINE = null;
           lastOpenState = null;
         })
-        .catch(function(){
-          DEADLINE = null;
-          lastOpenState = null;
-        })
+        .catch(function(){ DEADLINE = null; lastOpenState = null; })
         .then(function(){
           dishes.sort(function(a, b){ return (a.date || '').localeCompare(b.date || ''); });
           updateCountdown();
-
           if (!isLowEnd()){
             _animNextRender = true;
             grid.classList.add('animate');
             setTimeout(function(){ grid.classList.remove('animate'); }, 900);
           }
-
           loadVotes();
-
           if (!isLowEnd()){
             requestAnimationFrame(function(){
               grid.classList.remove('fading-out');
@@ -1495,7 +1066,6 @@ body.is-touch .podium { background: #fff !important; }
           }
         });
     };
-
     if (isLowEnd()) doUpdate();
     else setTimeout(doUpdate, 250);
   }
@@ -1508,9 +1078,7 @@ body.is-touch .podium { background: #fff !important; }
     var playAnim = _animNextRender;
     _animNextRender = false;
     var lowEnd = isLowEnd();
-
     var readonly = isAllMonthsView();
-
     var oldVotes = {};
     for (var k in votes) { oldVotes[k] = votes[k]; }
 
@@ -1523,32 +1091,34 @@ body.is-touch .podium { background: #fff !important; }
 
       var card = document.createElement('div');
       card.className = 'card';
-      if (playAnim && !lowEnd) {
-        card.style.animationDelay = (i * 0.03) + 's';
-      }
+      if (playAnim && !lowEnd) card.style.animationDelay = (i * 0.03) + 's';
 
-      var imgEl;
+      // ✅ 用 .img-wrap 容器固定高度，避免图片加载时塌陷
+      var imgWrap = document.createElement('div');
+      imgWrap.className = 'img-wrap';
       var nameOnly = imgFilename(filename);
       if (nameOnly){
-        imgEl = createImg(filename,
+        var imgInner = createImg(filename,
           function(){},
           function(){
+            imgWrap.innerHTML = '';
             var ph = document.createElement('div');
             ph.className = 'no-img';
             ph.textContent = '暂无图片';
-            if (imgEl && imgEl.parentNode) imgEl.parentNode.replaceChild(ph, imgEl);
+            imgWrap.appendChild(ph);
           }
         );
-        if (imgEl){
-          (function(el, n){ el.onclick = function(){ openViewer(el, CDN_LIST[0] + '/' + n); }; })(imgEl, nameOnly);
+        if (imgInner){
+          (function(el, n){ el.onclick = function(){ openViewer(el, CDN_LIST[0] + '/' + n); }; })(imgInner, nameOnly);
+          imgWrap.appendChild(imgInner);
         }
+      } else {
+        var ph = document.createElement('div');
+        ph.className = 'no-img';
+        ph.textContent = '暂无图片';
+        imgWrap.appendChild(ph);
       }
-      if (!imgEl){
-        imgEl = document.createElement('div');
-        imgEl.className = 'no-img';
-        imgEl.textContent = '暂无图片';
-      }
-      card.appendChild(imgEl);
+      card.appendChild(imgWrap);
 
       var info = document.createElement('div');
       info.className = 'info';
@@ -1581,7 +1151,6 @@ body.is-touch .podium { background: #fff !important; }
 
         var btns = document.createElement('div');
         btns.className = 'btns';
-
         var addBtn = document.createElement('button');
         addBtn.className = 'add';
         addBtn.type = 'button';
@@ -1599,10 +1168,8 @@ body.is-touch .podium { background: #fff !important; }
         rmBtn.setAttribute('data-id', id);
         rmBtn.setAttribute('data-act', 'remove');
         btns.appendChild(rmBtn);
-
         info.appendChild(btns);
       }
-
       card.appendChild(info);
       g.appendChild(card);
     }
@@ -1612,11 +1179,7 @@ body.is-touch .podium { background: #fff !important; }
 
   function renderPodium(){
     var p = $('podium'), g = $('podium-grid');
-    if (isAllMonthsView()){
-      p.style.display = 'none';
-      return;
-    }
-
+    if (isAllMonthsView()){ p.style.display = 'none'; return; }
     var arr = [];
     for (var i = 0; i < dishes.length; i++){
       var d = dishes[i];
@@ -1640,24 +1203,28 @@ body.is-touch .podium { background: #fff !important; }
       badgeEl.textContent = badge;
       card.appendChild(badgeEl);
 
+      var imgWrap = document.createElement('div');
+      imgWrap.className = 'img-wrap';
       var nameOnly = imgFilename(filename);
       if (nameOnly){
         var pImg = createImg(filename,
           function(){},
           function(){
+            imgWrap.innerHTML = '';
             var ph = document.createElement('div');
             ph.className = 'no-img';
             ph.textContent = '暂无图片';
-            if (pImg && pImg.parentNode) pImg.parentNode.replaceChild(ph, pImg);
+            imgWrap.appendChild(ph);
           }
         );
-        if (pImg) card.appendChild(pImg);
+        if (pImg) imgWrap.appendChild(pImg);
       } else {
         var ph = document.createElement('div');
         ph.className = 'no-img';
         ph.textContent = '暂无图片';
-        card.appendChild(ph);
+        imgWrap.appendChild(ph);
       }
+      card.appendChild(imgWrap);
 
       var info = document.createElement('div');
       info.className = 'podium-info';
@@ -1679,17 +1246,14 @@ body.is-touch .podium { background: #fff !important; }
     var err = $('err');
     err.style.display = 'none';
     if (!phone){ err.textContent = '手机号不能为空'; err.style.display = 'block'; return; }
-
     var btn = $('btn-reg');
     btn.disabled = true;
     btn.textContent = '处理中...';
-
     fetch(API + '/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: name,
-        phone: phone,
+        name: name, phone: phone,
         device_id: (window.__DEVICE__ && window.__DEVICE__.id) || ''
       })
     })
@@ -1716,30 +1280,19 @@ body.is-touch .podium { background: #fff !important; }
   }
 
   function doVote(id, act, btn){
-    if (isAllMonthsView()){
-      alert('全部月份视图仅供浏览，请先选择具体月份投票');
-      return;
-    }
-    if (!isVoteOpen()){
-      alert('本次投票已结束！');
-      render();
-      return;
-    }
+    if (isAllMonthsView()){ alert('全部月份视图仅供浏览，请先选择具体月份投票'); return; }
+    if (!isVoteOpen()){ alert('本次投票已结束！'); render(); return; }
     if (!user){ showModal(); return; }
     if (act === 'add' && getTotalVoted() >= 3){ alert('您最多只能投3票，请先取消其他菜的投票'); return; }
-
     btn.disabled = true;
     var oldText = btn.textContent;
     btn.textContent = '...';
-
     fetch(API + '/api/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ dish_id: id, action: act, phone: user.phone })
     })
-    .then(function(r){
-      return r.json().then(function(j){ return { status: r.status, data: j }; });
-    })
+    .then(function(r){ return r.json().then(function(j){ return { status: r.status, data: j }; }); })
     .then(function(res){
       btn.disabled = false;
       btn.textContent = oldText;
@@ -1771,35 +1324,22 @@ body.is-touch .podium { background: #fff !important; }
 
   function openViewer(triggerEl, url){
     _lastTriggerEl = triggerEl;
-
     var from = triggerEl.getBoundingClientRect();
-
     viewer.classList.add('show');
     viewerImg.style.opacity = '0';
     viewerImg.style.transform = '';
     viewerImg.style.transition = 'none';
     viewerImg.src = url;
-
     var startFly = function(){
       var to = viewerImg.getBoundingClientRect();
-      if (to.width === 0 || to.height === 0){
-        viewerImg.style.opacity = '1';
-        return;
-      }
-
-      var cx1 = from.left + from.width / 2;
-      var cy1 = from.top + from.height / 2;
-      var cx2 = to.left + to.width / 2;
-      var cy2 = to.top + to.height / 2;
-      var dx = cx1 - cx2;
-      var dy = cy1 - cy2;
+      if (to.width === 0 || to.height === 0){ viewerImg.style.opacity = '1'; return; }
+      var cx1 = from.left + from.width / 2, cy1 = from.top + from.height / 2;
+      var cx2 = to.left + to.width / 2, cy2 = to.top + to.height / 2;
+      var dx = cx1 - cx2, dy = cy1 - cy2;
       var scale = from.width / to.width;
-
       viewerImg.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
       viewerImg.style.opacity = '0.6';
-
       void viewerImg.offsetWidth;
-
       requestAnimationFrame(function(){
         requestAnimationFrame(function(){
           viewerImg.style.transition = 'transform .45s cubic-bezier(.34,1.15,.64,1), opacity .25s ease';
@@ -1808,26 +1348,15 @@ body.is-touch .podium { background: #fff !important; }
         });
       });
     };
-
     if (viewerImg.complete && viewerImg.naturalWidth > 0){
-      requestAnimationFrame(function(){
-        requestAnimationFrame(startFly);
-      });
+      requestAnimationFrame(function(){ requestAnimationFrame(startFly); });
     } else {
-      viewerImg.onload = function(){
-        viewerImg.onload = null;
-        requestAnimationFrame(startFly);
-      };
-      viewerImg.onerror = function(){
-        viewerImg.onerror = null;
-        viewerImg.style.opacity = '1';
-      };
+      viewerImg.onload = function(){ viewerImg.onload = null; requestAnimationFrame(startFly); };
+      viewerImg.onerror = function(){ viewerImg.onerror = null; viewerImg.style.opacity = '1'; };
     }
   }
-
   function closeViewer(){
     var trigger = _lastTriggerEl;
-
     if (!trigger || !viewerImg.src || !viewerImg.offsetParent){
       viewer.classList.remove('show');
       setTimeout(function(){
@@ -1839,24 +1368,16 @@ body.is-touch .podium { background: #fff !important; }
       _lastTriggerEl = null;
       return;
     }
-
     var from = trigger.getBoundingClientRect();
     var to = viewerImg.getBoundingClientRect();
-
-    var cx1 = from.left + from.width / 2;
-    var cy1 = from.top + from.height / 2;
-    var cx2 = to.left + to.width / 2;
-    var cy2 = to.top + to.height / 2;
-    var dx = cx1 - cx2;
-    var dy = cy1 - cy2;
+    var cx1 = from.left + from.width / 2, cy1 = from.top + from.height / 2;
+    var cx2 = to.left + to.width / 2, cy2 = to.top + to.height / 2;
+    var dx = cx1 - cx2, dy = cy1 - cy2;
     var scale = from.width / to.width;
-
     viewerImg.style.transition = 'transform .35s cubic-bezier(.4,0,.6,1), opacity .3s ease';
     viewerImg.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
     viewerImg.style.opacity = '0.2';
-
     viewer.classList.remove('show');
-
     setTimeout(function(){
       viewerImg.src = '';
       viewerImg.style.transition = '';
@@ -1875,10 +1396,8 @@ body.is-touch .podium { background: #fff !important; }
   document.addEventListener('click', function(e){
     var t = e.target;
     if (!t || t.tagName.toLowerCase() !== 'button') return;
-    if (t.classList && t.classList.contains('dropdown-trigger')) return;
-    if (t.classList && t.classList.contains('fab')) return;
-    if (t.classList && t.classList.contains('switch-row')) return;
-    if (t.classList && t.classList.contains('admin-close')) return;
+    if (t.classList && (t.classList.contains('dropdown-trigger') || t.classList.contains('fab') ||
+        t.classList.contains('switch-row') || t.classList.contains('admin-close'))) return;
     var id = t.getAttribute('data-id');
     var act = t.getAttribute('data-act');
     if (id && act) doVote(id, act, t);
@@ -1888,25 +1407,21 @@ body.is-touch .podium { background: #fff !important; }
 
   function init(){
     setInterval(updateCountdown, 1000);
-
     fetch(API + '/api/dishes')
       .then(function(r){ return r.json(); })
       .then(function(all){
         allDishesCache = all || [];
-
         var monthSet = {};
         allDishesCache.forEach(function(d){
           var m = (d.date || '').slice(0, 7);
           if (m) monthSet[m] = true;
         });
         var months = Object.keys(monthSet).sort();
-
         return fetch(API + '/api/vote_status')
           .then(function(r){ return r.json(); })
           .then(function(s){
             monthDeadlines = s.deadlines || {};
             renderMonthSelect(months);
-
             return fetch(API + '/api/current_month')
               .then(function(r){ return r.json(); })
               .then(function(m){
@@ -1922,9 +1437,7 @@ body.is-touch .podium { background: #fff !important; }
               });
           });
       })
-      .then(function(target){
-        loadMonth(target);
-      })
+      .then(function(target){ loadMonth(target); })
       .catch(function(){
         $('month-tip').textContent = '📅 加载失败，请刷新';
         updateCountdown();
@@ -1945,7 +1458,6 @@ body.is-touch .podium { background: #fff !important; }
         if (!user) showModal();
       });
   }
-
   function refreshUserVotes(){
     if (!user) return;
     fetch(API + '/api/user_votes?phone=' + encodeURIComponent(user.phone))
@@ -1966,13 +1478,10 @@ body.is-touch .podium { background: #fff !important; }
       .then(function(r){ return r.json(); })
       .then(function(v){
         var changed = false;
-        for (var k in v){
-          if (v[k] !== votes[k]){ changed = true; break; }
-        }
+        for (var k in v){ if (v[k] !== votes[k]){ changed = true; break; } }
         if (changed){ votes = v; render(); }
       })
       .catch(function(){});
-
     fetch(API + '/api/vote_status')
       .then(function(r){ return r.json(); })
       .then(function(s){
