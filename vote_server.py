@@ -180,15 +180,24 @@ def record_device(phone, device_id, ua, ua_display='', ua_detail=None):
     win_name = ''
     if platform == 'Windows' and platform_version:
         try:
-            major = int(platform_version.split('.')[0])
+            parts = platform_version.split('.')
+            major = int(parts[0]) if parts else 0
+            minor = int(parts[1]) if len(parts) > 1 else 0
+
             if major >= 13:
+                # Win11
                 win_name = 'Windows 11'
-            elif major == 10:
+            elif major >= 1:
+                # Win10（含 7.0.0、10.0.0 等）
                 win_name = 'Windows 10'
-            elif major == 6:
-                win_name = 'Windows 8.1'
-            elif major == 1:
-                win_name = 'Windows 7'
+            elif major == 0:
+                # 0.x.0 → Win7/8/8.1
+                if minor == 1:
+                    win_name = 'Windows 7'
+                elif minor == 2:
+                    win_name = 'Windows 8'
+                elif minor == 3:
+                    win_name = 'Windows 8.1'
         except Exception:
             pass
 
