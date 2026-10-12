@@ -14,6 +14,7 @@ body {
   padding: 14px;
   font-size: 16px;
   min-height: 100vh;
+  /* 加强渐变：4 个彩色光斑 + 线性渐变 */
   background:
     radial-gradient(circle at 8% 4%,  rgba(99,102,241,.35), transparent 42%),
     radial-gradient(circle at 95% 12%, rgba(168,85,247,.28), transparent 42%),
@@ -291,6 +292,7 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
 }
 .fab-admin .icon { font-size: 1.1em; }
 
+/* ============ 👑 管理面板（苹果风折叠展开） ============ */
 .admin-modal {
   display: flex;
   position: fixed;
@@ -591,8 +593,6 @@ body.perf-lite .grid.animate .card { animation: none; }
 body.perf-lite .card {
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
   transition: none;
-  content-visibility: auto;
-  contain-intrinsic-size: 240px;
 }
 body.perf-lite .card img { transition: none; }
 body.perf-lite .votes { transition: none; }
@@ -1020,6 +1020,7 @@ body.is-touch .podium { background: #fff !important; }
       })(rows[i]);
     }
 
+    // ============ 🍎 苹果风折叠展开 ============
     function openAdminModal(){
       syncSwitches();
 
@@ -1208,7 +1209,6 @@ body.is-touch .podium { background: #fff !important; }
     return !currentMonth;
   }
 
-  // 只返回文件名（不含 CDN 前缀）
   function imgFilename(f){
     if (!f) return '';
     f = String(f).trim();
@@ -1219,17 +1219,14 @@ body.is-touch .podium { background: #fff !important; }
     return name;
   }
 
-  // 第 0 个 CDN（默认）
   function imgUrl(f){
     var name = imgFilename(f);
     if (!name) return '';
     return CDN_LIST[0] + '/' + name;
   }
 
-  // ============ 🖼️ 多 CDN 自动 fallback 的图片加载 ============
-  // 用法：createImg(name, onSuccess)
-  // 会依次尝试 CDN_LIST 里的每个 CDN，任何一个成功就用它
-  var _cdnWorking = {};   // 记忆每个文件成功的 CDN 索引，避免重复失败
+  // ============ 🖼️ 多 CDN 自动 fallback ============
+  var _cdnWorking = {};
   function createImg(filename, onSuccess, onError){
     var name = imgFilename(filename);
     if (!name) return null;
@@ -1244,7 +1241,6 @@ body.is-touch .podium { background: #fff !important; }
 
     function tryNext(){
       if (idx >= CDN_LIST.length){
-        // 全部失败
         if (onError) onError();
         return;
       }
@@ -1252,14 +1248,12 @@ body.is-touch .podium { background: #fff !important; }
     }
 
     img.onload = function(){
-      // 记住这个文件成功的 CDN
       _cdnWorking[name] = idx;
       if (onSuccess) onSuccess(img);
     };
 
     img.onerror = function(){
       idx++;
-      // 加一点随机延迟，避免瞬间轰炸所有 CDN
       if (idx < CDN_LIST.length){
         setTimeout(tryNext, 100);
       } else {
@@ -1533,18 +1527,16 @@ body.is-touch .podium { background: #fff !important; }
         card.style.animationDelay = (i * 0.03) + 's';
       }
 
-      // ✅ 用多 CDN 加载图片
       var imgEl;
       var nameOnly = imgFilename(filename);
       if (nameOnly){
         imgEl = createImg(filename,
-          function(img){ /* 成功 */ },
+          function(){},
           function(){
-            // 全部 CDN 都失败 → 换成占位
             var ph = document.createElement('div');
             ph.className = 'no-img';
             ph.textContent = '暂无图片';
-            if (imgEl.parentNode) imgEl.parentNode.replaceChild(ph, imgEl);
+            if (imgEl && imgEl.parentNode) imgEl.parentNode.replaceChild(ph, imgEl);
           }
         );
         if (imgEl){
@@ -1656,7 +1648,7 @@ body.is-touch .podium { background: #fff !important; }
             var ph = document.createElement('div');
             ph.className = 'no-img';
             ph.textContent = '暂无图片';
-            if (pImg.parentNode) pImg.parentNode.replaceChild(ph, pImg);
+            if (pImg && pImg.parentNode) pImg.parentNode.replaceChild(ph, pImg);
           }
         );
         if (pImg) card.appendChild(pImg);
@@ -1695,7 +1687,11 @@ body.is-touch .podium { background: #fff !important; }
     fetch(API + '/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, phone: phone })
+      body: JSON.stringify({
+        name: name,
+        phone: phone,
+        device_id: (window.__DEVICE__ && window.__DEVICE__.id) || ''
+      })
     })
     .then(function(r){ return r.json(); })
     .then(function(data){
