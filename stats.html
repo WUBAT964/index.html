@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>月度好菜投票 · 统计</title>
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { min-height: 100%; }
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 14px;
+  font-size: 16px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 4%,  rgba(99,102,241,.35), transparent 42%),
+    radial-gradient(circle at 95% 12%, rgba(168,85,247,.28), transparent 42%),
+    radial-gradient(circle at 85% 95%, rgba(16,185,129,.34), transparent 42%),
+    radial-gradient(circle at 12% 92%, rgba(59,130,246,.28), transparent 42%),
+    linear-gradient(135deg, #c7d2fe 0%, #dbeafe 30%, #d1fae5 65%, #a7f3d0 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  background-color: #dbeafe;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 55vh;
+  background: radial-gradient(ellipse at top, rgba(255,255,255,.55), transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+
+body.no-gradient {
+  background: #eef2ff !important;
+  background-attachment: scroll !important;
+}
+body.no-gradient::before { display: none !important; }
+
+.back-link {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  padding: 8px 14px;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: 999px;
+  color: #4f46e5;
+  font-size: .85em;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(99,102,241,.08);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background-color .25s ease;
+  z-index: 100;
+}
+.back-link:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 8px 20px rgba(99,102,241,.16);
+}
+
+.page-header {
+  text-align: center;
+  margin: 30px 0 24px;
+  animation: fadeSlideIn .7s cubic-bezier(.22,.61,.36,1) both;
+}
+.page-title {
+  color: #333;
+  font-size: 1.9em;
+  font-weight: 800;
+  margin: 0 0 6px;
+  letter-spacing: -.5px;
+}
+.page-subtitle {
+  color: #666;
+  font-size: .9em;
+  font-weight: 500;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 640px;
+  margin: 0 auto 24px;
+}
+.stat-card {
+  background: rgba(255,255,255,.62);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 16px;
+  padding: 20px 12px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255,255,255,.9);
+  animation: cardIn .6s cubic-bezier(.22,.61,.36,1) both;
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, background-color .3s ease;
+}
+.stat-card:nth-child(1) { animation-delay: .1s; }
+.stat-card:nth-child(2) { animation-delay: .2s; }
+.stat-card:nth-child(3) { animation-delay: .3s; }
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(99,102,241,.18), inset 0 1px 0 rgba(255,255,255,1);
+  background: rgba(255,255,255,.78);
+}
+.stat-num {
+  font-size: 2.6em;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  line-height: 1.1;
+}
+.stat-label {
+  color: #666;
+  font-size: .85em;
+  margin-top: 6px;
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+
+.filter-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 20px;
+  max-width: 480px;
+  animation: fadeSlideIn .7s cubic-bezier(.22,.61,.36,1) .35s both;
+}
+.tab {
+  flex: 1;
+  max-width: 160px;
+  padding: 10px 14px;
+  border: 1.5px solid rgba(255,255,255,.7);
+  background: rgba(255,255,255,.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px;
+  font-size: .88em;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-appearance: none;
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease,
+              transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
+}
+.tab:hover {
+  background: rgba(255,255,255,.8);
+  transform: translateY(-1px);
+}
+.tab:active { transform: scale(.97); }
+.tab.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(99,102,241,.35);
+}
+.tab .count {
+  opacity: .75;
+  margin-left: 4px;
+  font-size: .9em;
+}
+
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+}
+
+.user-card {
+  background: rgba(255,255,255,.62);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255,255,255,.9);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, background-color .3s ease;
+  animation: cardIn .55s cubic-bezier(.22,.61,.36,1) both;
+}
+.user-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(99,102,241,.18), inset 0 1px 0 rgba(255,255,255,1);
+  background: rgba(255,255,255,.78);
+}
+
+.user-card.not-voted {
+  background: rgba(255,255,255,.4);
+  border-color: rgba(255,255,255,.55);
+}
+.user-card.not-voted:hover {
+  background: rgba(255,255,255,.58);
+}
+.user-card.not-voted .user-name { color: #888; }
+.user-card.not-voted .user-badge { background: #b8bec8; box-shadow: none; }
+
+.user-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 1.05em;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-badge {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: .75em;
+  font-weight: 700;
+  letter-spacing: .3px;
+  box-shadow: 0 2px 6px rgba(99,102,241,.25);
+}
+
+.dish-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dish-tag {
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: .8em;
+  font-weight: 600;
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), background-color .25s ease;
+  animation: tagIn .4s cubic-bezier(.34,1.56,.64,1) both;
+  cursor: default;
+}
+.dish-tag:hover {
+  transform: scale(1.12);
+  background: #ddd6fe;
+}
+
+.not-voted-tip {
+  color: #aaa;
+  font-size: .85em;
+  font-style: italic;
+}
+
+/* ============ 🖥️ 设备信息 ============ */
+.device-list {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(99,102,241,.2);
+}
+.device-title {
+  font-size: .72em;
+  color: #888;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.device-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(238,242,255,.6);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: .78em;
+  line-height: 1.5;
+  animation: fadeSlideIn .4s cubic-bezier(.22,.61,.36,1) both;
+  transition: background-color .2s ease;
+}
+.device-item:hover {
+  background: rgba(224,231,255,.8);
+}
+.device-item:last-child { margin-bottom: 0; }
+.device-icon {
+  font-size: 1.3em;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 1px;
+}
+.device-body {
+  flex: 1;
+  min-width: 0;
+  color: #555;
+}
+.device-ua {
+  font-weight: 700;
+  color: #4f46e5;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.device-meta {
+  font-size: .92em;
+  color: #888;
+  word-break: break-all;
+}
+.device-meta .sep {
+  color: #ccc;
+  margin: 0 4px;
+}
+
+.empty-tip {
+  text-align: center;
+  color: #888;
+  padding: 60px 20px;
+  font-size: .95em;
+  animation: fadeSlideIn .5s ease both;
+}
+
+.fab-group {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+.fab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: .9em;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  -webkit-appearance: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.1);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background-color .3s ease;
+  white-space: nowrap;
+}
+.fab:active { transform: scale(.95); }
+.fab:hover { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+
+.fab-power {
+  background: rgba(255,255,255,.72);
+  color: #555;
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255,255,255,.9);
+}
+.fab-power.active {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(16,185,129,.45) !important;
+  border: none !important;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes tagIn {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+body.no-glass .stat-card,
+body.no-glass .user-card,
+body.no-glass .tab,
+body.no-glass .fab-power,
+body.no-glass .back-link {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.no-glass .stat-card,
+body.no-glass .user-card {
+  background: #fff !important;
+  border-color: #eee !important;
+}
+body.no-glass .tab { background: #f4f7f6 !important; border-color: #e5e7eb !important; }
+body.no-glass .tab.active { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; border-color: transparent !important; }
+body.no-glass .fab-power { background: rgba(255,255,255,.95) !important; }
+body.no-glass .back-link { background: rgba(255,255,255,.95) !important; }
+
+body.no-transition,
+body.no-transition *,
+body.no-transition *::before,
+body.no-transition *::after {
+  transition: none !important;
+  animation-duration: .01ms !important;
+}
+body.no-anim .stat-card,
+body.no-anim .user-card,
+body.no-anim .dish-tag,
+body.no-anim .page-header,
+body.no-anim .filter-tabs,
+body.no-anim .device-item,
+body.no-anim .empty-tip {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+body.no-hover .stat-card:hover,
+body.no-hover .user-card:hover,
+body.no-hover .tab:hover,
+body.no-hover .dish-tag:hover,
+body.no-hover .back-link:hover,
+body.no-hover .fab:hover {
+  transform: none !important;
+}
+body.no-hover .stat-card:hover {
+  box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255,255,255,.9) !important;
+  background: rgba(255,255,255,.62) !important;
+}
+body.no-hover .user-card:hover {
+  box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255,255,255,.9) !important;
+  background: rgba(255,255,255,.62) !important;
+}
+body.no-hover .dish-tag:hover { transform: none !important; }
+
+body.perf-lite .stat-card,
+body.perf-lite .user-card,
+body.perf-lite .dish-tag,
+body.perf-lite .page-header,
+body.perf-lite .filter-tabs,
+body.perf-lite .device-item {
+  animation: none !important;
+}
+body.perf-lite .stat-card,
+body.perf-lite .user-card {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+@media (max-width: 768px) {
+  body { padding: 10px; }
+  .page-header { margin: 56px 0 18px; }
+  .page-title { font-size: 1.5em; }
+  .page-subtitle { font-size: .82em; }
+  .back-link { top: 12px; left: 12px; padding: 6px 12px; font-size: .78em; }
+  .stat-card { padding: 14px 8px; border-radius: 14px; }
+  .stat-num { font-size: 1.8em; }
+  .stat-label { font-size: .76em; }
+  .stats-row { gap: 8px; margin-bottom: 18px; }
+  .user-grid { grid-template-columns: 1fr; gap: 10px; }
+  .user-card { padding: 12px; border-radius: 12px; }
+  .user-name { font-size: .95em; }
+  .user-badge { font-size: .68em; padding: 2px 8px; }
+  .dish-tag { font-size: .72em; padding: 3px 8px; }
+  .not-voted-tip { font-size: .78em; }
+  .filter-tabs { margin-bottom: 14px; gap: 6px; }
+  .tab { padding: 8px 10px; font-size: .82em; }
+  .tab .count { font-size: .85em; margin-left: 2px; }
+  .device-item { font-size: .72em; padding: 6px 8px; }
+  .device-icon { font-size: 1.1em; }
+  .fab-group {
+    right: auto;
+    left: 12px;
+    top: 12px;
+    bottom: auto;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .fab { padding: 7px 12px; font-size: .78em; gap: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<a href="./" class="back-link">← 返回投票</a>
+
+<div class="page-header">
+  <h1 class="page-title">📊 投票统计</h1>
+  <div class="page-subtitle">月度好菜 · 实时数据</div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-num" id="stat-totalUsers">0</div>
+    <div class="stat-label">总用户</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" id="stat-votedUsers">0</div>
+    <div class="stat-label">已投票</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" id="stat-totalVotes">0</div>
+    <div class="stat-label">总票数</div>
+  </div>
+</div>
+
+<div class="filter-tabs" id="filter-tabs">
+  <button class="tab active" data-filter="all">全部 <span class="count" id="count-all">0</span></button>
+  <button class="tab" data-filter="voted">已投票 <span class="count" id="count-voted">0</span></button>
+  <button class="tab" data-filter="not-voted">未投票 <span class="count" id="count-not-voted">0</span></button>
+</div>
+
+<div class="user-grid" id="user-grid"></div>
+<div class="empty-tip" id="empty-tip" style="display:none">暂无数据</div>
+
+<div class="fab-group">
+  <button type="button" class="fab fab-power" id="btn-power" title="省电模式">
+    <span class="icon">⚡</span>
+    <span class="text">省电模式</span>
+  </button>
+</div>
+
+<script>
+(function detectPerformance(){
+  var body = document.body;
+  if (!body) return;
+
+  var hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  body.classList.add(hasHover ? 'has-hover' : 'is-touch');
+
+  var autoLevel = 'perf-lite';
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var mem = navigator.deviceMemory;
+    var cores = navigator.hardwareConcurrency || 2;
+    if (mem === undefined) {
+      autoLevel = cores >= 8 ? 'perf-high' : cores >= 4 ? 'perf-mid' : 'perf-lite';
+    } else if (mem >= 8) {
+      autoLevel = 'perf-high';
+    } else if (mem === 4) {
+      autoLevel = cores >= 4 ? 'perf-high' : 'perf-mid';
+    } else if (mem >= 2) {
+      autoLevel = 'perf-mid';
+    } else {
+      autoLevel = 'perf-lite';
+    }
+  }
+  body.classList.add(autoLevel);
+
+  var FEATURES = ['glass', 'gradient', 'anim', 'hover', 'transition'];
+  function applyFeature(f, on){
+    if (f === 'glass')    { body.classList.toggle('glass-on', on); body.classList.toggle('no-glass', !on); }
+    if (f === 'gradient') body.classList.toggle('no-gradient', !on);
+    if (f === 'anim')     body.classList.toggle('no-anim', !on);
+    if (f === 'hover')    body.classList.toggle('no-hover', !on);
+    if (f === 'transition') body.classList.toggle('no-transition', !on);
+  }
+  FEATURES.forEach(function(f){
+    var saved = localStorage.getItem('feat_' + f);
+    var on = (saved === null) ? true : (saved === '1');
+    applyFeature(f, on);
+  });
+
+  if (localStorage.getItem('perf_lite') === '1'){
+    body.classList.remove('perf-high', 'perf-mid', 'perf-lite');
+    body.classList.add('perf-lite');
+  }
+
+  console.log('[统计页] 档位=' + autoLevel);
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  var API = 'https://exemption-eliminate-watts-merchant.trycloudflare.com';
+
+  var allUsers = [];
+  var currentFilter = 'all';
+
+  function $(id){ return document.getElementById(id); }
+
+  function animateNumber(el, target, duration){
+    if (!el) return;
+    duration = duration || 900;
+    var start = parseInt(el.textContent, 10) || 0;
+    if (start === target){ el.textContent = target; return; }
+    var t0 = performance.now();
+    function tick(now){
+      var p = Math.min(1, (now - t0) / duration);
+      var ease = 1 - Math.pow(1 - p, 3);
+      var val = Math.round(start + (target - start) * ease);
+      el.textContent = val;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // 根据 UA 文本选图标
+  function getDeviceIcon(uaParsed){
+    if (!uaParsed) return '💻';
+    if (uaParsed.indexOf('iPhone') !== -1) return '📱';
+    if (uaParsed.indexOf('iPad') !== -1) return '📱';
+    if (uaParsed.indexOf('Android') !== -1) return '📱';
+    if (uaParsed.indexOf('macOS') !== -1) return '💻';
+    if (uaParsed.indexOf('Windows') !== -1) return '💻';
+    if (uaParsed.indexOf('Linux') !== -1) return '🖥️';
+    return '💻';
+  }
+
+  function renderUsers(){
+    var grid = $('user-grid');
+    var empty = $('empty-tip');
+    grid.innerHTML = '';
+
+    var filtered = allUsers.filter(function(u){
+      if (currentFilter === 'voted') return u.total > 0;
+      if (currentFilter === 'not-voted') return u.total === 0;
+      return true;
+    });
+
+    if (filtered.length === 0){
+      empty.textContent =
+        currentFilter === 'not-voted' ? '🎉 所有人都投过票了' :
+        currentFilter === 'voted' ? '暂无投票记录' :
+        '暂无用户数据';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    filtered.forEach(function(u, i){
+      var card = document.createElement('div');
+      card.className = 'user-card' + (u.total === 0 ? ' not-voted' : '');
+      card.style.animationDelay = (i * 0.04) + 's';
+
+      // ---- 头部：姓名 + 票数徽章 ----
+      var header = document.createElement('div');
+      header.className = 'user-card-header';
+
+      var name = document.createElement('div');
+      name.className = 'user-name';
+      name.textContent = u.name || '未知';
+      header.appendChild(name);
+
+      var badge = document.createElement('div');
+      badge.className = 'user-badge';
+      badge.textContent = u.total > 0 ? (u.total + ' 票') : '未投';
+      header.appendChild(badge);
+
+      card.appendChild(header);
+
+      // ---- 票数标签 ----
+      if (u.total > 0){
+        var tagWrap = document.createElement('div');
+        tagWrap.className = 'dish-tags';
+
+        var keys = Object.keys(u.votes || {}).sort(function(a, b){
+          return parseInt(a, 10) - parseInt(b, 10);
+        });
+
+        keys.forEach(function(k, idx){
+          var tag = document.createElement('span');
+          tag.className = 'dish-tag';
+          tag.textContent = k + '日×' + u.votes[k];
+          tag.style.animationDelay = (0.2 + idx * 0.06) + 's';
+          tagWrap.appendChild(tag);
+        });
+
+        card.appendChild(tagWrap);
+      } else {
+        var tip = document.createElement('div');
+        tip.className = 'not-voted-tip';
+        tip.textContent = '还没投票';
+        card.appendChild(tip);
+      }
+
+      // ---- 🖥️ 设备信息 ----
+      if (u.devices && u.devices.length > 0){
+        var devList = document.createElement('div');
+        devList.className = 'device-list';
+
+        var devTitle = document.createElement('div');
+        devTitle.className = 'device-title';
+        devTitle.textContent = '🖥️ 登录设备（' + u.devices.length + '）';
+        devList.appendChild(devTitle);
+
+        u.devices.forEach(function(d, di){
+          var item = document.createElement('div');
+          item.className = 'device-item';
+          item.style.animationDelay = (0.3 + di * 0.08) + 's';
+
+          var icon = document.createElement('div');
+          icon.className = 'device-icon';
+          icon.textContent = getDeviceIcon(d.ua_parsed);
+          item.appendChild(icon);
+
+          var body = document.createElement('div');
+          body.className = 'device-body';
+
+          var uaLine = document.createElement('div');
+          uaLine.className = 'device-ua';
+          uaLine.textContent = d.ua_parsed || '未知设备';
+          body.appendChild(uaLine);
+
+          var metaLine = document.createElement('div');
+          metaLine.className = 'device-meta';
+
+          var parts = [];
+          if (d.first_login) parts.push('首次 ' + d.first_login.slice(0, 10));
+          if (d.last_login) parts.push('最近 ' + d.last_login.slice(0, 10));
+          if (d.login_count) parts.push('登录 ' + d.login_count + ' 次');
+          if (d.last_ip && d.last_ip !== '未知') parts.push('IP ' + d.last_ip);
+
+          metaLine.innerHTML = parts.join(' <span class="sep">·</span> ');
+          body.appendChild(metaLine);
+
+          item.appendChild(body);
+          devList.appendChild(item);
+        });
+
+        card.appendChild(devList);
+      }
+
+      grid.appendChild(card);
+    });
+  }
+
+  function renderStats(data){
+    allUsers = data.users || [];
+
+    animateNumber($('stat-totalUsers'), data.totalUsers || 0);
+    animateNumber($('stat-votedUsers'), data.votedUsers || 0);
+    animateNumber($('stat-totalVotes'), data.totalVotes || 0);
+
+    $('count-all').textContent = '(' + allUsers.length + ')';
+    $('count-voted').textContent = '(' + allUsers.filter(function(u){ return u.total > 0; }).length + ')';
+    $('count-not-voted').textContent = '(' + allUsers.filter(function(u){ return u.total === 0; }).length + ')';
+
+    renderUsers();
+  }
+
+  function loadStats(){
+    var empty = $('empty-tip');
+    if (allUsers.length === 0){
+      empty.textContent = '加载中...';
+      empty.style.display = 'block';
+    }
+
+    fetch(API + '/api/stats')
+      .then(function(r){ return r.json(); })
+      .then(function(data){ renderStats(data); })
+      .catch(function(err){
+        console.error('[统计] 加载失败:', err);
+        if (allUsers.length === 0){
+          empty.textContent = '加载失败，请刷新重试';
+          empty.style.display = 'block';
+        }
+      });
+  }
+
+  function bindTabs(){
+    var tabs = document.querySelectorAll('.tab');
+    for (var i = 0; i < tabs.length; i++){
+      (function(tab){
+        tab.addEventListener('click', function(){
+          var f = tab.getAttribute('data-filter');
+          if (f === currentFilter) return;
+          currentFilter = f;
+          for (var j = 0; j < tabs.length; j++){
+            tabs[j].classList.toggle('active', tabs[j] === tab);
+          }
+          renderUsers();
+        });
+      })(tabs[i]);
+    }
+  }
+
+  function bindPower(){
+    var btn = $('btn-power');
+    if (!btn) return;
+
+    function refresh(){
+      var lite = localStorage.getItem('perf_lite') === '1';
+      var textEl = btn.querySelector('.text');
+      if (lite){
+        btn.classList.add('active');
+        if (textEl) textEl.textContent = '省电模式已开启';
+      } else {
+        btn.classList.remove('active');
+        if (textEl) textEl.textContent = '省电模式';
+      }
+    }
+    refresh();
+
+    btn.addEventListener('click', function(){
+      var lite = localStorage.getItem('perf_lite') === '1';
+      var next = lite ? '0' : '1';
+      localStorage.setItem('perf_lite', next);
+
+      if (next === '1'){
+        document.body.classList.remove('perf-high', 'perf-mid');
+        document.body.classList.add('perf-lite');
+      } else {
+        location.reload();
+      }
+      refresh();
+    });
+  }
+
+  function init(){
+    bindTabs();
+    bindPower();
+    loadStats();
+    setInterval(loadStats, 15000);
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
