@@ -17,9 +17,7 @@ body {
     radial-gradient(circle at 85% 95%, rgba(16,185,129,.34), transparent 42%),
     radial-gradient(circle at 12% 92%, rgba(59,130,246,.28), transparent 42%),
     linear-gradient(135deg, #c7d2fe 0%, #dbeafe 30%, #d1fae5 65%, #a7f3d0 100%);
-  background-attachment: fixed;
-  background-size: cover;
-  background-color: #dbeafe;
+  background-attachment: fixed; background-size: cover; background-color: #dbeafe;
 }
 body::before {
   content: ''; position: fixed; top: 0; left: 0; right: 0; height: 55vh;
@@ -113,7 +111,6 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
 }
 .grid.animate .card { animation: cardIn .4s cubic-bezier(.22,.61,.36,1) both; }
 
-/* ✅ 图片外层容器，固定高度 */
 .img-wrap {
   width: 100%; height: 200px; background: #eee; overflow: hidden;
   position: relative; flex-shrink: 0;
@@ -127,7 +124,6 @@ h1 { text-align: center; color: #333; font-size: 1.8em; margin: 12px 0; }
   display: flex; align-items: center; justify-content: center;
   color: #999; font-size: 1em;
 }
-/* 兼容旧式 img 直接挂 .card 下 */
 .card > img, .card > .no-img {
   width: 100%; height: 200px; object-fit: cover; display: block;
   background: #eee; cursor: pointer; transition: transform .35s ease;
@@ -266,7 +262,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   box-shadow: 0 4px 16px rgba(99,102,241,.45) !important;
 }
 
-/* 管理面板 */
 .admin-modal {
   display: flex; position: fixed; z-index: 10001; inset: 0;
   background: rgba(0,0,0,.5); justify-content: center; align-items: center;
@@ -327,7 +322,6 @@ button:disabled { background: #ccc; cursor: not-allowed; opacity: .7; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* 特性开关 */
 body.has-hover .card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
 body.has-hover .card img:hover { transform: scale(1.03); }
 body.has-hover .dropdown-item:hover { background: #eef2ff; color: #4f46e5; }
@@ -484,10 +478,7 @@ body.perf-lite .fab-admin, body.is-touch .fab-admin {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
-  }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 </style>
 </head>
@@ -598,7 +589,7 @@ body.perf-lite .fab-admin, body.is-touch .fab-admin {
 </div>
 
 <script>
-// ============ 🎯 设备识别 + 管理员 + 特效开关 ============
+// ============ 🎯 设备识别 + 管理员 + 特效开关 + Client Hints ============
 (function detectPerformance(){
   var body = document.body;
   if (!body) return;
@@ -677,8 +668,36 @@ body.perf-lite .fab-admin, body.is-touch .fab-admin {
   var featState = loadFeatureState();
   FEATURES.forEach(function(f){ applyFeature(f, featState[f]); });
 
+  window.__DEVICE__ = { id: DEVICE_ID, isAdmin: isAdmin, autoLevel: autoLevel, detail: null, uaDisplay: '' };
+
+  // ✅ Client Hints：获取详细设备信息
+  if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues){
+    navigator.userAgentData.getHighEntropyValues([
+      'platform', 'platformVersion', 'architecture',
+      'model', 'uaFullVersion', 'fullVersionList'
+    ]).then(function(d){
+      window.__DEVICE__.detail = d;
+      var platform = d.platform || '';
+      var pv = d.platformVersion || '';
+      var browser = '';
+      if (d.fullVersionList && d.fullVersionList.length){
+        for (var i = 0; i < d.fullVersionList.length; i++){
+          var b = d.fullVersionList[i];
+          if (b.brand !== 'Chromium' && b.brand !== 'Not_A Brand' && b.brand.indexOf('Not') !== 0){
+            browser = b.brand + ' ' + b.version.split('.')[0];
+            break;
+          }
+        }
+        if (!browser){
+          browser = d.fullVersionList[0].brand + ' ' + d.fullVersionList[0].version.split('.')[0];
+        }
+      }
+      window.__DEVICE__.uaDisplay = platform + ' ' + pv + ' · ' + browser;
+      console.log('[设备详细]', window.__DEVICE__.uaDisplay, d);
+    }).catch(function(){});
+  }
+
   console.log('[设备] id=' + DEVICE_ID + ' admin=' + isAdmin + ' 档位=' + autoLevel);
-  window.__DEVICE__ = { id: DEVICE_ID, isAdmin: isAdmin, autoLevel: autoLevel };
 
   var btnPower = document.getElementById('btn-power');
   function refreshPowerBtn(){
@@ -739,10 +758,8 @@ body.perf-lite .fab-admin, body.is-touch .fab-admin {
       requestAnimationFrame(function(){
         var to = adminBox.getBoundingClientRect();
         if (to.width === 0 || to.height === 0) return;
-        var cx1 = from.left + from.width / 2;
-        var cy1 = from.top + from.height / 2;
-        var cx2 = to.left + to.width / 2;
-        var cy2 = to.top + to.height / 2;
+        var cx1 = from.left + from.width / 2, cy1 = from.top + from.height / 2;
+        var cx2 = to.left + to.width / 2, cy2 = to.top + to.height / 2;
         var dx = cx1 - cx2, dy = cy1 - cy2;
         var scale = Math.max(0.08, from.width / to.width);
         adminBox.style.transition = 'none';
@@ -867,15 +884,12 @@ body.perf-lite .fab-admin, body.is-touch .fab-admin {
     return name;
   }
 
-  // 多 CDN 自动 fallback
   var _cdnWorking = {};
   function createImg(filename, onSuccess, onError){
     var name = imgFilename(filename);
     if (!name) return null;
     var img = document.createElement('img');
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.alt = '';
+    img.loading = 'lazy'; img.decoding = 'async'; img.alt = '';
     var startIdx = _cdnWorking[name] || 0;
     var idx = startIdx;
     function tryNext(){
@@ -1093,7 +1107,6 @@ body.perf-lite .fab-admin, body.is-touch .fab-admin {
       card.className = 'card';
       if (playAnim && !lowEnd) card.style.animationDelay = (i * 0.03) + 's';
 
-      // ✅ 用 .img-wrap 容器固定高度，避免图片加载时塌陷
       var imgWrap = document.createElement('div');
       imgWrap.className = 'img-wrap';
       var nameOnly = imgFilename(filename);
@@ -1253,8 +1266,11 @@ body.perf-lite .fab-admin, body.is-touch .fab-admin {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: name, phone: phone,
-        device_id: (window.__DEVICE__ && window.__DEVICE__.id) || ''
+        name: name,
+        phone: phone,
+        device_id: (window.__DEVICE__ && window.__DEVICE__.id) || '',
+        ua_display: (window.__DEVICE__ && window.__DEVICE__.uaDisplay) || '',
+        ua_detail: (window.__DEVICE__ && window.__DEVICE__.detail) || null
       })
     })
     .then(function(r){ return r.json(); })
