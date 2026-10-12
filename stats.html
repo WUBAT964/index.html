@@ -70,19 +70,16 @@ body.no-gradient::before { display: none !important; }
 }
 .stat-label { color: #666; font-size: .85em; margin-top: 6px; font-weight: 600; letter-spacing: .5px; }
 
-/* 筛选 tab */
 .filter-tabs {
   display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;
   margin: 0 auto 12px; max-width: 640px;
   animation: fadeSlideIn .7s cubic-bezier(.22,.61,.36,1) .35s both;
 }
 .tab {
-  padding: 9px 16px;
-  border: 1.5px solid rgba(255,255,255,.7);
+  padding: 9px 16px; border: 1.5px solid rgba(255,255,255,.7);
   background: rgba(255,255,255,.55);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border-radius: 999px;
-  font-size: .85em; font-weight: 600; color: #555;
+  border-radius: 999px; font-size: .85em; font-weight: 600; color: #555;
   cursor: pointer; font-family: inherit; -webkit-appearance: none;
   transition: background-color .3s ease, color .3s ease, border-color .3s ease,
               transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
@@ -96,7 +93,6 @@ body.no-gradient::before { display: none !important; }
 }
 .tab .count { opacity: .75; margin-left: 4px; font-size: .9em; }
 
-/* 月份切换栏 */
 .month-bar {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   margin: 0 auto 20px; max-width: 640px;
@@ -105,16 +101,12 @@ body.no-gradient::before { display: none !important; }
 .month-bar label { color: #555; font-weight: 600; font-size: .9em; }
 .month-select {
   padding: 8px 32px 8px 14px;
-  border: 1.5px solid rgba(255,255,255,.7);
-  background: rgba(255,255,255,.7);
+  border: 1.5px solid rgba(255,255,255,.7); background: rgba(255,255,255,.7);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border-radius: 10px;
-  font-size: .9em; font-weight: 600; color: #333;
-  font-family: inherit; cursor: pointer;
-  -webkit-appearance: none;
+  border-radius: 10px; font-size: .9em; font-weight: 600; color: #333;
+  font-family: inherit; cursor: pointer; -webkit-appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 10px center;
-  transition: border-color .2s ease;
 }
 .month-select:focus { outline: none; border-color: #6366f1; }
 
@@ -130,8 +122,18 @@ body.no-gradient::before { display: none !important; }
   box-shadow: 0 2px 10px rgba(99,102,241,.06), inset 0 1px 0 rgba(255,255,255,.9);
   transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, background-color .3s ease;
   animation: cardIn .55s cubic-bezier(.22,.61,.36,1) both;
+  cursor: pointer;
+  position: relative;
 }
 .user-card:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(99,102,241,.18); background: rgba(255,255,255,.78); }
+.user-card::after {
+  content: '👆 点击查看完整记录';
+  position: absolute; bottom: 6px; right: 12px;
+  font-size: .65em; color: #aaa;
+  opacity: 0; transition: opacity .3s ease;
+  pointer-events: none;
+}
+.user-card:hover::after { opacity: 1; }
 .user-card.not-voted { background: rgba(255,255,255,.4); border-color: rgba(255,255,255,.55); }
 .user-card.not-voted .user-name { color: #888; }
 .user-card.not-voted .user-badge { background: #b8bec8; box-shadow: none; }
@@ -154,14 +156,9 @@ body.no-gradient::before { display: none !important; }
   animation: tagIn .4s cubic-bezier(.34,1.56,.64,1) both;
 }
 .dish-tag:hover { transform: scale(1.12); background: #ddd6fe; }
-
 .not-voted-tip { color: #aaa; font-size: .85em; font-style: italic; }
 
-/* 投票记录 */
-.vote-log-list {
-  margin-top: 12px; padding-top: 12px;
-  border-top: 1px dashed rgba(99,102,241,.2);
-}
+.vote-log-list { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(99,102,241,.2); }
 .vote-log-title {
   font-size: .72em; color: #888; font-weight: 700;
   text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
@@ -183,7 +180,6 @@ body.no-gradient::before { display: none !important; }
 .vote-log-dish.remove { background: #fee2e2; color: #dc2626; }
 .vote-log-time { color: #888; font-size: .92em; margin-left: auto; font-family: "SF Mono", Menlo, Consolas, monospace; }
 
-/* 设备列表 */
 .device-list { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(99,102,241,.2); }
 .device-title {
   font-size: .72em; color: #888; font-weight: 700;
@@ -195,10 +191,8 @@ body.no-gradient::before { display: none !important; }
   border-radius: 8px; margin-bottom: 6px;
   font-size: .78em; line-height: 1.5;
   animation: fadeSlideIn .4s cubic-bezier(.22,.61,.36,1) both;
-  transition: background-color .2s ease;
 }
 .device-item:last-child { margin-bottom: 0; }
-.device-item:hover { background: rgba(224,231,255,.8); }
 .device-icon { font-size: 1.3em; flex-shrink: 0; line-height: 1; margin-top: 1px; }
 .device-body { flex: 1; min-width: 0; color: #555; }
 .device-ua { font-weight: 700; color: #4f46e5; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -206,6 +200,141 @@ body.no-gradient::before { display: none !important; }
 .device-meta .sep { color: #ccc; margin: 0 4px; }
 
 .empty-tip { text-align: center; color: #888; padding: 60px 20px; font-size: .95em; animation: fadeSlideIn .5s ease both; }
+
+/* ============ 🔍 详情弹窗（FLIP 动画） ============ */
+.detail-modal {
+  display: flex; position: fixed; z-index: 10001; inset: 0;
+  background: rgba(0,0,0,.5); justify-content: center; align-items: center;
+  padding: 16px; visibility: hidden; opacity: 0; pointer-events: none;
+  transition: opacity .35s ease, visibility 0s .4s;
+}
+.detail-modal.show {
+  visibility: visible; opacity: 1; pointer-events: auto;
+  transition: opacity .35s ease, visibility 0s 0s;
+}
+.detail-box {
+  background: #fff; border-radius: 20px; padding: 22px;
+  width: 100%; max-width: 520px; max-height: 85vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.5) inset;
+  will-change: transform, opacity, border-radius;
+  transform-origin: center center;
+}
+.detail-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px; flex-shrink: 0;
+}
+.detail-title-wrap { flex: 1; min-width: 0; }
+.detail-name {
+  font-size: 1.35em; font-weight: 800; color: #333;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.detail-sub {
+  font-size: .82em; color: #888; margin-top: 2px;
+}
+.detail-close {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border: none; background: #f3f4f6; border-radius: 50%;
+  color: #666; font-size: 1.1em; font-weight: bold;
+  cursor: pointer; -webkit-appearance: none;
+  transition: background-color .2s ease, transform .25s ease;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.detail-close:hover { background: #e5e7eb; transform: rotate(90deg); }
+
+.detail-body {
+  overflow-y: auto; flex: 1; min-height: 0;
+  padding-right: 4px;
+  margin-right: -4px;
+}
+.detail-section {
+  margin-bottom: 18px;
+}
+.detail-section-title {
+  font-size: .78em; font-weight: 700; color: #888;
+  text-transform: uppercase; letter-spacing: .5px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.detail-summary {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 12px; background: #f9fafb;
+  border-radius: 12px;
+}
+.summary-item {
+  flex: 1; min-width: 80px; text-align: center;
+}
+.summary-num {
+  font-size: 1.4em; font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+.summary-label { font-size: .72em; color: #888; margin-top: 2px; }
+
+/* 时间线 */
+.timeline-list { position: relative; }
+.timeline-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  background: rgba(249,250,251,.8);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  border-left: 3px solid #6366f1;
+  transition: background-color .2s ease;
+}
+.timeline-item:hover { background: #eef2ff; }
+.timeline-item.remove {
+  border-left-color: #ef4444;
+  background: rgba(254,242,242,.6);
+}
+.timeline-item.remove:hover { background: #fee2e2; }
+
+.timeline-icon {
+  flex-shrink: 0; font-size: 1.1em; line-height: 1.2;
+}
+.timeline-content { flex: 1; min-width: 0; }
+.timeline-action {
+  font-size: .92em; font-weight: 600; color: #333;
+  margin-bottom: 3px;
+}
+.timeline-action .dish-name {
+  color: #4f46e5;
+  font-weight: 700;
+}
+.timeline-item.remove .timeline-action .dish-name { color: #dc2626; }
+.timeline-action .dish-id {
+  color: #aaa; font-size: .85em; margin-left: 4px;
+}
+.timeline-time {
+  font-size: .78em; color: #888;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+.timeline-month {
+  display: inline-block;
+  background: #eef2ff; color: #6366f1;
+  padding: 1px 8px; border-radius: 999px;
+  font-size: .7em; font-weight: 700;
+  margin-left: 6px;
+}
+
+.detail-device-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; background: rgba(238,242,255,.6);
+  border-radius: 10px; margin-bottom: 8px;
+  font-size: .85em; line-height: 1.5;
+}
+.detail-device-item:last-child { margin-bottom: 0; }
+.detail-device-item .device-icon { font-size: 1.4em; }
+
+.detail-empty {
+  text-align: center; color: #aaa; padding: 30px 20px;
+  font-size: .9em; font-style: italic;
+}
 
 .fab-group {
   position: fixed; right: 18px; bottom: 18px; z-index: 9000;
@@ -254,18 +383,17 @@ body.no-transition, body.no-transition *, body.no-transition *::before, body.no-
 }
 body.no-anim .stat-card, body.no-anim .user-card, body.no-anim .dish-tag,
 body.no-anim .page-header, body.no-anim .filter-tabs, body.no-anim .device-item,
-body.no-anim .vote-log-item, body.no-anim .month-bar, body.no-anim .empty-tip {
+body.no-anim .vote-log-item, body.no-anim .month-bar, body.no-anim .empty-tip,
+body.no-anim .timeline-item {
   animation: none !important; opacity: 1 !important; transform: none !important;
 }
-
 body.no-hover .stat-card:hover, body.no-hover .user-card:hover, body.no-hover .tab:hover,
 body.no-hover .dish-tag:hover, body.no-hover .back-link:hover, body.no-hover .fab:hover {
   transform: none !important;
 }
-
 body.perf-lite .stat-card, body.perf-lite .user-card, body.perf-lite .dish-tag,
 body.perf-lite .page-header, body.perf-lite .filter-tabs, body.perf-lite .device-item,
-body.perf-lite .vote-log-item, body.perf-lite .month-bar {
+body.perf-lite .vote-log-item, body.perf-lite .month-bar, body.perf-lite .timeline-item {
   animation: none !important;
 }
 body.perf-lite .stat-card, body.perf-lite .user-card {
@@ -284,6 +412,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   .stats-row { gap: 8px; margin-bottom: 16px; }
   .user-grid { grid-template-columns: 1fr; gap: 10px; }
   .user-card { padding: 12px; border-radius: 12px; }
+  .user-card::after { display: none; }
   .user-name { font-size: .95em; }
   .user-badge { font-size: .68em; padding: 2px 8px; }
   .dish-tag { font-size: .72em; padding: 3px 8px; }
@@ -294,6 +423,11 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   .vote-log-item { font-size: .72em; padding: 5px 8px; }
   .fab-group { right: auto; left: 12px; top: 12px; bottom: auto; flex-direction: row; align-items: flex-start; }
   .fab { padding: 7px 12px; font-size: .78em; gap: 4px; }
+  .detail-box { max-width: 100%; max-height: 90vh; padding: 18px; border-radius: 16px; }
+  .detail-name { font-size: 1.15em; }
+  .timeline-item { padding: 8px 10px; }
+  .timeline-action { font-size: .85em; }
+  .timeline-time { font-size: .72em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -340,6 +474,20 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 
 <div class="user-grid" id="user-grid"></div>
 <div class="empty-tip" id="empty-tip" style="display:none">暂无数据</div>
+
+<!-- 详情弹窗 -->
+<div class="detail-modal" id="detail-modal">
+  <div class="detail-box" id="detail-box">
+    <div class="detail-header">
+      <div class="detail-title-wrap">
+        <div class="detail-name" id="detail-name">—</div>
+        <div class="detail-sub" id="detail-sub">—</div>
+      </div>
+      <button type="button" class="detail-close" id="detail-close">✕</button>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+</div>
 
 <div class="fab-group">
   <button type="button" class="fab fab-power" id="btn-power" title="省电模式">
@@ -397,7 +545,8 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 
   var allUsers = [];
   var currentFilter = 'all';
-  var currentMonth = '';   // 空 = 全部月份
+  var currentMonth = '';
+  var dishNames = {};   // { "1": "炆行鸡", ... }
 
   function $(id){ return document.getElementById(id); }
 
@@ -428,16 +577,215 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     return '💻';
   }
 
-  // 时间戳 → 简短显示
   function fmtShortTime(s){
     if (!s) return '?';
-    // "2026-10-12 20:15:33" → "10-12 20:15"
     var m = String(s).match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
     if (m) return m[2] + '-' + m[3] + ' ' + m[4] + ':' + m[5];
     return s;
   }
 
-  // 从所有用户的 vote_log 里提取月份
+  function fmtFullTime(s){
+    if (!s) return '?';
+    return s;
+  }
+
+  function dishName(did){
+    return dishNames[did] || ('菜#' + did);
+  }
+
+  // ============ 📋 详情弹窗 ============
+  var detailModal = null;
+  var detailBox = null;
+  var _detailOpenedFrom = null;
+
+  function openDetail(user, cardEl){
+    _detailOpenedFrom = cardEl;
+
+    // 填充标题
+    $('detail-name').textContent = user.name || '未知';
+    var totalDays = 0;
+    var totalVotes = 0;
+    var totalCancels = 0;
+    (user.vote_log || []).forEach(function(v){
+      if (v.action === 'add') totalVotes++;
+      else totalCancels++;
+    });
+    $('detail-sub').textContent =
+      '总票数：' + (user.total || 0) + ' · 投票 ' + totalVotes + ' 次 · 取消 ' + totalCancels + ' 次';
+
+    // 填充 body
+    var body = $('detail-body');
+    body.innerHTML = '';
+
+    // 1) 概要
+    var summary = document.createElement('div');
+    summary.className = 'detail-section';
+    summary.innerHTML =
+      '<div class="detail-summary">' +
+        '<div class="summary-item"><div class="summary-num">' + (user.total || 0) + '</div><div class="summary-label">当前票数</div></div>' +
+        '<div class="summary-item"><div class="summary-num">' + totalVotes + '</div><div class="summary-label">投票次数</div></div>' +
+        '<div class="summary-item"><div class="summary-num">' + totalCancels + '</div><div class="summary-label">取消次数</div></div>' +
+        '<div class="summary-item"><div class="summary-num">' + ((user.devices || []).length) + '</div><div class="summary-label">登录设备</div></div>' +
+      '</div>';
+    body.appendChild(summary);
+
+    // 2) 投票时间线
+    var logSection = document.createElement('div');
+    logSection.className = 'detail-section';
+    var logs = (user.vote_log || []).slice().reverse(); // 最新在前
+    logSection.innerHTML =
+      '<div class="detail-section-title">🗳️ 投票时间线（' + logs.length + ' 条，最新在前）</div>';
+
+    if (logs.length === 0){
+      var empty = document.createElement('div');
+      empty.className = 'detail-empty';
+      empty.textContent = '暂无投票记录（旧版数据不记录时间）';
+      logSection.appendChild(empty);
+    } else {
+      var list = document.createElement('div');
+      list.className = 'timeline-list';
+      logs.forEach(function(v, idx){
+        var item = document.createElement('div');
+        item.className = 'timeline-item' + (v.action === 'remove' ? ' remove' : '');
+        item.style.animationDelay = (idx * 0.03) + 's';
+
+        var icon = document.createElement('div');
+        icon.className = 'timeline-icon';
+        icon.textContent = v.action === 'add' ? '➕' : '➖';
+        item.appendChild(icon);
+
+        var content = document.createElement('div');
+        content.className = 'timeline-content';
+
+        var actionLine = document.createElement('div');
+        actionLine.className = 'timeline-action';
+        var verb = v.action === 'add' ? '投票' : '取消';
+        actionLine.innerHTML =
+          verb + ' <span class="dish-name">' + dishName(v.dish) + '</span>' +
+          '<span class="dish-id">#' + v.dish + '</span>' +
+          (v.month ? '<span class="timeline-month">' + v.month + '</span>' : '');
+        content.appendChild(actionLine);
+
+        var timeLine = document.createElement('div');
+        timeLine.className = 'timeline-time';
+        timeLine.textContent = '🕐 ' + fmtFullTime(v.time);
+        content.appendChild(timeLine);
+
+        item.appendChild(content);
+        list.appendChild(item);
+      });
+      logSection.appendChild(list);
+    }
+    body.appendChild(logSection);
+
+    // 3) 设备
+    if (user.devices && user.devices.length > 0){
+      var devSection = document.createElement('div');
+      devSection.className = 'detail-section';
+      devSection.innerHTML =
+        '<div class="detail-section-title">🖥️ 登录设备（' + user.devices.length + '）</div>';
+
+      user.devices.forEach(function(d){
+        var item = document.createElement('div');
+        item.className = 'detail-device-item';
+
+        var icon = document.createElement('div');
+        icon.className = 'device-icon';
+        icon.textContent = getDeviceIcon(d.ua_parsed);
+        item.appendChild(icon);
+
+        var dbody = document.createElement('div');
+        dbody.className = 'device-body';
+        dbody.innerHTML =
+          '<div class="device-ua">' + (d.ua_parsed || '未知设备') + '</div>' +
+          '<div class="device-meta">' +
+            (d.first_login ? '首次 ' + d.first_login : '') +
+            (d.last_login ? ' <span class="sep">·</span> 最近 ' + d.last_login : '') +
+            (d.login_count ? ' <span class="sep">·</span> 登录 ' + d.login_count + ' 次' : '') +
+            (d.last_ip && d.last_ip !== '未知' ? ' <span class="sep">·</span> IP ' + d.last_ip : '') +
+          '</div>';
+        item.appendChild(dbody);
+
+        devSection.appendChild(item);
+      });
+      body.appendChild(devSection);
+    }
+
+    // 打开：FLIP 动画
+    detailModal.classList.add('show');
+
+    requestAnimationFrame(function(){
+      var from = cardEl.getBoundingClientRect();
+      var to = detailBox.getBoundingClientRect();
+      if (to.width === 0 || to.height === 0) return;
+
+      var cx1 = from.left + from.width / 2;
+      var cy1 = from.top + from.height / 2;
+      var cx2 = to.left + to.width / 2;
+      var cy2 = to.top + to.height / 2;
+      var dx = cx1 - cx2;
+      var dy = cy1 - cy2;
+      var scale = Math.max(0.08, from.width / to.width);
+
+      detailBox.style.transition = 'none';
+      detailBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+      detailBox.style.borderRadius = '16px';
+      detailBox.style.opacity = '0';
+
+      void detailBox.offsetWidth;
+
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          detailBox.style.transition =
+            'transform .5s cubic-bezier(.32, .72, 0, 1), ' +
+            'border-radius .5s cubic-bezier(.32, .72, 0, 1), ' +
+            'opacity .3s ease';
+          detailBox.style.transform = 'translate(0, 0) scale(1)';
+          detailBox.style.borderRadius = '20px';
+          detailBox.style.opacity = '1';
+        });
+      });
+    });
+  }
+
+  function closeDetail(){
+    var card = _detailOpenedFrom;
+    if (!card){
+      detailModal.classList.remove('show');
+      return;
+    }
+
+    var from = card.getBoundingClientRect();
+    var to = detailBox.getBoundingClientRect();
+
+    var cx1 = from.left + from.width / 2;
+    var cy1 = from.top + from.height / 2;
+    var cx2 = to.left + to.width / 2;
+    var cy2 = to.top + to.height / 2;
+    var dx = cx1 - cx2;
+    var dy = cy1 - cy2;
+    var scale = Math.max(0.08, from.width / to.width);
+
+    detailBox.style.transition =
+      'transform .42s cubic-bezier(.4, 0, .2, 1), ' +
+      'border-radius .42s cubic-bezier(.4, 0, .2, 1), ' +
+      'opacity .3s ease';
+    detailBox.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+    detailBox.style.borderRadius = '16px';
+    detailBox.style.opacity = '0';
+
+    detailModal.classList.remove('show');
+
+    setTimeout(function(){
+      detailBox.style.transition = '';
+      detailBox.style.transform = '';
+      detailBox.style.borderRadius = '';
+      detailBox.style.opacity = '';
+      _detailOpenedFrom = null;
+    }, 450);
+  }
+
+  // ============ 渲染 ============
   function collectMonths(){
     var set = {};
     allUsers.forEach(function(u){
@@ -459,7 +807,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       opt.textContent = m;
       sel.appendChild(opt);
     });
-    // 保留原选中
     if (oldVal && months.indexOf(oldVal) !== -1){
       sel.value = oldVal;
     } else {
@@ -474,10 +821,8 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     grid.innerHTML = '';
 
     var filtered = allUsers.filter(function(u){
-      // tab 过滤
       if (currentFilter === 'voted' && u.total === 0) return false;
       if (currentFilter === 'not-voted' && u.total > 0) return false;
-      // 月份过滤
       if (currentMonth){
         var hasMonth = (u.vote_log || []).some(function(v){ return v.month === currentMonth; });
         if (!hasMonth) return false;
@@ -496,7 +841,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     empty.style.display = 'none';
 
     filtered.forEach(function(u, i){
-      // 若按月份过滤，只显示该月的 vote_log
       var logs = u.vote_log || [];
       if (currentMonth){
         logs = logs.filter(function(v){ return v.month === currentMonth; });
@@ -506,7 +850,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       card.className = 'user-card' + (u.total === 0 ? ' not-voted' : '');
       card.style.animationDelay = (i * 0.04) + 's';
 
-      // ---- 头部 ----
+      // 头部
       var header = document.createElement('div');
       header.className = 'user-card-header';
       var name = document.createElement('div');
@@ -517,8 +861,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       badge.className = 'user-badge';
       var shownTotal = u.total;
       if (currentMonth){
-        shownTotal = (u.votes ? Object.keys(u.votes).length : 0) || 0;
-        // 更准确：用当前月份对应的投票计数（简化显示）
         shownTotal = logs.filter(function(v){ return v.action === 'add'; }).length -
                      logs.filter(function(v){ return v.action === 'remove'; }).length;
         if (shownTotal < 0) shownTotal = 0;
@@ -527,7 +869,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
       header.appendChild(badge);
       card.appendChild(header);
 
-      // ---- 票数标签（按月份过滤） ----
+      // 票数标签
       if (u.total > 0){
         var tagWrap = document.createElement('div');
         tagWrap.className = 'dish-tags';
@@ -535,7 +877,6 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
         var keys = Object.keys(votedDishes).sort(function(a, b){
           return parseInt(a, 10) - parseInt(b, 10);
         });
-        // 若选了月份，只保留该月投过的菜
         if (currentMonth){
           keys = keys.filter(function(k){
             return logs.some(function(v){ return v.dish === k && v.action === 'add'; });
@@ -556,15 +897,13 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
         card.appendChild(tip);
       }
 
-      // ---- 投票记录（最近 5 条） ----
+      // 最近 5 条
       if (logs.length > 0){
         var logList = document.createElement('div');
         logList.className = 'vote-log-list';
         var logTitle = document.createElement('div');
-        logTitle.className = 'vote-title';
-        var logTitle = document.createElement('div');
         logTitle.className = 'vote-log-title';
-        logTitle.textContent = '🗳️ 投票记录（最近 ' + Math.min(5, logs.length) + ' 条）';
+        logTitle.textContent = '🗳️ 最近 ' + Math.min(5, logs.length) + ' 条';
         logList.appendChild(logTitle);
 
         var recent = logs.slice(-5).reverse();
@@ -572,70 +911,27 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
           var item = document.createElement('div');
           item.className = 'vote-log-item';
           item.style.animationDelay = (0.3 + vi * 0.05) + 's';
-
           var icon = document.createElement('span');
           icon.className = 'vote-log-icon';
           icon.textContent = v.action === 'add' ? '➕' : '➖';
           item.appendChild(icon);
-
           var dish = document.createElement('span');
           dish.className = 'vote-log-dish' + (v.action === 'remove' ? ' remove' : '');
           dish.textContent = v.dish + '日';
           item.appendChild(dish);
-
           var time = document.createElement('span');
           time.className = 'vote-log-time';
           time.textContent = fmtShortTime(v.time);
           item.appendChild(time);
-
           logList.appendChild(item);
         });
         card.appendChild(logList);
       }
 
-      // ---- 设备信息 ----
-      if (u.devices && u.devices.length > 0){
-        var devList = document.createElement('div');
-        devList.className = 'device-list';
-
-        var devTitle = document.createElement('div');
-        devTitle.className = 'device-title';
-        devTitle.textContent = '🖥️ 登录设备（' + u.devices.length + '）';
-        devList.appendChild(devTitle);
-
-        u.devices.forEach(function(d, di){
-          var item = document.createElement('div');
-          item.className = 'device-item';
-          item.style.animationDelay = (0.35 + di * 0.08) + 's';
-
-          var icon = document.createElement('div');
-          icon.className = 'device-icon';
-          icon.textContent = getDeviceIcon(d.ua_parsed);
-          item.appendChild(icon);
-
-          var body = document.createElement('div');
-          body.className = 'device-body';
-
-          var uaLine = document.createElement('div');
-          uaLine.className = 'device-ua';
-          uaLine.textContent = d.ua_parsed || '未知设备';
-          body.appendChild(uaLine);
-
-          var metaLine = document.createElement('div');
-          metaLine.className = 'device-meta';
-          var parts = [];
-          if (d.first_login) parts.push('首次 ' + d.first_login.slice(0, 10));
-          if (d.last_login) parts.push('最近 ' + d.last_login.slice(0, 10));
-          if (d.login_count) parts.push('登录 ' + d.login_count + ' 次');
-          if (d.last_ip && d.last_ip !== '未知') parts.push('IP ' + d.last_ip);
-          metaLine.innerHTML = parts.join(' <span class="sep">·</span> ');
-          body.appendChild(metaLine);
-
-          item.appendChild(body);
-          devList.appendChild(item);
-        });
-        card.appendChild(devList);
-      }
+      // 点击查看详情
+      card.addEventListener('click', function(){
+        openDetail(u, card);
+      });
 
       grid.appendChild(card);
     });
@@ -643,17 +939,25 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 
   function renderStats(data){
     allUsers = data.users || [];
-
     animateNumber($('stat-totalUsers'), data.totalUsers || 0);
     animateNumber($('stat-votedUsers'), data.votedUsers || 0);
     animateNumber($('stat-totalVotes'), data.totalVotes || 0);
-
     $('count-all').textContent = '(' + allUsers.length + ')';
     $('count-voted').textContent = '(' + allUsers.filter(function(u){ return u.total > 0; }).length + ')';
     $('count-not-voted').textContent = '(' + allUsers.filter(function(u){ return u.total === 0; }).length + ')';
-
     renderMonthSelect();
     renderUsers();
+  }
+
+  function loadDishes(){
+    fetch(API + '/api/dishes')
+      .then(function(r){ return r.json(); })
+      .then(function(all){
+        (all || []).forEach(function(d){
+          dishNames[String(d.id)] = d.name || ('#' + d.id);
+        });
+      })
+      .catch(function(){});
   }
 
   function loadStats(){
@@ -698,6 +1002,22 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     });
   }
 
+  function bindDetail(){
+    detailModal = $('detail-modal');
+    detailBox = $('detail-box');
+
+    $('detail-close').addEventListener('click', function(e){
+      e.stopPropagation();
+      closeDetail();
+    });
+    detailModal.addEventListener('click', function(e){
+      if (e.target === detailModal) closeDetail();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && detailModal.classList.contains('show')) closeDetail();
+    });
+  }
+
   function bindPower(){
     var btn = $('btn-power');
     if (!btn) return;
@@ -725,7 +1045,9 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   function init(){
     bindTabs();
     bindMonth();
+    bindDetail();
     bindPower();
+    loadDishes();
     loadStats();
     setInterval(loadStats, 15000);
   }
