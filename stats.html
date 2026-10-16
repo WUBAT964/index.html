@@ -583,6 +583,8 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   var currentMonth = '';
   var dishNames = {};
   var _detailOpen = false;
+  var _statsFingerprint = '';
+  var _firstRender = true;
 
   function $(id){ return document.getElementById(id); }
 
@@ -905,7 +907,12 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
 
       var card = document.createElement('div');
       card.className = 'user-card' + (u.total === 0 ? ' not-voted' : '');
-      card.style.animationDelay = (i * 0.04) + 's';
+      if (_firstRender){
+        card.style.animationDelay = (i * 0.04) + 's';
+      } else {
+        card.style.animation = 'none';
+        card.style.opacity = '1';
+      }
 
       var header = document.createElement('div');
       header.className = 'user-card-header';
@@ -1039,6 +1046,12 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
   }
 
   function renderStats(data){
+    var fp = JSON.stringify(data);
+    if (fp === _statsFingerprint && !_firstRender){
+      return;
+    }
+    _statsFingerprint = fp;
+
     allUsers = data.users || [];
     animateNumber($('stat-totalUsers'), data.totalUsers || 0);
     animateNumber($('stat-votedUsers'), data.votedUsers || 0);
@@ -1048,6 +1061,7 @@ body.perf-lite .stat-card, body.perf-lite .user-card {
     $('count-not-voted').textContent = '(' + allUsers.filter(function(u){ return u.total === 0; }).length + ')';
     renderMonthSelect();
     renderUsers();
+    _firstRender = false;
   }
 
   function loadDishes(){
