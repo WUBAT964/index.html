@@ -160,76 +160,6 @@ def get_client_ip():
     return request.remote_addr or '未知'
 
 
-# ==================== 🌍 IP 地理位置查询 ====================
-_ip_location_cache = {}   # { ip: { city, isp, region, country, query_time } }
-_ip_cache_lock = threading.Lock()
-IP_CACHE_TTL = 86400 * 7   # 缓存 7 天
-
-
-def query_ip_location(ip):
-    """查询 IP 地理位置，带缓存和超时"""
-    if not ip or ip == '未知':
-        return None
-
-    # 本地/内网 IP 不查
-    if ip.startswith(('127.', '192.168.', '10.', '172.16.', '172.17.', '172.18.',
-                       '172.19.', '172.2', '172.30.', '172.31.', '::1', 'fc', 'fd')):
-        return {'city': '本地', 'region': '本地', 'country': '本地', 'isp': ''}
-
-    # 查缓存
-    with _ip_cache_lock:
-        cached = _ip_location_cache.get(ip)
-        if cached:
-            import time as _t
-            if _t.time() - cached.get('query_time', 0) < IP_CACHE_TTL:
-                return cached
-
-    # 调 ip-api.com（免费，45次/分钟，支持 IPv4/IPv6）
-    try:
-        # 用 requests 库（vote_server 已经 import 了）
-        url = f"http://ip-api.com/json/{ip}?fields=status,country,regionName,city,isp,query&lang=zh-CN"
-        resp = requests.get(url, timeout=3)
-        if resp.status_code == 200:
-            data = resp.json()
-            if data.get('status') == 'success':
-                import time as _t
-                result = {
-                    'city': data.get('city', ''),
-                    'region': data.get('regionName', ''),
-                    'country': data.get('country', ''),
-                    'isp': data.get('isp', ''),
-                    'query_time': _t.time()
-                }
-                with _ip_cache_lock:
-                    _ip_location_cache[ip] = result
-                return result
-    except Exception as e:
-        print(f"[IP查询] ⚠️ {ip} 查询失败: {e}")
-
-    # 失败缓存一个空结果，避免频繁重试
-    with _ip_cache_lock:
-        _ip_location_cache[ip] = {
-            'city': '', 'region': '', 'country': '', 'isp': '',
-            'query_time': time.time()
-        }
-    return None
-
-
-def format_location(loc):
-    """把地理位置格式化成友好字符串"""
-    if not loc:
-        return ''
-    parts = []
-    if loc.get('country') and loc['country'] != '中国':
-        parts.append(loc['country'])
-    if loc.get('region') and loc['region'] not in ('', loc.get('city')):
-        parts.append(loc['region'])
-    if loc.get('city'):
-        parts.append(loc['city'])
-    if loc.get('isp'):
-        parts.append(loc['isp'])
-    return ' · '.join(parts) if parts else ''
-
 
 def record_device(phone, device_id, ua, ua_display='', ua_detail=None):
     """记录设备信息（含 Client Hints）"""
@@ -286,13 +216,11 @@ def record_device(phone, device_id, ua, ua_display='', ua_detail=None):
             d['ua_full_version'] = ua_full
             d['login_count'] = d.get('login_count', 1) + 1
 
-            # ✅ 记录每次登录的时间、IP、地理位置
-            loc = query_ip_location(ip)
+            # ✅ 记录每次登录的时间和 IP
             login_times = d.setdefault('login_times', [])
             login_times.append({
                 "time": now,
-                "ip": ip,
-                "location": format_location(loc)
+                "ip": ip
             })
             if len(login_times) > MAX_LOGIN_LOG:
                 login_times[:] = login_times[-MAX_LOGIN_LOG:]
@@ -310,11 +238,7 @@ def record_device(phone, device_id, ua, ua_display='', ua_detail=None):
         "last_login": now,
         "last_ip": ip,
         "login_count": 1,
-        "login_times": [{
-            "time": now,
-            "ip": ip,
-            "location": format_location(query_ip_location(ip))
-        }]
+        "login_times": [{"time": now, "ip": ip}]
     })
 
 
